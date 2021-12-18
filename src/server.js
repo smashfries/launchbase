@@ -2,6 +2,14 @@ const fastify = require('fastify')({
     logger: true,
 })
 
+fastify.register(require('fastify-cors'), function (instance) {
+
+    return (req, callback) => {
+      let corsOptions = { origin: true }
+      callback(null, corsOptions) // callback expects two parameters: error and options
+    }
+  })
+
 const { randomBytes } = require('crypto')
 
 fastify.register(require('./db/db-connector'))
@@ -17,16 +25,16 @@ fastify.get('/', (req, rep) => {
 fastify.post('/send-email-verification', async (req, rep) => {
     const email = req.body.email
     if (!email) {
-        return rep.code(400).send({ error: 'Email not provided.' })
+        return rep.code(400).send({ error: 'missing-email' })
     }
     const users = fastify.mongo.db.collection('users')
     const user = await users.findOne({ email })
     if (user) {
-        return rep.send({ error: 'Account already exists.' })
+        return rep.send({ error: 'account-exists' })
     }
     const result = await sendEmailVerification(email)
     if (result == 'error') {
-        return rep.send({ error: 'Invalid email' })
+        return rep.code(400).send({ error: 'invalid-email' })
     }
     const deviceIdentifier = randomBytes(24).toString('hex')
     const codes = fastify.mongo.db.collection('verification-codes')
