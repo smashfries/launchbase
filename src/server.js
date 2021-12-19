@@ -39,7 +39,7 @@ fastify.post('/send-email-verification', async (req, rep) => {
     const deviceIdentifier = randomBytes(24).toString('hex')
     const codes = fastify.mongo.db.collection('verification-codes')
     const item = await codes.findOne({ email })
-    const expiresOn = new Date().getTime() + 300000
+    const expiresOn = new Date().getTime() + 60000
     if (item) {
         codes.updateOne({ email }, { $set: { code: hash(result), expiresOn, deviceIdentifier: hash(deviceIdentifier) } })
     } else {
@@ -50,34 +50,34 @@ fastify.post('/send-email-verification', async (req, rep) => {
 
 fastify.post('/verify-code', async (req, rep) => {
     if (!req.body.code) {
-        return rep.code(400).send({ error: 'Verification code not provided.' })
+        return rep.code(400).send({ error: 'code-missing' })
     }
     if (!req.body.identifier) {
-        return rep.code(400).send({ error: 'Device identifier not provided.' })
+        return rep.code(400).send({ error: 'identifier-missing' })
     }
     if (!req.body.email) {
-        return rep.code(400).send({ error: 'Email address not provided.' })
+        return rep.code(400).send({ error: 'email-missing' })
     }
     const codes = fastify.mongo.db.collection('verification-codes')
     const code = await codes.findOne({ email: req.body.email })
     if (!code) {
-        return rep.code(400).send({ error: 'Invalid email' })
+        return rep.code(400).send({ error: 'invalid-email' })
     }
     const codeValidity = verify(req.body.code.toString(), code.code)
     const identifierValidity = verify(req.body.identifier, code.deviceIdentifier)
     if (!codeValidity) {
-        return rep.code(400).send({ error: 'Invalid code' })
+        return rep.code(400).send({ error: 'invalid-code' })
     }
     if (!identifierValidity) {
-        return rep.code(400).send({ error: 'Invalid device identifier' })
+        return rep.code(400).send({ error: 'invalid-identifier' })
     }
     const currentTime = new Date().getTime()
     if (currentTime > code.expiresOn) {
-        return rep.code(400).send({ error: 'Code has expired.' })
+        return rep.code(400).send({ error: 'expired' })
     }
     await fastify.mongo.db.collection('verification-codes').deleteMany({ email: req.body.email })
     await fastify.mongo.db.collection('users').insertOne({ email: req.body.email })
-    return rep.code(200).send({ message: 'Email has been verified.' })
+    return rep.code(200).send({ message: 'success' })
 })
 
 const start = async () => {
