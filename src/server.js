@@ -14,11 +14,12 @@ const { randomBytes } = require('crypto')
 
 fastify.register(require('./db/db-connector'))
 const sendEmailVerification = require('./utils/email-verification')
-const { hash, verify } = require('./utils/crypto')
+const { hash, verify, generateToken } = require('./utils/crypto')
 
 
 fastify.get('/', (req, rep) => {
-    rep.send({ hello: 'world' })
+    const token = generateToken('adityavinodh22@gmail.com')
+    rep.send({ token })
 })
 
 
@@ -39,7 +40,7 @@ fastify.post('/send-email-verification', async (req, rep) => {
     const deviceIdentifier = randomBytes(24).toString('hex')
     const codes = fastify.mongo.db.collection('verification-codes')
     const item = await codes.findOne({ email })
-    const expiresOn = new Date().getTime() + 60000
+    const expiresOn = new Date().getTime() + 300000
     if (item) {
         codes.updateOne({ email }, { $set: { code: hash(result), expiresOn, deviceIdentifier: hash(deviceIdentifier) } })
     } else {
