@@ -28,8 +28,18 @@ const generateToken = function (email) {
     return token
 }
 
+const verifyToken = function (token) {
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET)
+        return decoded
+    } catch (error) {
+        return
+    }
+}
+
 module.exports = {
     hash,
     verify,
-    generateToken
+    generateToken,
+    verifyToken
 }

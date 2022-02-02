@@ -14,12 +14,16 @@ const { randomBytes } = require('crypto')
 
 fastify.register(require('./db/db-connector'))
 const sendEmailVerification = require('./utils/email-verification')
-const { hash, verify, generateToken } = require('./utils/crypto')
+const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
 
 
 fastify.get('/', (req, rep) => {
-    const token = generateToken('adityavinodh22@gmail.com')
-    rep.send({ token })
+    const decoded = verifyToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YXZpbm9kaDIyQGdtYWlsLmNvbSIsImlhdCI6MTY0Mzc5NzM5Mn0.4g4rV1qL15MHin_GtbfkkNnIqKIVZQ0wGqsoL9fQEbI')
+    if (decoded) {
+        rep.send({ decoded })
+    } else {
+        rep.send('error')
+    }
 })
 
 
