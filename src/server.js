@@ -82,7 +82,8 @@ fastify.post('/verify-code', async (req, rep) => {
     }
     await fastify.mongo.db.collection('verification-codes').deleteMany({ email: req.body.email })
     await fastify.mongo.db.collection('users').insertOne({ email: req.body.email })
-    return rep.code(200).send({ message: 'success' })
+    const token = generateToken(req.body.email)
+    return rep.code(200).send({ message: 'success', token })
 })
 
 const start = async () => {
