@@ -1,6 +1,7 @@
 const fastify = require('fastify')({
     logger: true,
 })
+require('dotenv').config({path: __dirname+'/./../.env'})
 
 fastify.register(require('fastify-cors'), function (instance) {
 
@@ -13,17 +14,22 @@ fastify.register(require('fastify-cors'), function (instance) {
 const { randomBytes } = require('crypto')
 
 fastify.register(require('./db/db-connector'))
+fastify.register(require('fastify-redis'), { host: process.env.REDIS_HOST, port: 17807, password: process.env.REDIS_PASSWORD })
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
 
-
 fastify.get('/', (req, rep) => {
-    const decoded = verifyToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YXZpbm9kaDIyQGdtYWlsLmNvbSIsImlhdCI6MTY0Mzc5NzM5Mn0.4g4rV1qL15MHin_GtbfkkNnIqKIVZQ0wGqsoL9fQEbI')
-    if (decoded) {
-        rep.send({ decoded })
-    } else {
-        rep.send('error')
-    }
+    const { redis } = fastify
+    redis.del('adityavinodh22@gmail.com', 'a', (err) => {
+        if (err) {
+            console.log(err)
+        } else {
+            redis.get('adityavinodh22@gmail.com', (err, val) => {
+                console.log(val)
+                rep.send(val)
+            })
+        }
+    })
 })
 
 
@@ -54,6 +60,7 @@ fastify.post('/send-email-verification', async (req, rep) => {
 })
 
 fastify.post('/verify-code', async (req, rep) => {
+    const { redis } = fastify
     if (!req.body.code) {
         return rep.code(400).send({ error: 'code-missing' })
     }
@@ -83,6 +90,7 @@ fastify.post('/verify-code', async (req, rep) => {
     await fastify.mongo.db.collection('verification-codes').deleteMany({ email: req.body.email })
     await fastify.mongo.db.collection('users').insertOne({ email: req.body.email })
     const token = generateToken(req.body.email)
+    await redis.rpush(req.body.email, token)
     return rep.code(200).send({ message: 'success', token })
 })
 

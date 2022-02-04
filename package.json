@@ -17,6 +17,7 @@
     "fastify-cors": "^6.0.2",
     "fastify-mongodb": "^4.1.0",
     "fastify-plugin": "^3.0.0",
+    "fastify-redis": "^4.3.3",
     "jsonwebtoken": "^8.5.1",
     "nanoid": "^3.1.30"
   },
