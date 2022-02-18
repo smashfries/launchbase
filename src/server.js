@@ -94,6 +94,24 @@ fastify.post('/verify-code', async (req, rep) => {
     return rep.code(200).send({ message: 'success', token })
 })
 
+fastify.post('/logout', async (req, rep) => {
+    // console.log(req.headers)
+    if (req.headers.authorization) {
+        const token = req.headers.authorization.split(' ')[1]
+        const email = verifyToken(token).email
+        if (email) {
+            const { redis } = fastify;
+            console.log(token, email)
+            await redis.lrem(email, 1, token)
+            rep.send({ message: 'Logged out' })
+        } else {
+            rep.send({ error: 'Invalid token' })
+        }
+    } else {
+        rep.send({ error: 'Not logged in.' })
+    }
+})
+
 const start = async () => {
     try {
         await fastify.listen(5000)
