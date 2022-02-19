@@ -34,15 +34,11 @@ fastify.get('/', (req, rep) => {
 
 
 fastify.post('/send-email-verification', async (req, rep) => {
-    const email = req.body.email.toLowerCase()
+    let email = req.body.email
     if (!email) {
         return rep.code(400).send({ error: 'missing-email' })
     }
-    const users = fastify.mongo.db.collection('users')
-    const user = await users.findOne({ email })
-    if (user) {
-        return rep.send({ error: 'account-exists' })
-    }
+    email = email.toLowerCase()
     const result = await sendEmailVerification(email)
     if (result == 'error') {
         return rep.code(400).send({ error: 'invalid-email' })
