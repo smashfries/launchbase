@@ -105,10 +105,26 @@ fastify.post('/logout', async (req, rep) => {
             await redis.lrem(email, 1, token)
             rep.send({ message: 'Logged out' })
         } else {
-            rep.send({ error: 'Invalid token' })
+            rep.code(400).send({ error: 'Invalid token' })
         }
     } else {
-        rep.send({ error: 'Not logged in.' })
+        rep.code(400).send({ error: 'Not logged in.' })
+    }
+})
+
+fastify.post('/logout-all', async (req, rep) => {
+    if (req.headers.authorization) {
+        const token = req.headers.authorization.split(' ')[1]
+        const email = verifyToken(token).email
+        if (email) {
+            const { redis } = fastify;
+            await redis.del(email)
+            rep.send({ message: 'Successfully logged out of all devices' })
+        } else {
+            rep.code(400).send({ error: 'Invalid token' })
+        }
+    } else {
+        rep.code(400).send({ error: 'Not logged in' })
     }
 })
 
