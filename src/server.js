@@ -1,5 +1,6 @@
 const fastify = require('fastify')({
     logger: true,
+    trustProxy: true
 })
 const path = require('path')
 require('dotenv').config({path: __dirname+'/./../.env'})
@@ -257,13 +258,31 @@ fastify.post('/logout-all', async (req, rep) => {
     }
 })
 
-const start = async () => {
-    try {
-        await fastify.listen(5000)
-    } catch (e) {
-        fastify.log.error(e)
-        process.exit(1)
-    }
+
+function build() {
+  return fastify
 }
 
-start()
+async function start() {
+
+  // You must listen on the port Cloud Run provides
+  const port = process.env.PORT || 3000
+
+  // You must listen on all IPV4 addresses in Cloud Run
+  const address = "0.0.0.0"
+
+  try {
+    const server = build()
+    await server.listen(port, address)
+    console.log(`Listening on ${address}:${port}`)
+  } catch (err) {
+    console.error(err)
+    process.exit(1)
+  }
+}
+
+module.exports = build
+
+if (require.main === module) {
+  start()
+}
