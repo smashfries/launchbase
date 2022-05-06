@@ -6,7 +6,7 @@ require('dotenv').config({path: __dirname+'/./../.env'})
 
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, '../public'),
-  prefix: '/', // optional: default '/'
+  prefix: '/',
 })
 
 
@@ -24,6 +24,13 @@ fastify.register(require('./db/db-connector'))
 fastify.register(require('fastify-redis'), { host: process.env.REDIS_HOST, port: 16025, password: process.env.REDIS_PASSWORD })
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
+
+fastify.register(require("point-of-view"), {
+  engine: {
+    ejs: require("handlebars"),
+  },
+   root: path.join(__dirname, "views"),
+});
 
 fastify.register(require('./routes'))
 

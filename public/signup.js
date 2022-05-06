@@ -119,6 +119,7 @@ form.addEventListener('submit', (e) => {
             } else {      
                 localStorage.clear()
                 localStorage.setItem('token', data.token)
+                window.location.replace('home')
             }
         })
     }

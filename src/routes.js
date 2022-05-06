@@ -8,6 +8,9 @@ async function routes (fastify, options) {
     fastify.get('/signup', (req, rep) => {
         return rep.sendFile('signup.html')
     })
+    fastify.get('/home', (req, rep) => {http://localhost:5000/homw
+        return rep.view('home.hbs')
+    })
 }
 
 module.exports = routes
