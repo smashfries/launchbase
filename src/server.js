@@ -1,7 +1,14 @@
 const fastify = require('fastify')({
     logger: true,
 })
+const path = require('path')
 require('dotenv').config({path: __dirname+'/./../.env'})
+
+fastify.register(require('@fastify/static'), {
+  root: path.join(__dirname, '../public'),
+  prefix: '/', // optional: default '/'
+})
+
 
 fastify.register(require('fastify-cors'), function (instance) {
 
@@ -14,25 +21,11 @@ fastify.register(require('fastify-cors'), function (instance) {
 const { randomBytes } = require('crypto')
 
 fastify.register(require('./db/db-connector'))
-fastify.register(require('fastify-redis'), { host: process.env.REDIS_HOST, port: 17807, password: process.env.REDIS_PASSWORD })
+fastify.register(require('fastify-redis'), { host: process.env.REDIS_HOST, port: 16025, password: process.env.REDIS_PASSWORD })
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
-const { url } = require('inspector')
 
-fastify.get('/', (req, rep) => {
-    const { redis } = fastify
-    redis.del('adityavinodh22@gmail.com', 'a', (err) => {
-        if (err) {
-            console.log(err)
-        } else {
-            redis.get('adityavinodh22@gmail.com', (err, val) => {
-                console.log(val)
-                rep.send(val)
-            })
-        }
-    })
-})
-
+fastify.register(require('./routes'))
 
 fastify.post('/send-email-verification', async (req, rep) => {
     let email = req.body.email
@@ -155,7 +148,7 @@ fastify.post('/update-profile', async (req, rep) => {
                 if (!req.body.occ) {
                     return rep.code(400).send({ error: 'occupation-missing' })
                 }
-                if (req.body.nickname.occ > 256) {
+                if (req.body.occ.length > 256) {
                     return rep.code(400).send({ error: 'occ-toolong' })
                 }
                 if (!req.body.skills) {
@@ -188,7 +181,7 @@ fastify.post('/update-profile', async (req, rep) => {
                 if (req.body.github.length > 39) {
                     return rep.code(400).send({ error: 'github-toolong' })
                 }
-                if (!req.body.url.match(/^[a-zA-Z0-9]+$/g)) {
+                if (!req.body.url.match(/^[a-zA-Z0-9_]+$/g)) {
                     return rep.code(400).send({ error: 'invalid-url' })
                 }
                 const users = fastify.mongo.db.collection('users')
