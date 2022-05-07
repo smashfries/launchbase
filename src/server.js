@@ -6,10 +6,14 @@ const path = require('path')
 require('dotenv').config({path: __dirname+'/./../.env'})
 
 fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, '../public'),
-  prefix: '/',
+  root: path.join(__dirname, '../public/templates'),
+  serve: false
 })
 
+fastify.register(require('@fastify/static'), {
+  root: path.join(__dirname, '../public/assets'),
+  decorateReply: false
+})
 
 fastify.register(require('fastify-cors'), function (instance) {
 
