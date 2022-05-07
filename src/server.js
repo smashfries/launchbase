@@ -21,6 +21,7 @@ fastify.register(require('./db/mongo-connector'))
 fastify.register(require('./db/redis-connector'))
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
+const { sendEmailVerificationOpts } = require('./utils/schema')
 
 fastify.register(require("point-of-view"), {
   engine: {
@@ -31,14 +32,8 @@ fastify.register(require("point-of-view"), {
 
 fastify.register(require('./routes'))
 
-fastify.post('/send-email-verification', async (req, rep) => {
+fastify.post('/send-email-verification', sendEmailVerificationOpts, async (req, rep) => {
     let email = req.body.email
-    if (!email) {
-        return rep.code(400).send({ error: 'missing-email' })
-    }
-    if (!req.body.type) {
-        return rep.code(400).send({ error: 'missing-type' })
-    }
     const valid = (req.body.type == 'login' || req.body.type == 'signup') ? true : false;
     if (!valid) {
         return rep.code(400).send({ error: 'invalid-type' })
