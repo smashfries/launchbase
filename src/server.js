@@ -60,7 +60,7 @@ fastify.post('/send-email-verification', sendEmailVerificationOpts, async (req, 
     } else {
         codes.insertOne({ email, code: hash(result), expiresOn, deviceIdentifier: hash(deviceIdentifier) })
     }
-    return rep.code(200).send({ message: 'Email verification sent.', deviceIdentifier })
+    return rep.code(200).send({ deviceIdentifier })
 })
 
 fastify.post('/verify-code', async (req, rep) => {
@@ -82,7 +82,8 @@ fastify.post('/verify-code', async (req, rep) => {
         return rep.code(400).send({ error: 'invalid-type' })
     }
     const users = fastify.mongo.db.collection('users')
-    const user = await users.findOne({ email: req.body.email.toLowerCase() })
+    const email = req.body.email.toLowerCase()
+    const user = await users.findOne({ email })
     if (req.body.type == 'login' && !user) {
         return rep.code(400).send({ error: 'account-invalid' })
     }
@@ -90,11 +91,12 @@ fastify.post('/verify-code', async (req, rep) => {
         return rep.code(400).send({ error: 'account-exists' })
     }
     const codes = fastify.mongo.db.collection('verification-codes')
-    const code = await codes.findOne({ email: req.body.email.toLowerCase() })
+    const code = await codes.findOne({ email })
     if (!code) {
         return rep.code(400).send({ error: 'invalid-email' })
     }
-    const codeValidity = verify(req.body.code.toString(), code.code)
+    // removing toString for first arg
+    const codeValidity = verify(req.body.code, code.code)
     const identifierValidity = verify(req.body.identifier, code.deviceIdentifier)
     if (!codeValidity) {
         return rep.code(400).send({ error: 'invalid-code' })
@@ -106,13 +108,13 @@ fastify.post('/verify-code', async (req, rep) => {
     if (currentTime > code.expiresOn) {
         return rep.code(400).send({ error: 'expired' })
     }
-    await fastify.mongo.db.collection('verification-codes').deleteMany({ email: req.body.email.toLowerCase() })
+    await fastify.mongo.db.collection('verification-codes').deleteMany({ email })
     if (req.body.type == 'signup') {
-        await fastify.mongo.db.collection('users').insertOne({ email: req.body.email.toLowerCase() })
+        await fastify.mongo.db.collection('users').insertOne({ email })
     }
-    const token = generateToken(req.body.email.toLowerCase())
-    await redis.rpush(req.body.email.toLowerCase(), token)
-    return rep.code(200).send({ message: 'success', token })
+    const token = generateToken(email)
+    await redis.rpush(email, token)
+    return rep.code(200).send({ token })
 })
 
 fastify.post('/update-profile', async (req, rep) => {
