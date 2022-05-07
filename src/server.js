@@ -15,18 +15,10 @@ fastify.register(require('@fastify/static'), {
   decorateReply: false
 })
 
-fastify.register(require('fastify-cors'), function (instance) {
-
-    return (req, callback) => {
-      let corsOptions = { origin: true }
-      callback(null, corsOptions) // callback expects two parameters: error and options
-    }
-  })
-
 const { randomBytes } = require('crypto')
 
-fastify.register(require('./db/db-connector'))
-fastify.register(require('fastify-redis'), { host: process.env.REDIS_HOST, port: 16025, password: process.env.REDIS_PASSWORD })
+fastify.register(require('./db/mongo-connector'))
+fastify.register(require('./db/redis-connector'))
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
 
