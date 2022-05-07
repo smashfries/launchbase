@@ -21,7 +21,7 @@ fastify.register(require('./db/mongo-connector'))
 fastify.register(require('./db/redis-connector'))
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
-const { sendEmailVerificationOpts } = require('./utils/schema')
+const { sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts } = require('./utils/schema')
 
 fastify.register(require("point-of-view"), {
   engine: {
@@ -63,7 +63,7 @@ fastify.post('/send-email-verification', sendEmailVerificationOpts, async (req, 
     return rep.code(200).send({ deviceIdentifier })
 })
 
-fastify.post('/verify-code', async (req, rep) => {
+fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
     const { redis } = fastify
     if (!req.body.code) {
         return rep.code(400).send({ error: 'code-missing' })
@@ -95,7 +95,6 @@ fastify.post('/verify-code', async (req, rep) => {
     if (!code) {
         return rep.code(400).send({ error: 'invalid-email' })
     }
-    // removing toString for first arg
     const codeValidity = verify(req.body.code, code.code)
     const identifierValidity = verify(req.body.identifier, code.deviceIdentifier)
     if (!codeValidity) {
@@ -117,7 +116,7 @@ fastify.post('/verify-code', async (req, rep) => {
     return rep.code(200).send({ token })
 })
 
-fastify.post('/update-profile', async (req, rep) => {
+fastify.post('/update-profile', updateProfileOpts, async (req, rep) => {
     if (req.headers.authorization) {
         const token = req.headers.authorization.split(' ')[1]
         const dToken = verifyToken(token);
@@ -128,46 +127,7 @@ fastify.post('/update-profile', async (req, rep) => {
             const { redis } = fastify;
             const auths = await redis.lrange(email, 0, -1)
             if (auths.indexOf(token) !== -1) {
-                if (!req.body.name) {
-                    return rep.code(400).send({ error: 'name-missing' })
-                }
-                if (req.body.name.length > 256) {
-                    return rep.code(400).send({ error: 'name-toolong' })
-                }
-                if (!req.body.nickname) {
-                    return rep.code(400).send({ error: 'nickname-missing' })
-                }
-                if (req.body.nickname.length > 256) {
-                    return rep.code(400).send({ error: 'nickname-toolong' })
-                }
-                if (!req.body.url) {
-                    return rep.code(400).send({ error: 'url-missing' })
-                }
-                if (req.body.url.length > 256) {
-                    return rep.code(400).send({ error: 'url-toolong' })
-                }
-                if (!req.body.occ) {
-                    return rep.code(400).send({ error: 'occupation-missing' })
-                }
-                if (req.body.occ.length > 256) {
-                    return rep.code(400).send({ error: 'occ-toolong' })
-                }
-                if (!req.body.skills) {
-                    return rep.code(400).send({ error: 'skills-missing' })
-                }
-                if (req.body.skills.length > 256) {
-                    return rep.code(400).send({ error: 'skills-toolong' })
-                }
-                if (!req.body.interests) {
-                    return rep.code(400).send({ error: 'interests-missing' })
-                }
-                if (req.body.interests.length > 256) {
-                    return rep.code(400).send({ error: 'interests-toolong' })
-                }
                 if (req.body.twitter) {
-                    if (req.body.twitter.length > 16) {
-                        return rep.code(400).send({ error: 'twitter-toolong' })
-                    }
                     if (req.body.twitter.split('@').length > 2) {
                         return rep.code(400).send({ error: 'invalid-twitter' })
                     }
@@ -179,28 +139,24 @@ fastify.post('/update-profile', async (req, rep) => {
                 if (req.body.github) {
                     github = req.body.github
                 }
-                if (req.body.github.length > 39) {
-                    return rep.code(400).send({ error: 'github-toolong' })
-                }
+                console.log(req.body.url)
                 if (!req.body.url.match(/^[a-zA-Z0-9_]+$/g)) {
                     return rep.code(400).send({ error: 'invalid-url' })
                 }
                 const users = fastify.mongo.db.collection('users')
                 const user = await users.findOne({ email })
-                console.log(user)
+                const url = req.body.url
                 if (user.url) {
-                    if (user.url !== req.body.url) {
-                        const curosr = await users.find({ url: req.body.url })
-                        const urlMatches = await curosr.toArray();
-                        console.log(urlMatches, 'url')
+                    if (user.url !== url) {
+                        const cursor = await users.find({ url })
+                        const urlMatches = await cursor.toArray();
                         if (urlMatches.length > 0) {
                             return rep.code(400).send({ error: 'url-exists' })
                         }
                     }
                 } else {
-                    const cursor = await users.find({ url: req.body.url })
+                    const cursor = await users.find({ url })
                     const urlMatches = await cursor.toArray();
-                    console.log(urlMatches, 'url')
                     if (urlMatches.length > 0) {
                         return rep.code(400).send({ error: 'url-exists' })
                     }
