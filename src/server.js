@@ -21,7 +21,7 @@ fastify.register(require('./db/mongo-connector'))
 fastify.register(require('./db/redis-connector'))
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
-const { sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts } = require('./utils/schema')
+const { sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts, logoutOpts } = require('./utils/schema')
 
 fastify.register(require("point-of-view"), {
   engine: {
@@ -117,93 +117,81 @@ fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
 })
 
 fastify.post('/update-profile', updateProfileOpts, async (req, rep) => {
-    if (req.headers.authorization) {
-        const token = req.headers.authorization.split(' ')[1]
-        const dToken = verifyToken(token);
-        if (dToken) {
-            const email = dToken.email
-            let twitter = ''
-            let github = ''
-            const { redis } = fastify;
-            const auths = await redis.lrange(email, 0, -1)
-            if (auths.indexOf(token) !== -1) {
-                if (req.body.twitter) {
-                    if (req.body.twitter.split('@').length > 2) {
-                        return rep.code(400).send({ error: 'invalid-twitter' })
-                    }
-                    if (req.body.twitter.indexOf('@') > 0) {
-                        return rep.code(400).send({ error: 'invalid-twitter' })
-                    }
-                    twitter = req.body.twitter
+    const token = req.headers.authorization.split(' ')[1]
+    const dToken = verifyToken(token);
+    if (dToken) {
+        const email = dToken.email
+        let twitter = ''
+        let github = ''
+        const { redis } = fastify;
+        const auths = await redis.lrange(email, 0, -1)
+        if (auths.indexOf(token) !== -1) {
+            if (req.body.twitter) {
+                if (req.body.twitter.split('@').length > 2) {
+                    return rep.code(400).send({ error: 'invalid-twitter' })
                 }
-                if (req.body.github) {
-                    github = req.body.github
+                if (req.body.twitter.indexOf('@') > 0) {
+                    return rep.code(400).send({ error: 'invalid-twitter' })
                 }
-                console.log(req.body.url)
-                if (!req.body.url.match(/^[a-zA-Z0-9_]+$/g)) {
-                    return rep.code(400).send({ error: 'invalid-url' })
-                }
-                const users = fastify.mongo.db.collection('users')
-                const user = await users.findOne({ email })
-                const url = req.body.url
-                if (user.url) {
-                    if (user.url !== url) {
-                        const cursor = await users.find({ url })
-                        const urlMatches = await cursor.toArray();
-                        if (urlMatches.length > 0) {
-                            return rep.code(400).send({ error: 'url-exists' })
-                        }
-                    }
-                } else {
+                twitter = req.body.twitter
+            }
+            if (req.body.github) {
+                github = req.body.github
+            }
+            console.log(req.body.url)
+            if (!req.body.url.match(/^[a-zA-Z0-9_]+$/g)) {
+                return rep.code(400).send({ error: 'invalid-url' })
+            }
+            const users = fastify.mongo.db.collection('users')
+            const user = await users.findOne({ email })
+            const url = req.body.url
+            if (user.url) {
+                if (user.url !== url) {
                     const cursor = await users.find({ url })
                     const urlMatches = await cursor.toArray();
                     if (urlMatches.length > 0) {
                         return rep.code(400).send({ error: 'url-exists' })
                     }
                 }
-                await users.updateOne({ email }, { $set: { email, name: req.body.name, nickname: req.body.nickname, url: req.body.url, occ: req.body.occ, skills: req.body.skills, interests: req.body.interests, github, twitter } })
-                rep.code(200).send({ message: 'successfully updated profile' })
             } else {
-                rep.code(400).send({ error: 'token-expired' })
+                const cursor = await users.find({ url })
+                const urlMatches = await cursor.toArray();
+                if (urlMatches.length > 0) {
+                    return rep.code(400).send({ error: 'url-exists' })
+                }
             }
+            await users.updateOne({ email }, { $set: { email, name: req.body.name, nickname: req.body.nickname, url: req.body.url, occ: req.body.occ, skills: req.body.skills, interests: req.body.interests, github, twitter } })
+            rep.code(200).send({ message: 'successfully updated profile' })
         } else {
-            rep.code(400).send({ error: 'unauthorized' })
+            rep.code(400).send({ error: 'token-expired' })
         }
     } else {
         rep.code(400).send({ error: 'unauthorized' })
     }
 })
 
-fastify.post('/logout', async (req, rep) => {
-    if (req.headers.authorization) {
-        const token = req.headers.authorization.split(' ')[1]
-        const email = verifyToken(token).email
-        if (email) {
-            const { redis } = fastify;
-            console.log(token, email)
-            await redis.lrem(email, 1, token)
-            rep.send({ message: 'Logged out' })
-        } else {
-            rep.code(400).send({ error: 'Invalid token' })
-        }
+fastify.post('/logout', logoutOpts, async (req, rep) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const email = verifyToken(token).email
+    if (email) {
+        const { redis } = fastify;
+        console.log(token, email)
+        await redis.lrem(email, 1, token)
+        rep.code(200).send({ message: 'Logged out' })
     } else {
-        rep.code(400).send({ error: 'Not logged in.' })
+        rep.code(400).send({ error: 'Invalid token' })
     }
 })
 
-fastify.post('/logout-all', async (req, rep) => {
-    if (req.headers.authorization) {
-        const token = req.headers.authorization.split(' ')[1]
-        const email = verifyToken(token).email
-        if (email) {
-            const { redis } = fastify;
-            await redis.del(email)
-            rep.send({ message: 'Successfully logged out of all devices' })
-        } else {
-            rep.code(400).send({ error: 'Invalid token' })
-        }
+fastify.post('/logout-all', logoutOpts, async (req, rep) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const email = verifyToken(token).email
+    if (email) {
+        const { redis } = fastify;
+        await redis.del(email)
+        rep.code(200).send({ message: 'Successfully logged out of all devices' })
     } else {
-        rep.code(400).send({ error: 'Not logged in' })
+        rep.code(400).send({ error: 'Invalid token' })
     }
 })
 

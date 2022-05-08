@@ -98,8 +98,36 @@ const updateProfileOpts = {
     }
 }
 
+const logoutOpts = {
+    schema: {
+        headers: {
+            type: 'object',
+            properties: {
+                authorization: { type: 'string' }
+            },
+            required: ['authorization']
+        },
+        response: {
+            200: {
+                type: 'object',
+                properties: {
+                    message: { type: 'string' }
+                }
+            },
+            400: {
+                type: 'object',
+                properties: {
+                    error: { type: 'string' },
+                    message: { type: 'string' }
+                }
+            }
+        }
+    }
+}
+
 module.exports = {
     sendEmailVerificationOpts,
     verifyCodeOpts,
-    updateProfileOpts
+    updateProfileOpts,
+    logoutOpts
 }
