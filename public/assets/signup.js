@@ -1,3 +1,7 @@
+if (localStorage.getItem('token')) {
+    window.location.replace('home')
+}
+
 const loginBox = document.querySelector('.login-box')
 const form = document.querySelector('form')
 const emailInput = document.querySelector('.email-input')

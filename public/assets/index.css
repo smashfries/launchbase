@@ -121,3 +121,31 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* Inner styles */
+.nav-full {
+  width: 100%;
+  display: flex;
+  background-color: #ebebeb;
+  margin-top: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  margin: 15px;
+  padding: 5px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.nav-item:hover {
+  background-color: #fff;
+}
+
+.pfp {
+  position: absolute;
+  top: 23px;
+  right: 23px;
+  border-radius: 10px;
+}
