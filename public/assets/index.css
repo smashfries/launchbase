@@ -149,3 +149,10 @@ button {
   right: 23px;
   border-radius: 10px;
 }
+
+
+@media only screen and (max-width: 428px) {
+  .pfp {
+    right: 10px;
+  }
+}
