@@ -32,6 +32,26 @@ fastify.register(require("point-of-view"), {
 
 fastify.register(require('./routes'))
 
+fastify.decorateRequest('user', null)
+fastify.decorateRequest('token', '')
+fastify.addHook('preHandler', async (req, rep) => {
+    if (req.headers.authorization) {
+        const token = req.headers.authorization.split(' ')[1]
+        const dToken = verifyToken(token)
+        if (dToken) {
+            const { redis } = fastify;
+            const email = dToken.email
+            const auths = await redis.lrange(email, 0, -1)
+            if (auths.indexOf(token) !== -1) {
+                req.user = email
+                req.token = token
+            } else {
+                await redis.lrem(email, 1, token)
+            }
+        }
+    }
+})
+
 fastify.post('/send-email-verification', sendEmailVerificationOpts, async (req, rep) => {
     let email = req.body.email
     const valid = (req.body.type == 'login' || req.body.type == 'signup') ? true : false;
@@ -117,16 +137,11 @@ fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
 })
 
 fastify.post('/profile', updateProfileOpts, async (req, rep) => {
-    const token = req.headers.authorization.split(' ')[1]
-    const dToken = verifyToken(token);
-    if (dToken) {
-        const email = dToken.email
+    if (req.user) {
+        const email = req.user
         let twitter = ''
         let github = ''
-        const { redis } = fastify;
-        const auths = await redis.lrange(email, 0, -1)
-        if (auths.indexOf(token) !== -1) {
-            if (req.body.twitter) {
+        if (req.body.twitter) {
                 if (req.body.twitter.split('@').length > 2) {
                     return rep.code(400).send({ error: 'invalid-twitter' })
                 }
@@ -162,9 +177,6 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
             }
             await users.updateOne({ email }, { $set: { email, name: req.body.name, nickname: req.body.nickname, url: req.body.url, occ: req.body.occ, skills: req.body.skills, interests: req.body.interests, github, twitter } })
             rep.code(200).send({ message: 'successfully updated profile' })
-        } else {
-            rep.code(400).send({ error: 'token-expired' })
-        }
     } else {
         rep.code(400).send({ error: 'unauthorized' })
     }
