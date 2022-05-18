@@ -203,14 +203,12 @@ fastify.post('/logout', logoutOpts, async (req, rep) => {
 })
 
 fastify.post('/logout-all', logoutOpts, async (req, rep) => {
-    const token = req.headers.authorization.split(' ')[1]
-    const email = verifyToken(token).email
-    if (email) {
+    if (req.user) {
         const { redis } = fastify;
-        await redis.del(email)
+        await redis.del(req.user)
         rep.code(200).send({ message: 'Successfully logged out of all devices' })
     } else {
-        rep.code(400).send({ error: 'Invalid token' })
+        rep.code(400).send({ error: 'unauthorized' })
     }
 })
 
