@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="/bs-profile.js" defer></script>
+    <title>Launch Base | Profile</title>
+</head>
+<body>
+    <h1 class="logo-title"><a href="/">Launch Base</a></h1>
+
+    <div class="nav-full">
+        <a href="community" class="nav-item">Just an Idea</a>
+        <a href="launch" class="nav-item">The Real Thing</a>
+        <a href="grow" class="nav-item">Perks</a>
+        <a href="invest" class="nav-item active">Backstage</a>
+    </div>
+
+    <button class="pfp-container"><img class="pfp" src="https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08?s=50&d=mp" alt="pfp"></button>
+   
+    <div class="container settings-box">
+        <div class="side-panel">
+            <h2>Backstage</h2>
+            <a href="#" class="panel-item active-panel-item">Your profile</a>
+            <a href="#" class="panel-item">Email settings</a>
+            <a href="#" class="panel-item">DMs</a>
+            <a href="#" class="panel-item">Notifications</a>
+        </div>
+        <div class="settings-content">
+            <h3>Your Profile</h3>
+            <hr>
+            <p class="desc">All information excluding your email is public by default. Email can be made public explicitly if required.</p>
+            <form id="profile-form">
+                <h4>Who I am</h4>
+                <input type="text" placeholder="Full Name*" name="name" required maxlength="256">
+                <input type="text" name="nick" placeholder="Nickname*" required maxlength="256">
+                <input type="text" name="url" placeholder="Username*" required maxlength="256">
+                <input type="text" name="occ" placeholder="Occupation*" required maxlength="256">
+                <input type="text" name="skills" placeholder="Skills*" required maxlength="256">
+                <input type="text" name="interests" placeholder="Interests*" required maxlength="256">
+                <h4>Social</h4>
+                <input type="text" name="twitter" placeholder="Twitter handle" maxlength="16">
+                <input type="text" name="github" placeholder="GitHub username" maxlength="39">
+                <button type="submit">Update <span class="submit-icon">👉</span></button>
+            </form>
+        </div>
+    </div>
+
+    <dialog id="pfp-dropdown" class="container">
+        <a href="#" class="panel-item">Visit your profile</a>
+        <a href="#" class="panel-item">Logout</a>
+    </dialog>
+</body>
+</html>

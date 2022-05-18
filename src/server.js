@@ -21,7 +21,7 @@ fastify.register(require('./db/mongo-connector'))
 fastify.register(require('./db/redis-connector'))
 const sendEmailVerification = require('./utils/email-verification')
 const { hash, verify, generateToken, verifyToken } = require('./utils/crypto')
-const { sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts, logoutOpts } = require('./utils/schema')
+const { sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts, getProfileOpts, logoutOpts } = require('./utils/schema')
 
 fastify.register(require("point-of-view"), {
   engine: {
@@ -116,7 +116,7 @@ fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
     return rep.code(200).send({ token })
 })
 
-fastify.post('/update-profile', updateProfileOpts, async (req, rep) => {
+fastify.post('/profile', updateProfileOpts, async (req, rep) => {
     const token = req.headers.authorization.split(' ')[1]
     const dToken = verifyToken(token);
     if (dToken) {
@@ -139,7 +139,7 @@ fastify.post('/update-profile', updateProfileOpts, async (req, rep) => {
                 github = req.body.github
             }
             console.log(req.body.url)
-            if (!req.body.url.match(/^[a-zA-Z0-9_]+$/g)) {
+            if (!req.body.url.match(/^[a-zA-Z0-9_-]+$/g)) {
                 return rep.code(400).send({ error: 'invalid-url' })
             }
             const users = fastify.mongo.db.collection('users')
@@ -167,6 +167,16 @@ fastify.post('/update-profile', updateProfileOpts, async (req, rep) => {
         }
     } else {
         rep.code(400).send({ error: 'unauthorized' })
+    }
+})
+
+fastify.get('/profile', getProfileOpts, async (req, rep) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const dToken = verifyToken(token)
+    if (dToken) {
+
+    } else {
+        rep.code(400).send({ error: 'Invalid token' })
     }
 })
 

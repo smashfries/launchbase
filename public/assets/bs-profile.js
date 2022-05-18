@@ -7,6 +7,31 @@ const emailHash = MD5(email)
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`
 document.querySelector('.pfp').setAttribute('src', pfp)
 
+const pfpDropdown = document.querySelector('#pfp-dropdown')
+const pfpElement = document.querySelector('.pfp-container')
+
+pfpElement.addEventListener('click', showPfpDropdown)
+pfpDropdown.addEventListener('click', (e) => {
+    const rect = pfpDropdown.getBoundingClientRect();
+    const isInDialog=(rect.top <= e.clientY && e.clientY <= rect.top + rect.height
+        && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+    if (!isInDialog) {
+        pfpDropdown.close();
+    }
+})
+
+const errorCodes = {
+    'invalid-twitter': 'Your Twitter handle is invalid',
+    'invalid-url': 'Usernames can only contain alphanumeric combinations and the symbols: - and _',
+    'url-exists': 'This username is already taken.',
+    'token-expired': 'token-expired',
+    'unauthorized': 'unauthorized'
+}
+
+function showPfpDropdown(e) {
+    pfpDropdown.showModal()
+}
+
 function parseJwt (token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

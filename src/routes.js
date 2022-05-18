@@ -13,7 +13,7 @@ async function routes (fastify, options) {
         return rep.view('home.hbs')
     })
     fastify.get('/backstage/profile', (req, rep) => {
-        return rep.sendFile('bs-profile.html')
+        return rep.sendFile('backstage/profile.html')
     })
 }
 
