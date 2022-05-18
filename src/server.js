@@ -188,20 +188,17 @@ fastify.get('/profile', getProfileOpts, async (req, rep) => {
     if (dToken) {
 
     } else {
-        rep.code(400).send({ error: 'Invalid token' })
+        rep.code(400).send({ error: 'unauthorized' })
     }
 })
 
 fastify.post('/logout', logoutOpts, async (req, rep) => {
-    const token = req.headers.authorization.split(' ')[1]
-    const email = verifyToken(token).email
-    if (email) {
+    if (req.user) {
         const { redis } = fastify;
-        console.log(token, email)
-        await redis.lrem(email, 1, token)
+        await redis.lrem(req.user, 1, req.token)
         rep.code(200).send({ message: 'Logged out' })
     } else {
-        rep.code(400).send({ error: 'Invalid token' })
+        rep.code(400).send({ error: 'unauthorized' })
     }
 })
 
