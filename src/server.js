@@ -183,10 +183,11 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
 })
 
 fastify.get('/profile', getProfileOpts, async (req, rep) => {
-    const token = req.headers.authorization.split(' ')[1]
-    const dToken = verifyToken(token)
-    if (dToken) {
-
+    if (req.user) {
+        const users = fastify.mongo.db.collection('users')
+        const user = await users.findOne({ email: req.user })
+        const isComplete = user.name ? true : false;
+        rep.code(200).send({ ...user, isComplete })
     } else {
         rep.code(400).send({ error: 'unauthorized' })
     }
