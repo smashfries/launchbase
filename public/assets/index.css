@@ -87,7 +87,7 @@ button {
   cursor: pointer;  
 }
 
-.submit-icon {
+.submit-icon, .lock-icon {
   display: inline-block;
   animation-name: none;
   animation-duration: 1s;
@@ -181,6 +181,7 @@ button {
   display: block;
   border-radius: 5px;
   margin-bottom: 5px;
+  cursor: pointer;
 }
 
 .panel-item:hover {

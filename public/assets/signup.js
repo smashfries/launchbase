@@ -33,7 +33,7 @@ form.addEventListener('submit', (e) => {
   submitButton.disabled = true;
   // Verify email step
   if (form.dataset.step == 'verify-email') {
-    fetch('send-email-verification', {
+    fetch('/send-email-verification', {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ form.addEventListener('submit', (e) => {
     if (!identifier || !email) {
       location.reload();
     }
-    fetch('verify-code', {
+    fetch('/verify-code', {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ function sendEmailVerification() {
   submitIcon.style.animationName = 'loading';
   emailInput.disabled = true;
   submitButton.disabled = true;
-  fetch('send-email-verification', {
+  fetch('/send-email-verification', {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',

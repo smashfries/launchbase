@@ -3,7 +3,7 @@
  * @param {*} fastify
  * @param {*} _options
  */
-function routes(fastify, _options) {
+async function routes(fastify, _options) {
   fastify.get('/', (_req, rep) => {
     return rep.sendFile('index.html');
   });

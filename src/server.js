@@ -42,9 +42,9 @@ fastify.addHook('preHandler', async (req, rep) => {
     if (dToken) {
       const {redis} = fastify;
       const email = dToken.email;
+      req.user = email;
       const auths = await redis.lrange(email, 0, -1);
       if (auths.indexOf(token) !== -1) {
-        req.user = email;
         req.token = token;
       } else {
         await redis.lrem(email, 1, token);
@@ -143,7 +143,7 @@ fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
 });
 
 fastify.post('/profile', updateProfileOpts, async (req, rep) => {
-  if (req.user) {
+  if (req.token) {
     const email = req.user;
     let twitter = '';
     let github = '';
@@ -192,7 +192,7 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
 });
 
 fastify.get('/profile', getProfileOpts, async (req, rep) => {
-  if (req.user) {
+  if (req.token) {
     const users = fastify.mongo.db.collection('users');
     const user = await users.findOne({email: req.user});
     const isComplete = user.name ? true : false;
@@ -204,16 +204,20 @@ fastify.get('/profile', getProfileOpts, async (req, rep) => {
 
 fastify.post('/logout', logoutOpts, async (req, rep) => {
   if (req.user) {
-    const {redis} = fastify;
-    await redis.lrem(req.user, 1, req.token);
-    rep.code(200).send({message: 'Logged out'});
+    if (req.token) {
+      const {redis} = fastify;
+      await redis.lrem(req.user, 1, req.token);
+      rep.code(200).send({message: 'Logged out'});
+    } else {
+      rep.code(200).send({message: 'Already logged out'});
+    }
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
 });
 
 fastify.post('/logout-all', logoutOpts, async (req, rep) => {
-  if (req.user) {
+  if (req.token) {
     const {redis} = fastify;
     await redis.del(req.user);
     rep.code(200).send({message: 'Successfully logged out of all devices'});

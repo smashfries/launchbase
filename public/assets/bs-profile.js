@@ -14,6 +14,9 @@ document.querySelector('.pfp').setAttribute('src', pfp);
 
 const pfpDropdown = document.querySelector('#pfp-dropdown');
 const pfpElement = document.querySelector('.pfp-container');
+const logoutBtn = document.querySelector('#logout-btn');
+const submitIcon = document.querySelector('.submit-icon');
+const lockIcon = document.querySelector('.lock-icon');
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
@@ -35,6 +38,25 @@ const errorCodes = {
   'token-expired': 'token-expired',
   'unauthorized': 'unauthorized',
 };
+
+logoutBtn.addEventListener('click', () => {
+  console.log('hello');
+  lockIcon.style.animationName = 'loading';
+  logoutBtn.style.pointerEvents = 'none';
+  logoutBtn.classList.add('active-panel-item');
+  fetch('/logout', {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  }).then((data) => data.json())
+      .then((res) => {
+        if (res.message || res.error) {
+          localStorage.clear();
+          window.location.replace('/login');
+        }
+      });
+});
 
 /**
  * Show pfp modal
