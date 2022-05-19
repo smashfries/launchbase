@@ -107,6 +107,18 @@ button {
   border: 1px solid #badbcc;
 }
 
+.warning {
+  color: #664d03;
+  background-color: #fff3cd;
+  border: 1px solid #ffecb5;
+}
+
+.info {
+  color: #055160;
+  background-color: #cff4fc;
+  border: 1px solid #b6effb;
+}
+
 .msg {
   width: 290px;
   margin: auto;
@@ -213,6 +225,17 @@ h2 {
 
 #profile-form button {
   margin-left: 0;
+}
+
+.hide {
+  display: none;
+}
+
+.settings-content .msg {
+  width: 100% !important;
+  padding: 5px;
+  font-size: 12px;
+  box-sizing: border-box;
 }
 
 @media only screen and (max-width: 428px) {

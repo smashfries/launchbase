@@ -12,6 +12,47 @@ const emailHash = MD5(email);
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`;
 document.querySelector('.pfp').setAttribute('src', pfp);
 
+const nameInput = document.querySelector('[name="name"]');
+const nickInput = document.querySelector('[name="nick"]');
+const urlInput = document.querySelector('[name="url"]');
+const occInput = document.querySelector('[name="occ"]');
+const skillsInput = document.querySelector('[name="skills"]');
+const interestsInput = document.querySelector('[name="interests"]');
+const twitterInput = document.querySelector('[name="twitter"]');
+const githubInput = document.querySelector('[name="github"]');
+
+fetch('/profile', {
+  method: 'get',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  },
+}).then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        logout();
+      } else {
+        const msg = document.querySelector('.msg');
+        if (data.isComplete) {
+          msg.classList.add('hide');
+          nameInput.value = data.name;
+          nickInput.value = data.nickname;
+          urlInput.value = data.url;
+          occInput.value = data.occ;
+          skillsInput.value = data.skills;
+          interestsInput.value = data.interests;
+          if (data.twitter) {
+            twitterInput.value = data.twitter;
+          }
+          if (data.github) {
+            githubInput.value = data.github;
+          }
+        } else {
+          msg.textContent = 'Your profile is not complete.';
+          msg.className = 'warning msg';
+        }
+      }
+    });
+
 const pfpDropdown = document.querySelector('#pfp-dropdown');
 const pfpElement = document.querySelector('.pfp-container');
 const logoutBtn = document.querySelector('#logout-btn');
@@ -40,10 +81,16 @@ const errorCodes = {
 };
 
 logoutBtn.addEventListener('click', () => {
-  console.log('hello');
   lockIcon.style.animationName = 'loading';
   logoutBtn.style.pointerEvents = 'none';
   logoutBtn.classList.add('active-panel-item');
+  logout();
+});
+
+/**
+ * logout
+ */
+function logout() {
   fetch('/logout', {
     method: 'post',
     headers: {
@@ -56,7 +103,7 @@ logoutBtn.addEventListener('click', () => {
           window.location.replace('/login');
         }
       });
-});
+}
 
 /**
  * Show pfp modal
