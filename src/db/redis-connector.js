@@ -7,7 +7,7 @@ require('dotenv').config({path: __dirname+'/./../../.env'});
  * @param {*} options
  */
 async function dbConnector(fastify, options) {
-  fastify.register(require('fastify-redis'), {
+  fastify.register(require('@fastify/redis'), {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
     password: process.env.REDIS_PASSWORD,

@@ -7,7 +7,7 @@ require('dotenv').config({path: __dirname+'/./../../.env'});
  * @param {*} options
  */
 async function dbConnector(fastify, options) {
-  fastify.register(require('fastify-mongodb'), {
+  fastify.register(require('@fastify/mongodb'), {
     url: process.env.MONGODB_URI,
     forceClose: true,
   });
