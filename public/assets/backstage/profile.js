@@ -3,11 +3,12 @@
 /* eslint-disable require-jsdoc */
 /* eslint-disable no-var */
 /* eslint-disable new-cap */
-if (!localStorage.getItem('token')) {
+const token = localStorage.getItem('token');
+if (!token) {
   window.location.replace('/login');
 }
 
-const email = parseJwt(localStorage.getItem('token')).email;
+const email = parseJwt(token).email;
 const emailHash = MD5(email);
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`;
 document.querySelector('.pfp').setAttribute('src', pfp);
@@ -20,18 +21,20 @@ const skillsInput = document.querySelector('[name="skills"]');
 const interestsInput = document.querySelector('[name="interests"]');
 const twitterInput = document.querySelector('[name="twitter"]');
 const githubInput = document.querySelector('[name="github"]');
+const msg = document.querySelector('.msg');
 
 fetch('/profile', {
   method: 'get',
   headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Authorization': `Bearer ${token}`,
   },
 }).then((res) => res.json())
     .then((data) => {
+      console.log(data);
       if (data.error) {
+        console.log(data);
         logout();
       } else {
-        const msg = document.querySelector('.msg');
         if (data.isComplete) {
           msg.classList.add('hide');
           nameInput.value = data.name;
@@ -70,6 +73,12 @@ pfpDropdown.addEventListener('click', (e) => {
   }
 });
 
+logoutBtn.addEventListener('click', () => {
+  lockIcon.style.animationName = 'loading';
+  logoutBtn.style.pointerEvents = 'none';
+  logoutBtn.classList.add('active-panel-item');
+  logout();
+});
 
 const errorCodes = {
   'invalid-twitter': 'Your Twitter handle is invalid',
@@ -80,11 +89,49 @@ const errorCodes = {
   'unauthorized': 'unauthorized',
 };
 
-logoutBtn.addEventListener('click', () => {
-  lockIcon.style.animationName = 'loading';
-  logoutBtn.style.pointerEvents = 'none';
-  logoutBtn.classList.add('active-panel-item');
-  logout();
+const submitBtn = document.querySelector('button[type="submit"]');
+document.querySelector('form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  submitIcon.style.animationName = 'loading';
+  fetch('/profile', {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: nameInput.value,
+      nickname: nickInput.value,
+      url: urlInput.value,
+      occ: occInput.value,
+      skills: skillsInput.value,
+      interests: interestsInput.value,
+      twitter: twitterInput.value,
+      github: githubInput.value,
+    }),
+  }).then((res) => res.json())
+      .then((data) => {
+        submitBtn.disabled = false;
+        submitIcon.style.animationName = 'none';
+        if (data.error) {
+          if (!document.querySelector('.error')) {
+            const errorMsg = document.createElement('p');
+            errorMsg.className = 'error msg';
+            errorMsg.textContent = errorCodes[data.error];
+            document.querySelector('.settings-content').appendChild(errorMsg);
+          } else {
+            document.querySelector('.error')
+                .textContent = errorCodes[data.error];
+          }
+        } else {
+          msg.className = 'msg success';
+          msg.textContent = 'Profile updated!';
+          if (document.querySelector('.error')) {
+            document.querySelector('.error').remove();
+          }
+        }
+      });
 });
 
 /**

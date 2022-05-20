@@ -2,6 +2,9 @@ const fastify = require('fastify')({
   logger: true,
   trustProxy: true,
 });
+fastify.register(require('./db/mongo-connector'));
+fastify.register(require('./db/redis-connector'));
+
 const path = require('path');
 require('dotenv').config({path: __dirname + '/./../.env'});
 
@@ -17,8 +20,6 @@ fastify.register(require('@fastify/static'), {
 
 const {randomBytes} = require('crypto');
 
-fastify.register(require('./db/mongo-connector'));
-fastify.register(require('./db/redis-connector'));
 const sendEmailVerification = require('./utils/email-verification');
 const {hash, verify, generateToken, verifyToken} = require('./utils/crypto');
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
