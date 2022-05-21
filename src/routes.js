@@ -26,6 +26,9 @@ async function routes(fastify, _options) {
   fastify.get('/backstage/email', (_req, rep) => {
     return rep.sendFile('backstage/email.html');
   });
+  fastify.get('/backstage/security', (_req, rep) => {
+    return rep.sendFile('backstage/security.html');
+  });
 }
 
 module.exports = routes;

@@ -4,6 +4,10 @@ html, body {
   padding: 0;
 }
 
+p {
+  font-size: 14px;
+}
+
 .logo-title {
   border: 2px dashed #000;
   margin: auto;
@@ -87,7 +91,7 @@ button {
   cursor: pointer;  
 }
 
-.submit-icon, .lock-icon {
+.submit-icon, .lock-icon, .logout-icon, .logoutall-icon {
   display: inline-block;
   animation-name: none;
   animation-duration: 1s;
