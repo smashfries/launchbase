@@ -17,8 +17,14 @@ async function routes(fastify, _options) {
   fastify.get('/home', (_req, rep) => {
     return rep.view('home.hbs');
   });
+  fastify.get('/backstage', (_req, rep) => {
+    return rep.redirect('/backstage/profile');
+  });
   fastify.get('/backstage/profile', (_req, rep) => {
     return rep.sendFile('backstage/profile.html');
+  });
+  fastify.get('/backstage/email', (_req, rep) => {
+    return rep.sendFile('backstage/email.html');
   });
 }
 

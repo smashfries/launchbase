@@ -229,7 +229,7 @@ h2 {
   width: 433px !important;
 }
 
-#profile-form button {
+.back-btn {
   margin-left: 0;
 }
 
@@ -242,6 +242,14 @@ h2 {
   padding: 5px;
   font-size: 12px;
   box-sizing: border-box;
+}
+
+label {
+  font-size: 14px;
+}
+
+input[type="checkbox"] {
+  vertical-align: middle;
 }
 
 @media only screen and (max-width: 428px) {
