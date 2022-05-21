@@ -92,18 +92,6 @@ fastify.post('/send-email-verification', sendEmailVerificationOpts,
 
 fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
   const {redis} = fastify;
-  if (!req.body.code) {
-    return rep.code(400).send({error: 'code-missing'});
-  }
-  if (!req.body.identifier) {
-    return rep.code(400).send({error: 'identifier-missing'});
-  }
-  if (!req.body.email) {
-    return rep.code(400).send({error: 'email-missing'});
-  }
-  if (!req.body.type) {
-    return rep.code(400).send({error: 'type-missing'});
-  }
   const valid = (req.body.type == 'login' || req.body.type == 'signup') ?
     true : false;
   if (!valid) {
