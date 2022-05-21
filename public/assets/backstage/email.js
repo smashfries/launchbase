@@ -24,6 +24,9 @@ fetch('/email-settings', {
   },
 }).then((res) => res.json())
     .then((data) => {
+      if (data.error) {
+        logout();
+      }
       msg.classList.add('hide');
       publicInput.checked = data.publicEmail;
       subInput.checked = data.subscribed;
@@ -33,6 +36,7 @@ const pfpDropdown = document.querySelector('#pfp-dropdown');
 const pfpElement = document.querySelector('.pfp-container');
 const logoutBtn = document.querySelector('#logout-btn');
 const lockIcon = document.querySelector('.lock-icon');
+const submitIcon = document.querySelector('.submit-icon');
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
@@ -52,15 +56,30 @@ logoutBtn.addEventListener('click', () => {
   logout();
 });
 
-// to be changed
-const errorCodes = {
-  'invalid-twitter': 'Your Twitter handle is invalid',
-  'invalid-url': `Usernames can only contain alphanumeric
-    combinations and the symbols: - and _`,
-  'url-exists': 'This username is already taken.',
-  'token-expired': 'token-expired',
-  'unauthorized': 'unauthorized',
-};
+const form = document.querySelector('form');
+const submitBtn = document.querySelector('button');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  submitIcon.style.animationName = 'loading';
+  fetch('/email-settings', {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      subscribed: subInput.checked,
+      publicEmail: publicInput.checked,
+    }),
+  }).then((res) => res.json())
+      .then((_data) => {
+        submitBtn.disabled = false;
+        submitIcon.style.animationName = 'none';
+        msg.textContent = 'Settings updated!';
+        msg.className = 'msg success';
+      });
+});
 
 
 /**

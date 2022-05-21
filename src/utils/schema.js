@@ -161,6 +161,39 @@ const getEmailSettings = {
   },
 };
 
+const updateEmailSettings = {
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        publicEmail: {type: 'boolean'},
+        subscribed: {type: 'boolean'},
+      },
+    },
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 const logoutOpts = {
   schema: {
     headers: {
@@ -195,4 +228,5 @@ module.exports = {
   getProfileOpts,
   logoutOpts,
   getEmailSettings,
+  updateEmailSettings,
 };
