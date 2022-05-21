@@ -24,7 +24,7 @@ const sendEmailVerification = require('./utils/email-verification');
 const {hash, verify, generateToken, verifyToken} = require('./utils/crypto');
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
-  updateEmailSettings} = require('./utils/schema');
+  updateEmailSettings, getActiveTokens} = require('./utils/schema');
 
 fastify.register(require('point-of-view'), {
   engine: {
@@ -222,6 +222,16 @@ fastify.post('/email-settings', updateEmailSettings, async (req, rep) => {
     await users.updateOne({email: req.user}, {$set:
       {publicEmail: req.body.publicEmail, subscribed: req.body.subscribed}});
     rep.code(200).send({message: 'success'});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
+  if (req.token) {
+    const {redis} = fastify;
+    const tokens = await redis.lrange(req.user, 0, -1);
+    rep.code(200).send({number: tokens.length});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }

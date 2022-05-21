@@ -194,6 +194,32 @@ const updateEmailSettings = {
   },
 };
 
+const getActiveTokens = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          number: {type: 'number'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+          error: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 const logoutOpts = {
   schema: {
     headers: {
@@ -229,4 +255,5 @@ module.exports = {
   logoutOpts,
   getEmailSettings,
   updateEmailSettings,
+  getActiveTokens,
 };
