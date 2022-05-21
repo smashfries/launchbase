@@ -30,9 +30,7 @@ fetch('/profile', {
   },
 }).then((res) => res.json())
     .then((data) => {
-      console.log(data);
       if (data.error) {
-        console.log(data);
         logout();
       } else {
         if (data.isComplete) {

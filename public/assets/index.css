@@ -175,6 +175,7 @@ button {
 .settings-box {
   margin: auto;
   margin-top: 50px;
+  margin-bottom: 100px;
   width: 80%;
   display: flex;
 }
@@ -252,5 +253,19 @@ h2 {
 @media only screen and (max-width: 828px) {
   #profile-form input, .settings-content .error {
     width: calc(100% - 40px) !important;
+  }
+}
+
+@media only screen and (max-width: 645px) {
+  .settings-box {
+    flex-direction: column;
+  }
+  .side-panel {
+    width: 100%;
+  }
+  .settings-content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
   }
 }
