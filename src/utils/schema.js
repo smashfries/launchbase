@@ -133,6 +133,34 @@ const getProfileOpts = {
   },
 };
 
+const getEmailSettings = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+      required: ['authorization'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          publicEmail: {type: 'boolean'},
+          subscribed: {type: 'boolean'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 const logoutOpts = {
   schema: {
     headers: {
@@ -166,4 +194,5 @@ module.exports = {
   updateProfileOpts,
   getProfileOpts,
   logoutOpts,
+  getEmailSettings,
 };

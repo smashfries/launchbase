@@ -23,7 +23,7 @@ const {randomBytes} = require('crypto');
 const sendEmailVerification = require('./utils/email-verification');
 const {hash, verify, generateToken, verifyToken} = require('./utils/crypto');
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
-  getProfileOpts, logoutOpts} = require('./utils/schema');
+  getProfileOpts, getEmailSettings, logoutOpts} = require('./utils/schema');
 
 fastify.register(require('point-of-view'), {
   engine: {
@@ -198,6 +198,18 @@ fastify.get('/profile', getProfileOpts, async (req, rep) => {
     const user = await users.findOne({email: req.user});
     const isComplete = user.name ? true : false;
     rep.code(200).send({...user, isComplete});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
+  if (req.token) {
+    const users = fastify.mongo.db.collection('users');
+    const user = await users.findOne({email: req.user});
+    const publicEmail = user.publicEmail ? true : false;
+    const subscribed = user.subscribed ? true : false;
+    rep.code(200).send({publicEmail, subscribed});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
