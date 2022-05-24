@@ -169,12 +169,14 @@ const updateEmailSettings = {
         publicEmail: {type: 'boolean'},
         subscribed: {type: 'boolean'},
       },
+      required: ['publicEmail', 'subscribed'],
     },
     headers: {
       type: 'object',
       properties: {
         authorization: {type: 'string'},
       },
+      required: ['authorization'],
     },
     response: {
       200: {
@@ -201,6 +203,7 @@ const getActiveTokens = {
       properties: {
         authorization: {type: 'string'},
       },
+      required: ['authorization'],
     },
     response: {
       200: {
@@ -214,6 +217,72 @@ const getActiveTokens = {
         properties: {
           message: {type: 'string'},
           error: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
+const createIdea = {
+  schema: {
+    headers: {
+      authorization: {type: 'string'},
+    },
+    required: ['authorization'],
+    body: {
+      type: 'object',
+      properties: {
+        name: {type: 'string', maxLength: 256},
+        desc: {type: 'string', maxLength: 5000},
+        links: {type: 'array', maxItems: 10},
+        members: {type: 'array', maxItems: 5},
+      },
+      required: ['name', 'desc'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
+const getIdeas = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+      required: ['authorization'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          ideas: {type: 'array'},
+          properties: {
+            name: {type: 'string'},
+            desc: {type: 'string'},
+            members: {type: 'array'},
+          },
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
         },
       },
     },
@@ -256,4 +325,6 @@ module.exports = {
   getEmailSettings,
   updateEmailSettings,
   getActiveTokens,
+  createIdea,
+  getIdeas,
 };

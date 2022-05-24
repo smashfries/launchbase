@@ -33,4 +33,26 @@ const sendEmailVerification = function(email) {
   });
 };
 
-module.exports = sendEmailVerification;
+const inviteIdeaMembers = function(emailList) {
+  return new Promise((resolve) => {
+    const msg = {
+      to: emailList,
+      from: 'aditya@adityaone.com',
+      subject: 'Idea Invite | Launch Base',
+      text: `Hi 👋! You have been invited to join as a ` +
+       `Member for a new idea on Launch Base. Please visit launchbase.com ` +
+       `for more details.`,
+    };
+    sgMail.sendMultiple(msg).then(() => {
+      resolve(true);
+    }).catch((e) => {
+      resolve(false);
+    });
+  });
+};
+
+module.exports = {
+  sendEmailVerification,
+  validateEmail,
+  inviteIdeaMembers,
+};

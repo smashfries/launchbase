@@ -20,11 +20,13 @@ fastify.register(require('@fastify/static'), {
 
 const {randomBytes} = require('crypto');
 
-const sendEmailVerification = require('./utils/email-verification');
+const {sendEmailVerification, validateEmail,
+  inviteIdeaMembers} = require('./utils/email');
 const {hash, verify, generateToken, verifyToken} = require('./utils/crypto');
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
-  updateEmailSettings, getActiveTokens} = require('./utils/schema');
+  updateEmailSettings, getActiveTokens, createIdea,
+  getIdeas} = require('./utils/schema');
 
 fastify.register(require('point-of-view'), {
   engine: {
@@ -220,6 +222,48 @@ fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
     const {redis} = fastify;
     const tokens = await redis.lrange(req.user, 0, -1);
     rep.code(200).send({number: tokens.length});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.post('/ideas', createIdea, async (req, rep) => {
+  if (req.token) {
+    let members = req.body.members;
+    if (members) {
+      const invalidEmails = req.body.members.find((i) => !validateEmail(i));
+      if (invalidEmails) {
+        return rep.code(400).send({error: 'invalid-emails'});
+      }
+      await inviteIdeaMembers(members);
+    }
+    const ideas = fastify.mongo.db.collection('ideas');
+    const users = fastify.mongo.db.collection('users');
+    members = [req.user];
+    if (req.body.members) {
+      members = [...req.body.members, req.user];
+    }
+    const idea = await ideas.insertOne({name: req.body.name,
+      desc: req.body.desc, links: req.body.links ? req.body.links : [],
+      members});
+    console.log(idea);
+    members.forEach(async (i) => {
+      await users.updateOne({email: i}, {$push:
+        {ideas: idea.insertedId}});
+    });
+    rep.code(200).send({message: 'done'});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.get('/ideas', getIdeas, async (req, rep) => {
+  if (req.token) {
+    const ideasCollection = fastify.mongo.db.collection('ideas');
+    const cursor = await ideasCollection.find();
+    const ideas = await cursor.toArray();
+    console.log(ideas);
+    rep.code(200).send({ideas});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
