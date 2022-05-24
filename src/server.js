@@ -229,25 +229,27 @@ fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
 
 fastify.post('/ideas', createIdea, async (req, rep) => {
   if (req.token) {
-    let members = req.body.members;
-    if (members) {
+    let uniqueMembers = req.body.members;
+    if (uniqueMembers) {
+      uniqueMembers = [...new Set(uniqueMembers)];
       const invalidEmails = req.body.members.find((i) => !validateEmail(i));
       if (invalidEmails) {
         return rep.code(400).send({error: 'invalid-emails'});
       }
-      await inviteIdeaMembers(members);
+      await inviteIdeaMembers(uniqueMembers);
     }
     const ideas = fastify.mongo.db.collection('ideas');
     const users = fastify.mongo.db.collection('users');
-    members = [req.user];
-    if (req.body.members) {
-      members = [...req.body.members, req.user];
+    let members = [req.user];
+    if (uniqueMembers) {
+      members = [...uniqueMembers, req.user];
+      uniqueMembers = [...new Set(members)];
     }
     const idea = await ideas.insertOne({name: req.body.name,
       desc: req.body.desc, links: req.body.links ? req.body.links : [],
-      members});
+      uniqueMembers});
     console.log(idea);
-    members.forEach(async (i) => {
+    uniqueMembers.forEach(async (i) => {
       await users.updateOne({email: i}, {$push:
         {ideas: idea.insertedId}});
     });
