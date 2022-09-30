@@ -22,7 +22,8 @@ const {randomBytes} = require('crypto');
 
 const {sendEmailVerification, validateEmail,
   inviteIdeaMembers} = require('./utils/email');
-const {hash, verify, generateToken, verifyToken} = require('./utils/crypto');
+const {hash, verify, generateToken, verifyToken,
+  md5} = require('./utils/crypto');
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdea,
@@ -45,13 +46,13 @@ fastify.addHook('preHandler', async (req, rep) => {
     const dToken = verifyToken(token);
     if (dToken) {
       const {redis} = fastify;
-      const email = dToken.email;
-      req.user = email;
-      const auths = await redis.lrange(email, 0, -1);
+      const id = dToken.id;
+      const oid = new fastify.mongo.ObjectId(id);
+      req.user = id;
+      req.userOId = oid;
+      const auths = await redis.lrange(id, 0, -1);
       if (auths.indexOf(token) !== -1) {
         req.token = token;
-      } else {
-        await redis.lrem(email, 1, token);
       }
     }
   }
@@ -125,18 +126,22 @@ fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
   if (currentTime > code.expiresOn) {
     return rep.code(400).send({error: 'expired'});
   }
+  let id;
   await fastify.mongo.db.collection('verification-codes').deleteMany({email});
   if (req.body.type == 'signup') {
-    await fastify.mongo.db.collection('users').insertOne({email});
+    const newUser = await fastify.mongo.db.collection('users')
+        .insertOne({email});
+    id = newUser.insertedId;
+  } else {
+    id = user._id;
   }
-  const token = generateToken(email);
-  await redis.rpush(email, token);
+  const token = generateToken(id, md5(email));
+  await redis.rpush(id, token);
   return rep.code(200).send({token});
 });
 
 fastify.post('/profile', updateProfileOpts, async (req, rep) => {
   if (req.token) {
-    const email = req.user;
     let twitter = '';
     let github = '';
     if (req.body.twitter) {
@@ -156,7 +161,7 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
       return rep.code(400).send({error: 'invalid-url'});
     }
     const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({email});
+    const user = await users.findOne({_id: req.userOId});
     const url = req.body.url;
     if (user.url) {
       if (user.url !== url) {
@@ -173,7 +178,7 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
         return rep.code(400).send({error: 'url-exists'});
       }
     }
-    await users.updateOne({email}, {$set: {email, name: req.body.name,
+    await users.updateOne({_id: req.userOId}, {$set: {name: req.body.name,
       nickname: req.body.nickname, url: req.body.url, occ: req.body.occ,
       skills: req.body.skills, interests: req.body.interests, github,
       twitter}});
@@ -186,8 +191,8 @@ fastify.post('/profile', updateProfileOpts, async (req, rep) => {
 fastify.get('/profile', getProfileOpts, async (req, rep) => {
   if (req.token) {
     const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({email: req.user});
-    const isComplete = user.name ? true : false;
+    const user = await users.findOne({_id: req.userOId});
+    const isComplete = user.hasOwnProperty('name') ? true : false;
     rep.code(200).send({...user, isComplete});
   } else {
     rep.code(400).send({error: 'unauthorized'});
@@ -197,9 +202,9 @@ fastify.get('/profile', getProfileOpts, async (req, rep) => {
 fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
   if (req.token) {
     const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({email: req.user});
-    const publicEmail = user.publicEmail ? true : false;
-    const subscribed = user.subscribed ? true : false;
+    const user = await users.findOne({_id: req.userOId});
+    const publicEmail = user.hasOwnProperty('publicEmail') ? true : false;
+    const subscribed = user.hasOwnProperty('subscribed') ? true : false;
     rep.code(200).send({publicEmail, subscribed});
   } else {
     rep.code(400).send({error: 'unauthorized'});
@@ -209,7 +214,8 @@ fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
 fastify.post('/email-settings', updateEmailSettings, async (req, rep) => {
   if (req.token) {
     const users = fastify.mongo.db.collection('users');
-    await users.updateOne({email: req.user}, {$set:
+
+    await users.updateOne({_id: req.userOId}, {$set:
       {publicEmail: req.body.publicEmail, subscribed: req.body.subscribed}});
     rep.code(200).send({message: 'success'});
   } else {
@@ -229,30 +235,27 @@ fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
 
 fastify.post('/ideas', createIdea, async (req, rep) => {
   if (req.token) {
-    let uniqueMembers = req.body.members;
-    if (uniqueMembers) {
-      uniqueMembers = [...new Set(uniqueMembers)];
+    const members = req.body.members ? req.body.members :
+     [];
+    let uniqueMembers = [...new Set(members)];
+    if (members.length > 1) {
       const invalidEmails = req.body.members.find((i) => !validateEmail(i));
       if (invalidEmails) {
         return rep.code(400).send({error: 'invalid-emails'});
       }
-      await inviteIdeaMembers(uniqueMembers);
     }
     const ideas = fastify.mongo.db.collection('ideas');
-    const users = fastify.mongo.db.collection('users');
-    let members = [req.user];
-    if (uniqueMembers) {
-      members = [...uniqueMembers, req.user];
-      uniqueMembers = [...new Set(members)];
-    }
+    const ideaInvites = fastify.mongo.db.collection('idea-invites');
     const idea = await ideas.insertOne({name: req.body.name,
       desc: req.body.desc, links: req.body.links ? req.body.links : [],
-      uniqueMembers});
+      members: [req.userOId]});
     console.log(idea);
-    uniqueMembers.forEach(async (i) => {
-      await users.updateOne({email: i}, {$push:
-        {ideas: idea.insertedId}});
+    await inviteIdeaMembers(uniqueMembers, idea.insertedId);
+    uniqueMembers = uniqueMembers.map((i) => {
+      return {idea: idea.insertedId, email: i, timeStamp: new Date(),
+        status: 'pending'};
     });
+    await ideaInvites.insertMany(uniqueMembers);
     rep.code(200).send({message: 'done'});
   } else {
     rep.code(400).send({error: 'unauthorized'});
@@ -262,7 +265,24 @@ fastify.post('/ideas', createIdea, async (req, rep) => {
 fastify.get('/ideas', getIdeas, async (req, rep) => {
   if (req.token) {
     const ideasCollection = fastify.mongo.db.collection('ideas');
-    const cursor = await ideasCollection.find();
+    const cursor = await ideasCollection.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'members',
+          foreignField: '_id',
+          as: 'member_details',
+        },
+      },
+      {
+        $project: {
+          'name': 1,
+          'desc': 1,
+          'member_details.name': 1,
+        },
+      },
+    ]);
+    // const cursor = await ideasCollection.find();
     const ideas = await cursor.toArray();
     console.log(ideas);
     rep.code(200).send({ideas});

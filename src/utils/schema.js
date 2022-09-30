@@ -271,10 +271,13 @@ const getIdeas = {
         type: 'object',
         properties: {
           ideas: {type: 'array'},
-          properties: {
-            name: {type: 'string'},
-            desc: {type: 'string'},
-            members: {type: 'array'},
+          items: {
+            type: 'object',
+            properties: {
+              name: {type: 'string'},
+              desc: {type: 'string'},
+              member_details: {type: 'array'},
+            },
           },
         },
       },

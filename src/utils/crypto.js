@@ -1,4 +1,5 @@
-const {scryptSync, randomBytes, timingSafeEqual} = require('crypto');
+const {scryptSync, randomBytes, timingSafeEqual,
+  createHash} = require('crypto');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({path: __dirname+'/./../../.env'});
 
@@ -36,11 +37,12 @@ const verify = function(str, hash) {
 
 /**
  * Generates a jwt with email in the payload
- * @param {string} email email that is added to payload
+ * @param {string} id user ID that is added to payload
+ * @param {string} emailHash MD5 emailHash that is added to the payload
  * @return {string} jwt
  */
-const generateToken = function(email) {
-  const token = jwt.sign({email}, process.env.SECRET);
+const generateToken = function(id, emailHash) {
+  const token = jwt.sign({id, emailHash}, process.env.SECRET);
   return token;
 };
 
@@ -58,9 +60,26 @@ const verifyToken = function(token) {
   }
 };
 
+/**
+ * Create MD5 hash of a string
+ * @param {string} str the string to be hashed
+ * @return {string} hashed string
+ */
+const md5 = function(str) {
+  const hash = createHash('md5').update(str).digest('hex');
+  return hash;
+};
+
+const generateIdeaInviteToken = function(ideaId, email) {
+  const token = jwt.sign({ideaId, email}, process.env.SECRET);
+  return token;
+};
+
 module.exports = {
   hash,
   verify,
   generateToken,
   verifyToken,
+  md5,
+  generateIdeaInviteToken,
 };

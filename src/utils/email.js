@@ -1,6 +1,7 @@
 require('dotenv').config({path: __dirname+'/./../../.env'});
 const sgMail = require('@sendgrid/mail');
 const nanoid = require('nanoid').customAlphabet('0123456789', 6);
+const {generateIdeaInviteToken} = require('./crypto');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -33,17 +34,18 @@ const sendEmailVerification = function(email) {
   });
 };
 
-const inviteIdeaMembers = function(emailList) {
+const inviteIdeaMembers = function(emailList, ideaId) {
   return new Promise((resolve) => {
+    const personalizations = emailList.map((i) => {
+      return {to: [{email: i}], dynamicTemplateData: {'token':
+       generateIdeaInviteToken(ideaId, i)}};
+    });
     const msg = {
-      to: emailList,
+      personalizations,
       from: 'aditya@adityaone.com',
-      subject: 'Idea Invite | Launch Base',
-      text: `Hi 👋! You have been invited to join as a ` +
-       `Member for a new idea on Launch Base. Please visit launchbase.com ` +
-       `for more details.`,
+      template_id: 'd-4533f15b05714033952240af1da8729e',
     };
-    sgMail.sendMultiple(msg).then(() => {
+    sgMail.send(msg).then(() => {
       resolve(true);
     }).catch((e) => {
       resolve(false);
