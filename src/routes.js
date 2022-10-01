@@ -13,7 +13,7 @@ async function routes(fastify, _options) {
   fastify.get('/signup', (_req, rep) => {
     return rep.sendFile('signup.html');
   });
-  // change route
+  // TODO change route
   fastify.get('/home', (_req, rep) => {
     return rep.view('home.hbs');
   });

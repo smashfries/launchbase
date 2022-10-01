@@ -27,7 +27,7 @@ const {hash, verify, generateToken, verifyToken,
 const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdea,
-  getIdeas} = require('./utils/schema');
+  getIdeas, revokeIdeaInvite} = require('./utils/schema');
 
 fastify.register(require('point-of-view'), {
   engine: {
@@ -246,17 +246,49 @@ fastify.post('/ideas', createIdea, async (req, rep) => {
     }
     const ideas = fastify.mongo.db.collection('ideas');
     const ideaInvites = fastify.mongo.db.collection('idea-invites');
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
     const idea = await ideas.insertOne({name: req.body.name,
-      desc: req.body.desc, links: req.body.links ? req.body.links : [],
-      members: [req.userOId]});
-    console.log(idea);
+      desc: req.body.desc, links: req.body.links ? req.body.links : []});
+    await ideaMembers.insertOne({user: req.userOId, accessPrivilege: 'owner',
+      idea: idea.insertedId});
     await inviteIdeaMembers(uniqueMembers, idea.insertedId);
     uniqueMembers = uniqueMembers.map((i) => {
       return {idea: idea.insertedId, email: i, timeStamp: new Date(),
-        status: 'pending'};
+        status: 'pending', accessPrivilege: 'member'};
     });
     await ideaInvites.insertMany(uniqueMembers);
     rep.code(200).send({message: 'done'});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.delete('/idea/invite', revokeIdeaInvite, async (req, rep) => {
+  if (req.token) {
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
+    const invites = fastify.mongo.db.collection('idea-invites');
+    if (fastify.mongo.ObjectId.isValid(req.body.inviteId)) {
+      const inviteId = new fastify.mongo.ObjectId(req.body.inviteId);
+      const invite = await invites.findOne({_id: inviteId});
+      if (invite) {
+        const owner = await ideaMembers.findOne({idea:
+          new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
+        accessPrivilege: 'owner'});
+        if (owner) {
+          await invites.deleteOne({_id: inviteId});
+          rep.code(200).send({message:
+             'Invite was successfully revoked!'});
+        } else {
+          rep.code(400).send({error:
+             'You must be an owner to delete an invite'});
+        }
+      } else {
+        rep.code(400).send({error: 'Invite does not exists.'});
+      }
+    } else {
+      rep.code(400).send({error:
+         'Invalid invite ID. Must be a valid MongoDB ObjectID.'});
+    }
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }

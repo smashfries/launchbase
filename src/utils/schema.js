@@ -292,6 +292,40 @@ const getIdeas = {
   },
 };
 
+const revokeIdeaInvite = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+      required: ['authorization'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        inviteId: {type: 'string'},
+      },
+      required: ['inviteId'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 const logoutOpts = {
   schema: {
     headers: {
@@ -330,4 +364,5 @@ module.exports = {
   getActiveTokens,
   createIdea,
   getIdeas,
+  revokeIdeaInvite,
 };
