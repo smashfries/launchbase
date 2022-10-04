@@ -300,21 +300,28 @@ fastify.get('/ideas', getIdeas, async (req, rep) => {
     const cursor = await ideasCollection.aggregate([
       {
         $lookup: {
-          from: 'users',
-          localField: 'members',
-          foreignField: '_id',
+          from: 'idea-members',
+          localField: '_id',
+          foreignField: 'idea',
           as: 'member_details',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'member_details.user',
+          foreignField: '_id',
+          as: 'users',
         },
       },
       {
         $project: {
           'name': 1,
           'desc': 1,
-          'member_details.name': 1,
+          'users.name': 1,
         },
       },
     ]);
-    // const cursor = await ideasCollection.find();
     const ideas = await cursor.toArray();
     console.log(ideas);
     rep.code(200).send({ideas});
