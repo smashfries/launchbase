@@ -1,4 +1,4 @@
-const sendEmailVerificationOpts = {
+export const sendEmailVerificationOpts = {
   schema: {
     body: {
       type: 'object',
@@ -27,7 +27,7 @@ const sendEmailVerificationOpts = {
   },
 };
 
-const verifyCodeOpts = {
+export const verifyCodeOpts = {
   schema: {
     body: {
       type: 'object',
@@ -57,7 +57,7 @@ const verifyCodeOpts = {
   },
 };
 
-const updateProfileOpts = {
+export const updateProfileOpts = {
   schema: {
     headers: {
       type: 'object',
@@ -98,7 +98,7 @@ const updateProfileOpts = {
   },
 };
 
-const getProfileOpts = {
+export const getProfileOpts = {
   schema: {
     headers: {
       type: 'object',
@@ -133,7 +133,7 @@ const getProfileOpts = {
   },
 };
 
-const getEmailSettings = {
+export const getEmailSettings = {
   schema: {
     headers: {
       type: 'object',
@@ -161,7 +161,7 @@ const getEmailSettings = {
   },
 };
 
-const updateEmailSettings = {
+export const updateEmailSettings = {
   schema: {
     body: {
       type: 'object',
@@ -196,7 +196,7 @@ const updateEmailSettings = {
   },
 };
 
-const getActiveTokens = {
+export const getActiveTokens = {
   schema: {
     headers: {
       type: 'object',
@@ -223,7 +223,7 @@ const getActiveTokens = {
   },
 };
 
-const createIdea = {
+export const createIdea = {
   schema: {
     headers: {
       authorization: {type: 'string'},
@@ -257,7 +257,7 @@ const createIdea = {
   },
 };
 
-const getIdeas = {
+export const getIdeas = {
   schema: {
     headers: {
       type: 'object',
@@ -292,7 +292,7 @@ const getIdeas = {
   },
 };
 
-const revokeIdeaInvite = {
+export const revokeIdeaInvite = {
   schema: {
     headers: {
       type: 'object',
@@ -326,7 +326,7 @@ const revokeIdeaInvite = {
   },
 };
 
-const logoutOpts = {
+export const logoutOpts = {
   schema: {
     headers: {
       type: 'object',
@@ -351,18 +351,4 @@ const logoutOpts = {
       },
     },
   },
-};
-
-module.exports = {
-  sendEmailVerificationOpts,
-  verifyCodeOpts,
-  updateProfileOpts,
-  getProfileOpts,
-  logoutOpts,
-  getEmailSettings,
-  updateEmailSettings,
-  getActiveTokens,
-  createIdea,
-  getIdeas,
-  revokeIdeaInvite,
 };

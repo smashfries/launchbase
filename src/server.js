@@ -1,42 +1,59 @@
-const fastify = require('fastify')({
+import Fastify from 'fastify';
+
+/**
+ * @type {import('fastify').FastifyInstance} Instance of Fastify
+ */
+const fastify = new Fastify({
   logger: true,
   trustProxy: true,
 });
-fastify.register(require('./db/mongo-connector'));
-fastify.register(require('./db/redis-connector'));
 
-const path = require('path');
-require('dotenv').config({path: __dirname + '/./../.env'});
+import {resolve} from 'path';
 
-fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, '../public/templates'),
+import fastifyStatic from '@fastify/static';
+fastify.register(fastifyStatic, {
+  root: resolve('./public/templates'),
   serve: false,
 });
 
-fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, '../public/assets'),
+fastify.register(fastifyStatic, {
+  root: resolve('./public/assets'),
   decorateReply: false,
 });
 
-const {randomBytes} = require('crypto');
+import pointOfView from 'point-of-view';
+import handlebars from 'handlebars';
 
-const {sendEmailVerification, validateEmail,
-  inviteIdeaMembers} = require('./utils/email');
-const {hash, verify, generateToken, verifyToken,
-  md5} = require('./utils/crypto');
-const {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
+import routes from './routes.js';
+
+import mongoConnector from './db/mongo-connector.js';
+import redisConnector from './db/redis-connector.js';
+fastify.register(mongoConnector);
+fastify.register(redisConnector);
+
+import * as dotenv from 'dotenv';
+dotenv.config({path: './.env'});
+
+
+import {randomBytes} from 'crypto';
+
+import {sendEmailVerification, validateEmail,
+  inviteIdeaMembers} from './utils/email.js';
+import {hash, verify, generateToken, verifyToken,
+  md5} from './utils/crypto.js';
+import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdea,
-  getIdeas, revokeIdeaInvite} = require('./utils/schema');
+  getIdeas, revokeIdeaInvite} from './utils/schema.js';
 
-fastify.register(require('point-of-view'), {
+fastify.register(pointOfView, {
   engine: {
-    ejs: require('handlebars'),
+    ejs: handlebars,
   },
-  root: path.join(__dirname, 'views'),
+  root: resolve('./src/views'),
 });
 
-fastify.register(require('./routes'));
+fastify.register(routes);
 
 fastify.decorateRequest('user', null);
 fastify.decorateRequest('token', '');
@@ -383,8 +400,4 @@ async function start() {
   }
 }
 
-module.exports = build;
-
-if (require.main === module) {
-  start();
-}
+start();

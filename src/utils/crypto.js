@@ -1,14 +1,16 @@
-const {scryptSync, randomBytes, timingSafeEqual,
-  createHash} = require('crypto');
-const jwt = require('jsonwebtoken');
-require('dotenv').config({path: __dirname+'/./../../.env'});
+import {scryptSync, randomBytes, timingSafeEqual,
+  createHash} from 'crypto';
+import jwt from 'jsonwebtoken';
+
+import * as dotenv from 'dotenv';
+dotenv.config({path: './.env'});
 
 /**
  * Hash a string
  * @param {string} str the string to be hashed
  * @return {string} hashed string
  */
-const hash = function(str) {
+export const hash = function(str) {
   const salt = randomBytes(16).toString('hex');
   const hashedStr = scryptSync(str, salt, 64).toString('hex');
 
@@ -21,7 +23,7 @@ const hash = function(str) {
  * @param {string} hash the hash of the string
  * @return {boolean} If string is valid or not
  */
-const verify = function(str, hash) {
+export const verify = function(str, hash) {
   const [salt, key] = hash.split(':');
   const hashedBuffer = scryptSync(str, salt, 64);
 
@@ -41,7 +43,7 @@ const verify = function(str, hash) {
  * @param {string} emailHash MD5 emailHash that is added to the payload
  * @return {string} jwt
  */
-const generateToken = function(id, emailHash) {
+export const generateToken = function(id, emailHash) {
   const token = jwt.sign({id, emailHash}, process.env.SECRET);
   return token;
 };
@@ -51,7 +53,7 @@ const generateToken = function(id, emailHash) {
  * @param {string} token jwt
  * @return {Object} decoded token
  */
-const verifyToken = function(token) {
+export const verifyToken = function(token) {
   try {
     const decoded = jwt.verify(token, process.env.SECRET);
     return decoded;
@@ -65,21 +67,12 @@ const verifyToken = function(token) {
  * @param {string} str the string to be hashed
  * @return {string} hashed string
  */
-const md5 = function(str) {
+export const md5 = function(str) {
   const hash = createHash('md5').update(str).digest('hex');
   return hash;
 };
 
-const generateIdeaInviteToken = function(ideaId, email) {
+export const generateIdeaInviteToken = function(ideaId, email) {
   const token = jwt.sign({ideaId, email}, process.env.SECRET);
   return token;
-};
-
-module.exports = {
-  hash,
-  verify,
-  generateToken,
-  verifyToken,
-  md5,
-  generateIdeaInviteToken,
 };

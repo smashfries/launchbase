@@ -1,17 +1,21 @@
-require('dotenv').config({path: __dirname+'/./../../.env'});
-const sgMail = require('@sendgrid/mail');
-const nanoid = require('nanoid').customAlphabet('0123456789', 6);
-const {generateIdeaInviteToken} = require('./crypto');
+import * as dotenv from 'dotenv';
+dotenv.config({path: './.env'});
 
+import sgMail from '@sendgrid/mail';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const validateEmail = function(email) {
+import {customAlphabet} from 'nanoid';
+const nanoid = customAlphabet('0123456789', 6);
+
+import {generateIdeaInviteToken} from './crypto.js';
+
+export const validateEmail = function(email) {
   // eslint-disable-next-line max-len
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
-const sendEmailVerification = function(email) {
+export const sendEmailVerification = function(email) {
   return new Promise((resolve) => {
     if (validateEmail(email)) {
       const code = nanoid();
@@ -34,7 +38,7 @@ const sendEmailVerification = function(email) {
   });
 };
 
-const inviteIdeaMembers = function(emailList, ideaId) {
+export const inviteIdeaMembers = function(emailList, ideaId) {
   return new Promise((resolve) => {
     const personalizations = emailList.map((i) => {
       return {to: [{email: i}], dynamicTemplateData: {'token':
@@ -51,10 +55,4 @@ const inviteIdeaMembers = function(emailList, ideaId) {
       resolve(false);
     });
   });
-};
-
-module.exports = {
-  sendEmailVerification,
-  validateEmail,
-  inviteIdeaMembers,
 };

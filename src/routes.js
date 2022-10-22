@@ -3,7 +3,7 @@
  * @param {*} fastify
  * @param {*} _options
  */
-async function routes(fastify, _options) {
+export default async function routes(fastify, _options) {
   fastify.get('/', (_req, rep) => {
     return rep.sendFile('index.html');
   });
@@ -30,5 +30,3 @@ async function routes(fastify, _options) {
     return rep.sendFile('backstage/security.html');
   });
 }
-
-module.exports = routes;

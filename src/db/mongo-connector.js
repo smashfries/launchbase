@@ -1,16 +1,19 @@
-const fastifyPlugin = require('fastify-plugin');
-require('dotenv').config({path: __dirname+'/./../../.env'});
+import fastifyPlugin from 'fastify-plugin';
+import fastifyMongo from '@fastify/mongodb';
+
+import * as dotenv from 'dotenv';
+dotenv.config({path: './.env'});
 
 /**
  * MongoDB connector plugin
- * @param {*} fastify
- * @param {*} options
+ * @param {FastifyInstance} fastify
+ * @param {Object} options
  */
 async function dbConnector(fastify, options) {
-  fastify.register(require('@fastify/mongodb'), {
+  fastify.register(fastifyMongo, {
     url: process.env.MONGODB_URI,
     forceClose: true,
   });
 }
 
-module.exports = fastifyPlugin(dbConnector);
+export default fastifyPlugin(dbConnector);
