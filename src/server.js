@@ -21,7 +21,7 @@ fastify.register(fastifyStatic, {
   decorateReply: false,
 });
 
-import pointOfView from 'point-of-view';
+import pointOfView from '@fastify/view';
 import handlebars from 'handlebars';
 
 import routes from './routes.js';
@@ -220,8 +220,10 @@ fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
   if (req.token) {
     const users = fastify.mongo.db.collection('users');
     const user = await users.findOne({_id: req.userOId});
-    const publicEmail = user.hasOwnProperty('publicEmail') ? true : false;
-    const subscribed = user.hasOwnProperty('subscribed') ? true : false;
+    const publicEmail = user.hasOwnProperty('publicEmail') &&
+     user.publicEmail ? true : false;
+    const subscribed = user.hasOwnProperty('subscribed') &&
+     user.subscribed ? true : false;
     rep.code(200).send({publicEmail, subscribed});
   } else {
     rep.code(400).send({error: 'unauthorized'});
@@ -392,7 +394,7 @@ async function start() {
 
   try {
     const server = build();
-    await server.listen(port, address);
+    await server.listen({port});
     console.log(`Listening on ${address}:${port}`);
   } catch (err) {
     console.error(err);
