@@ -43,7 +43,7 @@ import {hash, verify, generateToken, verifyToken,
   md5} from './utils/crypto.js';
 import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
-  updateEmailSettings, getActiveTokens, createIdea,
+  updateEmailSettings, getActiveTokens, createIdeaDraft,
   getIdeas, revokeIdeaInvite} from './utils/schema.js';
 
 fastify.register(pointOfView, {
@@ -252,30 +252,46 @@ fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
   }
 });
 
-fastify.post('/ideas', createIdea, async (req, rep) => {
+fastify.post('/ideas/draft', createIdeaDraft, async (req, rep) => {
   if (req.token) {
     const members = req.body.members ? req.body.members :
      [];
-    let uniqueMembers = [...new Set(members)];
-    if (members.length > 1) {
-      const invalidEmails = req.body.members.find((i) => !validateEmail(i));
+    const memberEmails = members.map((i) => {
+      return i.email;
+    });
+    let uniqueMembers = [...new Set(memberEmails)];
+    if (members.length > 0) {
+      let invalidEmails = memberEmails.find((i) => !validateEmail(i));
+      if (!invalidEmails) {
+        invalidEmails = members.find((i) => i.role !== 'admin' &&
+        i.role !== 'member');
+      }
       if (invalidEmails) {
         return rep.code(400).send({error: 'invalid-emails'});
       }
     }
-    const ideas = fastify.mongo.db.collection('ideas');
+    const drafts = fastify.mongo.db.collection('idea-drafts');
     const ideaInvites = fastify.mongo.db.collection('idea-invites');
     const ideaMembers = fastify.mongo.db.collection('idea-members');
-    const idea = await ideas.insertOne({name: req.body.name,
-      desc: req.body.desc, links: req.body.links ? req.body.links : []});
-    await ideaMembers.insertOne({user: req.userOId, accessPrivilege: 'owner',
-      idea: idea.insertedId});
-    await inviteIdeaMembers(uniqueMembers, idea.insertedId);
-    uniqueMembers = uniqueMembers.map((i) => {
-      return {idea: idea.insertedId, email: i, timeStamp: new Date(),
-        status: 'pending', accessPrivilege: 'member'};
-    });
-    await ideaInvites.insertMany(uniqueMembers);
+
+    const data = req.body;
+
+    const draft = await drafts.insertOne({name: data.name,
+      desc: data.desc ? data.desc : '', idea: data.idea ? data.idea : '',
+      links: data.links ? data.links : []});
+    await ideaMembers.insertOne({user: req.userOId, role: 'admin',
+      idea: draft.insertedId});
+
+    if (members.length > 0) {
+      await inviteIdeaMembers(uniqueMembers, draft.insertedId);
+      uniqueMembers = uniqueMembers.map((i) => {
+        return {idea: draft.insertedId, email: i, timeStamp: new Date(),
+          status: 'draft', role: members.find((j) => j.email == i)
+              .role};
+      });
+      await ideaInvites.insertMany(uniqueMembers);
+    }
+
     rep.code(200).send({message: 'done'});
   } else {
     rep.code(400).send({error: 'unauthorized'});

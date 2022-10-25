@@ -4,8 +4,8 @@ export const sendEmailVerificationOpts = {
       type: 'object',
       required: ['email', 'type'],
       properties: {
-        email: {type: 'string'},
-        type: {type: 'string'},
+        email: {type: 'string', maxLength: 320},
+        type: {type: 'string', maxLength: 6},
 
       },
     },
@@ -33,10 +33,10 @@ export const verifyCodeOpts = {
       type: 'object',
       required: ['email', 'type', 'code', 'identifier'],
       properties: {
-        code: {type: 'string'},
-        type: {type: 'string'},
-        identifier: {type: 'string'},
-        email: {type: 'string'},
+        code: {type: 'string', maxLength: 6},
+        type: {type: 'string', maxLength: 6},
+        identifier: {type: 'string', maxLength: 24},
+        email: {type: 'string', maxLength: 320},
       },
     },
     response: {
@@ -223,7 +223,7 @@ export const getActiveTokens = {
   },
 };
 
-export const createIdea = {
+export const createIdeaDraft = {
   schema: {
     headers: {
       authorization: {type: 'string'},
@@ -232,12 +232,19 @@ export const createIdea = {
     body: {
       type: 'object',
       properties: {
-        name: {type: 'string', maxLength: 256},
-        desc: {type: 'string', maxLength: 5000},
+        name: {type: 'string', maxLength: 80},
+        desc: {type: 'string', maxLength: 300},
+        idea: {type: 'string', maxLength: 5000},
         links: {type: 'array', maxItems: 10},
-        members: {type: 'array', maxItems: 5},
+        members: {type: 'array', maxItems: 5, items: {
+          type: 'object',
+          properties: {
+            email: {type: 'string', maxLength: 320},
+            role: {type: 'string', maxLength: 20},
+          },
+        }},
       },
-      required: ['name', 'desc'],
+      required: ['name'],
     },
     response: {
       200: {
