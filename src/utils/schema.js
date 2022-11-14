@@ -35,7 +35,7 @@ export const verifyCodeOpts = {
       properties: {
         code: {type: 'string', maxLength: 6},
         type: {type: 'string', maxLength: 6},
-        identifier: {type: 'string', maxLength: 24},
+        identifier: {type: 'string', maxLength: 48},
         email: {type: 'string', maxLength: 320},
       },
     },
