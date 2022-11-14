@@ -251,6 +251,7 @@ export const createIdeaDraft = {
         type: 'object',
         properties: {
           message: {type: 'string'},
+          draftId: {type: 'string'},
         },
       },
       400: {
@@ -263,6 +264,42 @@ export const createIdeaDraft = {
     },
   },
 };
+
+export const updateIdeaDraft = {
+  schema: {
+    headers: {
+      authorization: {type: 'string'},
+    },
+    required: ['authorization'],
+    body: {
+      type: 'object',
+      properties: {
+        name: {type: 'string', maxLength: 80},
+        desc: {type: 'string', maxLength: 300},
+        idea: {type: 'string', maxLength: 5000},
+        links: {type: 'array', maxItems: 10, items: {type: 'string'}},
+      },
+      required: ['name'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+          draftId: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 
 export const getIdeas = {
   schema: {

@@ -43,7 +43,7 @@ import {hash, verify, generateToken, verifyToken,
   md5} from './utils/crypto.js';
 import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
-  updateEmailSettings, getActiveTokens, createIdeaDraft,
+  updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
   getIdeas, revokeIdeaInvite} from './utils/schema.js';
 
 fastify.register(pointOfView, {
@@ -292,11 +292,54 @@ fastify.post('/ideas/draft', createIdeaDraft, async (req, rep) => {
       await ideaInvites.insertMany(uniqueMembers);
     }
 
-    rep.code(200).send({message: 'done'});
+    rep.code(200).send({message: 'done', draftId: draft.insertedId});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
 });
+
+fastify.put('/ideas/draft/:draftId', updateIdeaDraft, async (req, rep) => {
+  if (req.token) {
+    const {draftId} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(draftId)) {
+      return rep.code(400).send({error: 'invalid ID',
+        message: 'Draft ID must be a valid MongoDB ObjectID'});
+    }
+    const drafts = fastify.mongo.db.collection('idea-drafts');
+    const members = fastify.mongo.db.collection('idea-members');
+    const draftOId = new fastify.mongo.ObjectId(draftId);
+    const draft = await drafts.findOne({_id: draftOId});
+    if (!draft) {
+      return rep.code(400).send({error: 'draft does not exist'});
+    }
+    const member = await members.findOne({user: req.userOId, idea: draftOId,
+      role: 'admin'});
+    if (!member) {
+      return rep.code(400).send({error: 'unauthorized',
+        message: 'Must be a member of the idea and have the *admin* role.'});
+    }
+    // do the actual update -> can copy code from the create draft endpoint
+    const data = req.body;
+    await drafts.updateOne({_id: draftOId},
+        {$set: {name: data.name, desc: data.desc ? data.desc : '',
+          idea: data.idea ? data.idea : '',
+          links: data.links ? data.links : []}});
+    rep.code(200).send({message: 'done'});
+  } else {
+    rep.code(400).send({error: 'unauthorized', message: 'check auth token'});
+  }
+});
+
+// TODO send new invite endpoint (draft)
+// TODO send new invite endpoint (published)
+// TODO revoke invite endpoint
+// TODO accept invite endpoint
+// TODO delete idea draft endpoint
+// TODO delete published idea endpoint
+// TODO update published idea endpoint
+// TODO update member role
+// TODO publish idea draft
+// TODO rollback published idea
 
 fastify.delete('/idea/invite/:inviteId', revokeIdeaInvite, async (req, rep) => {
   if (req.token) {
