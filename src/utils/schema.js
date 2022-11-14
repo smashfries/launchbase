@@ -235,7 +235,7 @@ export const createIdeaDraft = {
         name: {type: 'string', maxLength: 80},
         desc: {type: 'string', maxLength: 300},
         idea: {type: 'string', maxLength: 5000},
-        links: {type: 'array', maxItems: 10},
+        links: {type: 'array', maxItems: 10, items: {type: 'string'}},
         members: {type: 'array', maxItems: 5, items: {
           type: 'object',
           properties: {
