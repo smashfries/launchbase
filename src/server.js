@@ -350,16 +350,16 @@ fastify.delete('/ideas/draft/:draftId', deleteIdeaDraft, async (req, rep) => {
         await ideaDrafts.deleteOne({_id: draftOId});
         await ideaInvites.deleteMany({idea: draftOId});
         await members.deleteOne({idea: draftOId, user: req.userOId});
-        return rep.code(200).send({message: `The idea was deleted as
-         you were the only member`});
+        return rep.code(200).send({message: 'The idea was deleted as' +
+         ' you were the only member'});
         break;
       default:
         await members.deleteOne({idea: draftOId, user: req.userOId});
         if (membersDocs.length == 2) {
           await members.updateOne({idea: draftOId}, {$set: {role: 'admin'}});
         }
-        return rep.code(200).send({message: `You have been removed
-         from the idea`});
+        return rep.code(200).send({message: 'You have been removed' +
+         ' from the idea'});
         break;
     }
   } else {

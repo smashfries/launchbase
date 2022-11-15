@@ -245,6 +245,7 @@ export const createIdeaDraft = {
             email: {type: 'string', maxLength: 320},
             role: {type: 'string', maxLength: 20},
           },
+          required: ['email', 'role'],
         }},
       },
       required: ['name'],
