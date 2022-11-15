@@ -44,7 +44,7 @@ import {hash, verify, generateToken, verifyToken,
 import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
-  getIdeas, revokeIdeaInvite} from './utils/schema.js';
+  deleteIdeaDraft, getIdeas, revokeIdeaInvite} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -318,7 +318,6 @@ fastify.put('/ideas/draft/:draftId', updateIdeaDraft, async (req, rep) => {
       return rep.code(400).send({error: 'unauthorized',
         message: 'Must be a member of the idea and have the *admin* role.'});
     }
-    // do the actual update -> can copy code from the create draft endpoint
     const data = req.body;
     await drafts.updateOne({_id: draftOId},
         {$set: {name: data.name, desc: data.desc ? data.desc : '',
@@ -330,11 +329,47 @@ fastify.put('/ideas/draft/:draftId', updateIdeaDraft, async (req, rep) => {
   }
 });
 
+fastify.delete('/ideas/draft/:draftId', deleteIdeaDraft, async (req, rep) => {
+  if (req.token) {
+    const {draftId} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(draftId)) {
+      return rep.code(400).send({error: 'invalid ID',
+        message: 'Draft ID must be a valid MongoDB ObjectID'});
+    }
+    const draftOId = new fastify.mongo.ObjectId(draftId);
+    const members = fastify.mongo.db.collection('idea-members');
+    const ideaDrafts = fastify.mongo.db.collection('idea-drafts');
+    const ideaInvites = fastify.mongo.db.collection('idea-invites');
+    const ideaMembers = await members.find({idea: draftOId});
+    const membersDocs = await ideaMembers.toArray();
+    switch (membersDocs.length) {
+      case 0:
+        return rep.code(400).send({error: 'Draft does not exist'});
+        break;
+      case 1:
+        await ideaDrafts.deleteOne({_id: draftOId});
+        await ideaInvites.deleteMany({idea: draftOId});
+        await members.deleteOne({idea: draftOId, user: req.userOId});
+        return rep.code(200).send({message: `The idea was deleted as
+         you were the only member`});
+        break;
+      default:
+        await members.deleteOne({idea: draftOId, user: req.userOId});
+        if (membersDocs.length == 2) {
+          await members.updateOne({idea: draftOId}, {$set: {role: 'admin'}});
+        }
+        return rep.code(200).send({message: `You have been removed
+         from the idea`});
+        break;
+    }
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
 // TODO send new invite endpoint (draft)
 // TODO send new invite endpoint (published)
-// TODO revoke invite endpoint
 // TODO accept invite endpoint
-// TODO delete idea draft endpoint
 // TODO delete published idea endpoint
 // TODO update published idea endpoint
 // TODO update member role
