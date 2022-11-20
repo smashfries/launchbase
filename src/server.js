@@ -391,10 +391,11 @@ fastify.post('/ideas/:ideaId/invite', sendIdeaInvite, async (req, rep) => {
       return rep.code(400).send({error: 'Idea does not exist.'});
     }
     await inviteIdeaMembers([req.body.email], ideaId);
-    await ideaInvites.updateOne({email: req.body.email, idea: ideaOId},
-        {$set: {idea: ideaOId, email: req.body.email,
-          role: req.body.role, timeStamp: new Date()}}, {upsert: true});
-    rep.code(200).send({message: 'invite was sent'});
+    const newInvite = await ideaInvites.updateOne({email: req.body.email,
+      idea: ideaOId}, {$set: {idea: ideaOId, email: req.body.email,
+      role: req.body.role, timeStamp: new Date()}}, {upsert: true});
+    rep.code(200).send({message: 'invite was sent', upsertedId:
+    newInvite.upsertedId});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
@@ -402,43 +403,42 @@ fastify.post('/ideas/:ideaId/invite', sendIdeaInvite, async (req, rep) => {
 
 
 // TODO accept invite endpoint
-// TODO delete published idea endpoint
-// TODO update published idea endpoint
 // TODO update member role
 // TODO publish idea draft
 // TODO rollback published idea
 
-fastify.delete('/idea/invite/:inviteId', revokeIdeaInvite, async (req, rep) => {
-  if (req.token) {
-    const ideaMembers = fastify.mongo.db.collection('idea-members');
-    const invites = fastify.mongo.db.collection('idea-invites');
-    const {inviteId} = req.params;
-    if (fastify.mongo.ObjectId.isValid(inviteId)) {
-      const objectId = new fastify.mongo.ObjectId(inviteId);
-      const invite = await invites.findOne({_id: objectId});
-      if (invite) {
-        const admin = await ideaMembers.findOne({idea:
-          new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
-        role: 'admin'});
-        if (admin) {
-          await invites.deleteOne({_id: inviteId});
-          rep.code(200).send({message:
-             'Invite was successfully revoked!'});
+fastify.delete('/ideas/invite/:inviteId', revokeIdeaInvite,
+    async (req, rep) => {
+      if (req.token) {
+        const ideaMembers = fastify.mongo.db.collection('idea-members');
+        const invites = fastify.mongo.db.collection('idea-invites');
+        const {inviteId} = req.params;
+        if (fastify.mongo.ObjectId.isValid(inviteId)) {
+          const objectId = new fastify.mongo.ObjectId(inviteId);
+          const invite = await invites.findOne({_id: objectId});
+          if (invite) {
+            const admin = await ideaMembers.findOne({idea:
+              new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
+            role: 'admin'});
+            if (admin) {
+              await invites.deleteOne({_id: inviteId});
+              rep.code(200).send({message:
+                'Invite was successfully revoked!'});
+            } else {
+              rep.code(400).send({error:
+                'You must be an admin to delete an invite'});
+            }
+          } else {
+            rep.code(400).send({error: 'Invite does not exists.'});
+          }
         } else {
           rep.code(400).send({error:
-             'You must be an admin to delete an invite'});
+            'Invalid invite ID. Must be a valid MongoDB ObjectID.'});
         }
       } else {
-        rep.code(400).send({error: 'Invite does not exists.'});
+        rep.code(400).send({error: 'unauthorized'});
       }
-    } else {
-      rep.code(400).send({error:
-         'Invalid invite ID. Must be a valid MongoDB ObjectID.'});
-    }
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
+    });
 
 fastify.get('/ideas', getIdeas, async (req, rep) => {
   if (req.token) {

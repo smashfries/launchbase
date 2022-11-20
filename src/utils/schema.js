@@ -391,6 +391,7 @@ export const sendIdeaInvite = {
         type: 'object',
         properties: {
           message: {type: 'string'},
+          upsertedId: {type: 'string'},
         },
       },
       400: {
