@@ -490,12 +490,23 @@ fastify.patch('/ideas/:ideaId/members/:memberId/role', updateIdeaMemberRole,
           return rep.code(400).send({error:
             'you must be an admin of this idea to change roles'});
         }
-        const updatedMember = await ideaMembers.updateOne({idea: ideaOId,
-          user: memberOId}, {$set: {role: req.body.role}});
-        if (updatedMember.matchedCount == 0) {
-          return rep.code(400).send({error: 'member does not exist',
-            message: 'check the member and idea ID again'});
+        const toUpdateMember = await ideaMembers.findOne({idea: ideaOId,
+          user: memberOId});
+        if (!toUpdateMember) {
+          return rep.code(400).send({error:
+            'member does not exist for this idea'});
         }
+        const adminMembers = await ideaMembers.find({idea: ideaOId,
+          role: 'admin'});
+        const membersArray = await adminMembers.toArray();
+
+        if (membersArray.length == 1 && req.body.role == 'member' &&
+         toUpdateMember.role == 'admin') {
+          return rep.code(400).send({error:
+            'there must be atleast one admin for every idea'});
+        }
+        await ideaMembers.updateOne({idea: ideaOId,
+          user: memberOId}, {$set: {role: req.body.role}});
         rep.code(200).send({message: 'member role was successfully updated!'});
       } else {
         rep.code(400).send({error: 'unauthorized'});
