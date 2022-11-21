@@ -430,6 +430,27 @@ export const updateIdeaMemberRole = {
   },
 };
 
+export const publishIdea = {
+  schema: {
+    headers,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const logoutOpts = {
   schema: {
     headers,
