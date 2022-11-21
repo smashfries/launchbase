@@ -402,6 +402,39 @@ fastify.post('/ideas/:ideaId/invite', sendIdeaInvite, async (req, rep) => {
   }
 });
 
+fastify.delete('/ideas/invite/:inviteId', revokeIdeaInvite,
+    async (req, rep) => {
+      if (req.token) {
+        const ideaMembers = fastify.mongo.db.collection('idea-members');
+        const invites = fastify.mongo.db.collection('idea-invites');
+        const {inviteId} = req.params;
+        if (fastify.mongo.ObjectId.isValid(inviteId)) {
+          const objectId = new fastify.mongo.ObjectId(inviteId);
+          const invite = await invites.findOne({_id: objectId});
+          if (invite) {
+            const admin = await ideaMembers.findOne({idea:
+              new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
+            role: 'admin'});
+            if (admin) {
+              await invites.deleteOne({_id: objectId});
+              rep.code(200).send({message:
+                'Invite was successfully revoked!'});
+            } else {
+              rep.code(400).send({error:
+                'You must be an admin to delete an invite'});
+            }
+          } else {
+            rep.code(400).send({error: 'Invite does not exists.'});
+          }
+        } else {
+          rep.code(400).send({error:
+            'Invalid invite ID. Must be a valid MongoDB ObjectID.'});
+        }
+      } else {
+        rep.code(400).send({error: 'unauthorized'});
+      }
+    });
+
 fastify.post('/ideas/accept-invite', acceptIdeaInvite, async (req, rep) => {
   if (req.token) {
     const token = req.body.token;
@@ -494,40 +527,31 @@ fastify.post('/ideas/:ideaId/publish', publishIdea, async (req, rep) => {
   }
 });
 
-// TODO rollback published idea
+fastify.post('/ideas/:ideaId/rollback', publishIdea, async (req, rep) => {
+  if (req.token) {
+    const {ideaId} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
+      return rep.code(400).send({error: 'invalid ideaID', message:
+        'ideaId must be a valid MongoDB Object ID'});
+    }
+    const ideaOId = new fastify.mongo.ObjectId(ideaId);
 
-fastify.delete('/ideas/invite/:inviteId', revokeIdeaInvite,
-    async (req, rep) => {
-      if (req.token) {
-        const ideaMembers = fastify.mongo.db.collection('idea-members');
-        const invites = fastify.mongo.db.collection('idea-invites');
-        const {inviteId} = req.params;
-        if (fastify.mongo.ObjectId.isValid(inviteId)) {
-          const objectId = new fastify.mongo.ObjectId(inviteId);
-          const invite = await invites.findOne({_id: objectId});
-          if (invite) {
-            const admin = await ideaMembers.findOne({idea:
-              new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
-            role: 'admin'});
-            if (admin) {
-              await invites.deleteOne({_id: objectId});
-              rep.code(200).send({message:
-                'Invite was successfully revoked!'});
-            } else {
-              rep.code(400).send({error:
-                'You must be an admin to delete an invite'});
-            }
-          } else {
-            rep.code(400).send({error: 'Invite does not exists.'});
-          }
-        } else {
-          rep.code(400).send({error:
-            'Invalid invite ID. Must be a valid MongoDB ObjectID.'});
-        }
-      } else {
-        rep.code(400).send({error: 'unauthorized'});
-      }
-    });
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
+    const ideas = fastify.mongo.db.collection('ideas');
+
+    const member = await ideaMembers.findOne({user: req.userOId,
+      idea: ideaOId, role: 'admin'});
+    if (!member) {
+      return rep.code(400).send({error: 'invalid user', message:
+        'you must be an *admin* user of this idea in order to rollback'});
+    }
+    await ideas.updateOne({_id: ideaOId}, {$set: {status: 'draft'}});
+    rep.code(200).send({message:
+      'the idea was successfully reverted to draft!'});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
 
 fastify.get('/ideas', getIdeas, async (req, rep) => {
   if (req.token) {
