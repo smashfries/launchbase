@@ -1,3 +1,11 @@
+const headers = {
+  type: 'object',
+  properties: {
+    authorization: {type: 'string'},
+  },
+  required: ['authorization'],
+};
+
 export const sendEmailVerificationOpts = {
   schema: {
     body: {
@@ -59,13 +67,7 @@ export const verifyCodeOpts = {
 
 export const updateProfileOpts = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     body: {
       type: 'object',
       required: ['name', 'nickname', 'url', 'occ', 'skills', 'interests'],
@@ -100,13 +102,7 @@ export const updateProfileOpts = {
 
 export const getProfileOpts = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     response: {
       200: {
         type: 'object',
@@ -135,13 +131,7 @@ export const getProfileOpts = {
 
 export const getEmailSettings = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     response: {
       200: {
         type: 'object',
@@ -163,6 +153,7 @@ export const getEmailSettings = {
 
 export const updateEmailSettings = {
   schema: {
+    headers,
     body: {
       type: 'object',
       properties: {
@@ -170,13 +161,6 @@ export const updateEmailSettings = {
         subscribed: {type: 'boolean'},
       },
       required: ['publicEmail', 'subscribed'],
-    },
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
     },
     response: {
       200: {
@@ -198,13 +182,7 @@ export const updateEmailSettings = {
 
 export const getActiveTokens = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     response: {
       200: {
         type: 'object',
@@ -225,13 +203,7 @@ export const getActiveTokens = {
 
 export const createIdeaDraft = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     body: {
       type: 'object',
       properties: {
@@ -271,13 +243,7 @@ export const createIdeaDraft = {
 
 export const updateIdeaDraft = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     body: {
       type: 'object',
       properties: {
@@ -309,26 +275,20 @@ export const updateIdeaDraft = {
 
 export const deleteIdeaDraft = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
+    headers,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
       },
-    },
-    required: ['authorization'],
-  },
-  response: {
-    200: {
-      type: 'object',
-      properties: {
-        message: {type: 'string'},
-      },
-    },
-    400: {
-      type: 'object',
-      properties: {
-        error: {type: 'string'},
-        message: {type: 'string'},
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
       },
     },
   },
@@ -336,13 +296,7 @@ export const deleteIdeaDraft = {
 
 export const getIdeas = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     response: {
       200: {
         type: 'object',
@@ -371,13 +325,7 @@ export const getIdeas = {
 
 export const sendIdeaInvite = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     body: {
       type: 'object',
       properties: {
@@ -407,13 +355,7 @@ export const sendIdeaInvite = {
 
 export const revokeIdeaInvite = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     response: {
       200: {
         type: 'object',
@@ -434,13 +376,7 @@ export const revokeIdeaInvite = {
 
 export const acceptIdeaInvite = {
   schema: {
-    headers: {
-      type: 'object',
-      properties: {
-        authorization: {type: 'string'},
-      },
-      required: ['authorization'],
-    },
+    headers,
     body: {
       type: 'object',
       properties: {
@@ -466,15 +402,37 @@ export const acceptIdeaInvite = {
   },
 };
 
-export const logoutOpts = {
+export const updateIdeaMemberRole = {
   schema: {
-    headers: {
+    headers,
+    body: {
       type: 'object',
       properties: {
-        authorization: {type: 'string'},
+        role: {type: 'string'},
       },
-      required: ['authorization'],
+      required: ['role'],
     },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
+export const logoutOpts = {
+  schema: {
+    headers,
     response: {
       200: {
         type: 'object',

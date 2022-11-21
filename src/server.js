@@ -45,7 +45,8 @@ import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
   deleteIdeaDraft, getIdeas, revokeIdeaInvite,
-  sendIdeaInvite, acceptIdeaInvite} from './utils/schema.js';
+  sendIdeaInvite, acceptIdeaInvite,
+  updateIdeaMemberRole} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -431,7 +432,43 @@ fastify.post('/ideas/accept-invite', acceptIdeaInvite, async (req, rep) => {
   }
 });
 
-// TODO update member role
+fastify.patch('/ideas/:ideaId/members/:memberId/role', updateIdeaMemberRole,
+    async (req, rep) => {
+      if (req.token) {
+        const {ideaId, memberId} = req.params;
+        if (!fastify.mongo.ObjectId.isValid(ideaId)) {
+          return rep.code(400).send({error:
+            'ideaId must be a valid MongoDB Object ID'});
+        }
+        if (!fastify.mongo.ObjectId.isValid(memberId)) {
+          return rep.code(400).send({error:
+            'memberId must be a valid MongoDB Object ID'});
+        }
+        if (req.body.role !== 'admin' && req.body.role !== 'member') {
+          return rep.code(400).send({error:
+            'invalid role', message: 'role must be *admin* or *member*'});
+        }
+        const ideaOId = new fastify.mongo.ObjectId(ideaId);
+        const memberOId = new fastify.mongo.ObjectId(memberId);
+        const ideaMembers = fastify.mongo.db.collection('idea-members');
+        const currentMember = await ideaMembers.findOne({idea: ideaOId,
+          user: req.userOId, role: 'admin'});
+        if (!currentMember) {
+          return rep.code(400).send({error:
+            'you must be an admin to change roles'});
+        }
+        const updatedMember = await ideaMembers.updateOne({idea: ideaOId,
+          user: memberOId}, {$set: {role: req.body.role}});
+        if (updatedMember.matchedCount == 0) {
+          return rep.code(400).send({error: 'member does not exist',
+            message: 'check the member and idea ID again'});
+        }
+        rep.code(200).send({message: 'member role was successfully updated!'});
+      } else {
+        rep.code(400).send({error: 'unauthorized'});
+      }
+    });
+
 // TODO publish idea draft
 // TODO rollback published idea
 
