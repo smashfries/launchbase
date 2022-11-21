@@ -414,13 +414,6 @@ export const revokeIdeaInvite = {
       },
       required: ['authorization'],
     },
-    body: {
-      type: 'object',
-      properties: {
-        inviteId: {type: 'string'},
-      },
-      required: ['inviteId'],
-    },
     response: {
       200: {
         type: 'object',

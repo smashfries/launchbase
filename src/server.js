@@ -421,7 +421,7 @@ fastify.delete('/ideas/invite/:inviteId', revokeIdeaInvite,
               new fastify.mongo.ObjectId(invite.idea), user: req.userOId,
             role: 'admin'});
             if (admin) {
-              await invites.deleteOne({_id: inviteId});
+              await invites.deleteOne({_id: objectId});
               rep.code(200).send({message:
                 'Invite was successfully revoked!'});
             } else {
