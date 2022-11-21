@@ -45,7 +45,7 @@ import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   getProfileOpts, getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
   deleteIdeaDraft, getIdeas, revokeIdeaInvite,
-  sendIdeaInvite} from './utils/schema.js';
+  sendIdeaInvite, acceptIdeaInvite} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -401,8 +401,36 @@ fastify.post('/ideas/:ideaId/invite', sendIdeaInvite, async (req, rep) => {
   }
 });
 
+fastify.post('/ideas/accept-invite', acceptIdeaInvite, async (req, rep) => {
+  if (req.token) {
+    const token = req.body.token;
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return rep.code(400).send({error: 'invalid token'});
+    }
+    const ideaId = new fastify.mongo.ObjectId(decoded.ideaId);
+    const ideaInvites = fastify.mongo.db.collection('idea-invites');
+    const invite = await ideaInvites.findOne({idea: ideaId,
+      email: decoded.email});
+    if (!invite) {
+      return rep.code(400).send({error: 'invite does not exist'});
+    }
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
+    const member = await ideaMembers.findOne({idea: ideaId,
+      user: req.userOId});
+    if (member) {
+      return rep.code(400).send({error:
+        'you are already a member of this idea'});
+    }
+    await ideaMembers.insertOne({idea: ideaId, role: invite.role,
+      user: req.userOId});
+    await ideaInvites.deleteOne({idea: ideaId, email: decoded.email});
+    rep.code(200).send({message: 'invite was accepted, you are a member!'});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
 
-// TODO accept invite endpoint
 // TODO update member role
 // TODO publish idea draft
 // TODO rollback published idea

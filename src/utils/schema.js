@@ -432,6 +432,40 @@ export const revokeIdeaInvite = {
   },
 };
 
+export const acceptIdeaInvite = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        authorization: {type: 'string'},
+      },
+      required: ['authorization'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        token: {type: 'string'},
+      },
+      required: ['token'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const logoutOpts = {
   schema: {
     headers: {
