@@ -26,6 +26,7 @@ import handlebars from 'handlebars';
 
 import pages from './routes/pages/pages.js';
 import auth from './routes/api/auth.js';
+import profile from './routes/api/profile.js';
 
 import mongoConnector from './db/mongo-connector.js';
 import redisConnector from './db/redis-connector.js';
@@ -37,7 +38,7 @@ dotenv.config({path: './.env'});
 
 import {validateEmail, inviteIdeaMembers} from './utils/email.js';
 import {verifyToken} from './utils/crypto.js';
-import {updateProfileOpts, getProfileOpts, getEmailSettings, logoutOpts,
+import {getEmailSettings, logoutOpts,
   updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
   deleteIdeaDraft, getIdeas, revokeIdeaInvite, sendIdeaInvite, acceptIdeaInvite,
   updateIdeaMemberRole, publishIdea, getIdea} from './utils/schema.js';
@@ -72,65 +73,7 @@ fastify.addHook('preHandler', async (req, rep) => {
 
 fastify.register(pages);
 fastify.register(auth);
-
-fastify.post('/profile', updateProfileOpts, async (req, rep) => {
-  if (req.token) {
-    let twitter = '';
-    let github = '';
-    if (req.body.twitter) {
-      if (req.body.twitter.split('@').length > 2) {
-        return rep.code(400).send({error: 'invalid-twitter'});
-      }
-      if (req.body.twitter.indexOf('@') > 0) {
-        return rep.code(400).send({error: 'invalid-twitter'});
-      }
-      twitter = req.body.twitter;
-    }
-    if (req.body.github) {
-      github = req.body.github;
-    }
-    console.log(req.body.url);
-    if (!req.body.url.match(/^[a-zA-Z0-9_-]+$/g)) {
-      return rep.code(400).send({error: 'invalid-url'});
-    }
-    const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({_id: req.userOId});
-    const url = req.body.url;
-    if (user.url) {
-      if (user.url !== url) {
-        const cursor = await users.find({url});
-        const urlMatches = await cursor.toArray();
-        if (urlMatches.length > 0) {
-          return rep.code(400).send({error: 'url-exists'});
-        }
-      }
-    } else {
-      const cursor = await users.find({url});
-      const urlMatches = await cursor.toArray();
-      if (urlMatches.length > 0) {
-        return rep.code(400).send({error: 'url-exists'});
-      }
-    }
-    await users.updateOne({_id: req.userOId}, {$set: {name: req.body.name,
-      nickname: req.body.nickname, url: req.body.url, occ: req.body.occ,
-      skills: req.body.skills, interests: req.body.interests, github,
-      twitter}});
-    rep.code(200).send({message: 'successfully updated profile'});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.get('/profile', getProfileOpts, async (req, rep) => {
-  if (req.token) {
-    const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({_id: req.userOId});
-    const isComplete = user.hasOwnProperty('name') ? true : false;
-    rep.code(200).send({...user, isComplete});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
+fastify.register(profile);
 
 fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
   if (req.token) {
