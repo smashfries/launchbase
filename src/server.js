@@ -280,7 +280,8 @@ fastify.post('/ideas', createIdeaDraft, async (req, rep) => {
 
     const draft = await drafts.insertOne({name: data.name,
       desc: data.desc ? data.desc : '', idea: data.idea ? data.idea : '',
-      links: data.links ? data.links : [], status: 'draft'});
+      links: data.links ? data.links : [], status: 'draft',
+      timeStamp: new Date()});
     await ideaMembers.insertOne({user: req.userOId, role: 'admin',
       idea: draft.insertedId});
 
@@ -566,35 +567,49 @@ fastify.post('/ideas/:ideaId/rollback', publishIdea, async (req, rep) => {
 
 fastify.get('/ideas', getIdeas, async (req, rep) => {
   if (req.token) {
+    const query = req.query;
+    const filter = query.filter;
+    const page = query.page ? query.page : 1;
+    if (page < 1) {
+      return rep.code(400).send({error:
+        'page must be a number greater than or equal to 1'});
+    }
     const ideasCollection = fastify.mongo.db.collection('ideas');
-    const cursor = await ideasCollection.aggregate([
-      {
-        $lookup: {
-          from: 'idea-members',
-          localField: '_id',
-          foreignField: 'idea',
-          as: 'member_details',
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'member_details.user',
-          foreignField: '_id',
-          as: 'users',
-        },
-      },
-      {
-        $project: {
-          'name': 1,
-          'desc': 1,
-          'users.name': 1,
-        },
-      },
-    ]);
-    const ideas = await cursor.toArray();
-    console.log(ideas);
-    rep.code(200).send({ideas});
+
+    if (filter == 'display' || !filter) {
+      const latestIdeas = await ideasCollection.find({status: 'published'})
+          .sort({timeStamp: -1}).skip((page - 1)*20).limit(20);
+      const hottestIdeas = await ideasCollection.find({status: 'published'})
+          .sort({upvotes: 1}).skip((page - 1)*20).limit(5);
+
+      const latestIdeasArr = await latestIdeas.toArray();
+      const hottestIdeasArr = await hottestIdeas.toArray();
+
+      return rep.code(200).send({latestIdeas: latestIdeasArr,
+        hottestIdeas: hottestIdeasArr});
+    }
+
+    if (filter == 'latest') {
+      const latestIdeas = await ideasCollection.find({status: 'published'})
+          .sort({timeStamp: -1}).skip((page - 1)*20).limit(20);
+      const arr = await latestIdeas.toArray();
+      return rep.code(200).send({latestIdeas: arr});
+    }
+
+    if (filter == 'oldest') {
+      const oldestIdeas = await ideasCollection.find({status: 'published'})
+          .sort({timeStamp: 1}).skip((page - 1)*20).limit(20);
+      const arr = await oldestIdeas.toArray();
+      return rep.code(200).send({oldestIdeas: arr});
+    }
+
+    if (filter == 'upvotes') {
+      const hottestIdeas = await ideasCollection.find({status: 'published'})
+          .sort({upvotes: -1}).skip((page - 1)*20).limit(20);
+
+      const arr = await hottestIdeas.toArray();
+      return rep.code(200).send({hottestIdeas: arr});
+    }
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }

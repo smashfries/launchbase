@@ -301,13 +301,37 @@ export const getIdeas = {
       200: {
         type: 'object',
         properties: {
-          ideas: {type: 'array'},
-          items: {
-            type: 'object',
-            properties: {
-              name: {type: 'string'},
-              desc: {type: 'string'},
-              member_details: {type: 'array'},
+          latestIdeas: {type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: {type: 'string'},
+                desc: {type: 'string'},
+                timeStamp: {type: 'string'},
+                upvotes: {type: 'number'},
+              },
+            },
+          },
+          oldestIdeas: {type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: {type: 'string'},
+                desc: {type: 'string'},
+                timeStamp: {type: 'string'},
+                upvotes: {type: 'number'},
+              },
+            },
+          },
+          hottestIdeas: {type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: {type: 'string'},
+                desc: {type: 'string'},
+                timeStamp: {type: 'string'},
+                upvotes: {type: 'number'},
+              },
             },
           },
         },
