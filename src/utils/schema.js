@@ -309,6 +309,7 @@ export const getIdeas = {
                 desc: {type: 'string'},
                 timeStamp: {type: 'string'},
                 upvotes: {type: 'number'},
+                idea_details: {type: 'array'},
               },
             },
           },

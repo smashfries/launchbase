@@ -565,7 +565,7 @@ fastify.post('/ideas/:ideaId/rollback', publishIdea, async (req, rep) => {
   }
 });
 
-fastify.get('/ideas', getIdeas, async (req, rep) => {
+fastify.get('/ideas/published', getIdeas, async (req, rep) => {
   if (req.token) {
     const query = req.query;
     const filter = query.filter;
@@ -610,6 +610,45 @@ fastify.get('/ideas', getIdeas, async (req, rep) => {
       const arr = await hottestIdeas.toArray();
       return rep.code(200).send({hottestIdeas: arr});
     }
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.get('/ideas/my/drafts', getIdeas, async (req, rep) => {
+  if (req.token) {
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
+    const myIdeaDrafts = await ideaMembers.aggregate([
+      {
+        $match: {
+          user: req.userOId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'ideas',
+          localField: 'idea',
+          foreignField: '_id',
+          as: 'idea_details',
+        },
+      },
+      {
+        $match: {
+          'idea_details.status': 'draft',
+        },
+      },
+      {
+        $project: {
+          'idea_details._id': 1,
+          'idea_details.name': 1,
+          'idea_details.desc': 1,
+          'idea_details.timeStamp': 1,
+        },
+      },
+    ]);
+    const arr = await myIdeaDrafts.toArray();
+    console.log(arr);
+    rep.code(200).send({latestIdeas: arr});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
