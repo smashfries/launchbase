@@ -1,5 +1,24 @@
 import Fastify from 'fastify';
 
+import {resolve} from 'path';
+
+import fastifyStatic from '@fastify/static';
+import pointOfView from '@fastify/view';
+
+import handlebars from 'handlebars';
+import * as dotenv from 'dotenv';
+
+import mongoConnector from './db/mongo-connector.js';
+import redisConnector from './db/redis-connector.js';
+
+import pages from './routes/pages/pages.js';
+import auth from './routes/api/auth.js';
+import profile from './routes/api/profile.js';
+import email from './routes/api/email.js';
+import cruIdeas from './routes/api/ideas/cru-idea.js';
+import ideaInvites from './routes/api/ideas/idea-invites.js';
+import ideaMembers from './routes/api/ideas/idea-members.js';
+
 /**
  * @type {import('fastify').FastifyInstance} Instance of Fastify
  */
@@ -8,9 +27,7 @@ const fastify = new Fastify({
   trustProxy: true,
 });
 
-import {resolve} from 'path';
 
-import fastifyStatic from '@fastify/static';
 fastify.register(fastifyStatic, {
   root: resolve('./public/templates'),
   serve: false,
@@ -21,31 +38,17 @@ fastify.register(fastifyStatic, {
   decorateReply: false,
 });
 
-import pointOfView from '@fastify/view';
-import handlebars from 'handlebars';
-
-import pages from './routes/pages/pages.js';
-import auth from './routes/api/auth.js';
-import profile from './routes/api/profile.js';
-import email from './routes/api/email.js';
-import cruIdeas from './routes/api/ideas/cru-idea.js';
-import ideaInvites from './routes/api/ideas/idea-invites.js';
-
-import mongoConnector from './db/mongo-connector.js';
-import redisConnector from './db/redis-connector.js';
 fastify.register(mongoConnector);
 fastify.register(redisConnector);
 
-import * as dotenv from 'dotenv';
 dotenv.config({path: './.env'});
 
 import {verifyToken} from './utils/crypto.js';
-import {logoutOpts, getIdeas, updateIdeaMemberRole, publishIdea,
-  getIdea} from './utils/schema.js';
+import {logoutOpts, getIdeas, publishIdea, getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
-    ejs: handlebars,
+    handlebars,
   },
   root: resolve('./src/views'),
 });
@@ -77,54 +80,7 @@ fastify.register(profile);
 fastify.register(email);
 fastify.register(cruIdeas);
 fastify.register(ideaInvites);
-
-fastify.patch('/ideas/:ideaId/members/:memberId/role', updateIdeaMemberRole,
-    async (req, rep) => {
-      if (req.token) {
-        const {ideaId, memberId} = req.params;
-        if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-          return rep.code(400).send({error:
-            'ideaId must be a valid MongoDB Object ID'});
-        }
-        if (!fastify.mongo.ObjectId.isValid(memberId)) {
-          return rep.code(400).send({error:
-            'memberId must be a valid MongoDB Object ID'});
-        }
-        if (req.body.role !== 'admin' && req.body.role !== 'member') {
-          return rep.code(400).send({error:
-            'invalid role', message: 'role must be *admin* or *member*'});
-        }
-        const ideaOId = new fastify.mongo.ObjectId(ideaId);
-        const memberOId = new fastify.mongo.ObjectId(memberId);
-        const ideaMembers = fastify.mongo.db.collection('idea-members');
-        const currentMember = await ideaMembers.findOne({idea: ideaOId,
-          user: req.userOId, role: 'admin'});
-        if (!currentMember) {
-          return rep.code(400).send({error:
-            'you must be an admin of this idea to change roles'});
-        }
-        const toUpdateMember = await ideaMembers.findOne({idea: ideaOId,
-          user: memberOId});
-        if (!toUpdateMember) {
-          return rep.code(400).send({error:
-            'member does not exist for this idea'});
-        }
-        const adminMembers = await ideaMembers.find({idea: ideaOId,
-          role: 'admin'});
-        const membersArray = await adminMembers.toArray();
-
-        if (membersArray.length == 1 && req.body.role == 'member' &&
-         toUpdateMember.role == 'admin') {
-          return rep.code(400).send({error:
-            'there must be atleast one admin for every idea'});
-        }
-        await ideaMembers.updateOne({idea: ideaOId,
-          user: memberOId}, {$set: {role: req.body.role}});
-        rep.code(200).send({message: 'member role was successfully updated!'});
-      } else {
-        rep.code(400).send({error: 'unauthorized'});
-      }
-    });
+fastify.register(ideaMembers);
 
 fastify.post('/ideas/:ideaId/publish', publishIdea, async (req, rep) => {
   if (req.token) {
