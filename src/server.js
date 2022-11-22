@@ -457,6 +457,12 @@ fastify.post('/ideas/accept-invite', acceptIdeaInvite, async (req, rep) => {
       return rep.code(400).send({error:
         'you are already a member of this idea'});
     }
+    const users = fastify.mongo.db.collection('users');
+    const userDetails = await users.findOne({_id: req.userOId});
+    const isComplete = userDetails.hasOwnProperty('name') ? true : false;
+    if (!isComplete) {
+      return rep.code(400).send({error: 'profile is incomplete'});
+    }
     await ideaMembers.insertOne({idea: ideaId, role: invite.role,
       user: req.userOId});
     await ideaInvites.deleteOne({idea: ideaId, email: decoded.email});
