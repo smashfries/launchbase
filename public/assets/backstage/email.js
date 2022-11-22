@@ -63,7 +63,7 @@ form.addEventListener('submit', (e) => {
   submitBtn.disabled = true;
   submitIcon.style.animationName = 'loading';
   fetch('/email-settings', {
-    method: 'post',
+    method: 'put',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

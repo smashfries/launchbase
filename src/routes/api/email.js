@@ -20,7 +20,7 @@ export default async function auth(fastify, _options) {
     }
   });
 
-  fastify.post('/email-settings', updateEmailSettings, async (req, rep) => {
+  fastify.put('/email-settings', updateEmailSettings, async (req, rep) => {
     if (req.token) {
       const users = fastify.mongo.db.collection('users');
 
