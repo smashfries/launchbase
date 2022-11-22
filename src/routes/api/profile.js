@@ -6,7 +6,7 @@ import {updateProfileOpts, getProfileOpts} from '../../utils/schema.js';
  * @param {*} _options
  */
 export default async function profile(fastify, _options) {
-  fastify.post('/profile', updateProfileOpts, async (req, rep) => {
+  fastify.put('/profile', updateProfileOpts, async (req, rep) => {
     if (req.token) {
       let twitter = '';
       let github = '';

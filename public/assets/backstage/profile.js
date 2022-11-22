@@ -93,7 +93,7 @@ document.querySelector('form').addEventListener('submit', (e) => {
   submitBtn.disabled = true;
   submitIcon.style.animationName = 'loading';
   fetch('/profile', {
-    method: 'post',
+    method: 'put',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
