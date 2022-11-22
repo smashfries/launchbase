@@ -348,6 +348,34 @@ export const getIdeas = {
   },
 };
 
+export const getIdea = {
+  schema: {
+    headers,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          _id: {type: 'string'},
+          name: {type: 'string'},
+          desc: {type: 'string'},
+          idea: {type: 'string'},
+          links: {type: 'array'},
+          upvotes: {type: 'number'},
+          members: {type: 'array'},
+          timeStamp: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const sendIdeaInvite = {
   schema: {
     headers,

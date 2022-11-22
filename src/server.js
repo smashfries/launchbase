@@ -46,7 +46,7 @@ import {sendEmailVerificationOpts, verifyCodeOpts, updateProfileOpts,
   updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
   deleteIdeaDraft, getIdeas, revokeIdeaInvite,
   sendIdeaInvite, acceptIdeaInvite,
-  updateIdeaMemberRole, publishIdea} from './utils/schema.js';
+  updateIdeaMemberRole, publishIdea, getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -688,6 +688,64 @@ fastify.get('/ideas/my/published', getIdeas, async (req, rep) => {
     const arr = await myIdeaDrafts.toArray();
     console.log(arr);
     rep.code(200).send({latestIdeas: arr});
+  } else {
+    rep.code(400).send({error: 'unauthorized'});
+  }
+});
+
+fastify.get('/ideas/:ideaId', getIdea, async (req, rep) => {
+  if (req.token) {
+    const {ideaId} = req.params;
+
+    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
+      return rep.code(400).send({error: 'invalid ideaId',
+        message: 'ideaId must be a valid MongoDB Object ID'});
+    }
+
+    const ideaOId = new fastify.mongo.ObjectId(ideaId);
+    const ideas = fastify.mongo.db.collection('ideas');
+    const ideaMembers = fastify.mongo.db.collection('idea-members');
+    const idea = await ideas.findOne({_id: ideaOId});
+
+    if (!idea) {
+      return rep.code(400).send({error: 'idea does not exist'});
+    }
+
+    if (idea.status == 'draft') {
+      const member = await ideaMembers.findOne({idea: ideaOId,
+        user: req.userOId});
+      if (!member) {
+        return rep.code(400).send({error: 'access denied',
+          message: 'you are not a member of this idea'});
+      }
+    }
+
+    const members = await ideaMembers.aggregate([
+      {
+        $match: {
+          idea: ideaOId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user_details',
+        },
+      },
+      {
+        $project: {
+          'user_details.nickname': 1,
+          'user': 1,
+          'role': 1,
+        },
+      },
+    ]);
+    const arr = await members.toArray();
+
+    const target = {members: arr};
+    rep.code(200).send(Object.assign(target, idea));
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
