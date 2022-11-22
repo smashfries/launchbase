@@ -28,6 +28,7 @@ import pages from './routes/pages/pages.js';
 import auth from './routes/api/auth.js';
 import profile from './routes/api/profile.js';
 import email from './routes/api/email.js';
+import cruIdeas from './routes/api/ideas/cru-idea.js';
 
 import mongoConnector from './db/mongo-connector.js';
 import redisConnector from './db/redis-connector.js';
@@ -39,9 +40,9 @@ dotenv.config({path: './.env'});
 
 import {validateEmail, inviteIdeaMembers} from './utils/email.js';
 import {verifyToken} from './utils/crypto.js';
-import {logoutOpts, createIdeaDraft, updateIdeaDraft, deleteIdeaDraft,
-  getIdeas, revokeIdeaInvite, sendIdeaInvite, acceptIdeaInvite,
-  updateIdeaMemberRole, publishIdea, getIdea} from './utils/schema.js';
+import {logoutOpts, getIdeas, revokeIdeaInvite, sendIdeaInvite,
+  acceptIdeaInvite, updateIdeaMemberRole, publishIdea,
+  getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -75,123 +76,7 @@ fastify.register(pages);
 fastify.register(auth);
 fastify.register(profile);
 fastify.register(email);
-
-fastify.post('/ideas', createIdeaDraft, async (req, rep) => {
-  if (req.token) {
-    const members = req.body.members ? req.body.members :
-     [];
-    const memberEmails = members.map((i) => {
-      return i.email;
-    });
-    let uniqueMembers = [...new Set(memberEmails)];
-    if (members.length > 0) {
-      let invalidEmails = memberEmails.find((i) => !validateEmail(i));
-      if (!invalidEmails) {
-        invalidEmails = members.find((i) => i.role !== 'admin' &&
-        i.role !== 'member');
-      }
-      if (invalidEmails) {
-        return rep.code(400).send({error: 'invalid-emails'});
-      }
-    }
-    const drafts = fastify.mongo.db.collection('ideas');
-    const ideaInvites = fastify.mongo.db.collection('idea-invites');
-    const ideaMembers = fastify.mongo.db.collection('idea-members');
-
-    const data = req.body;
-
-    const draft = await drafts.insertOne({name: data.name,
-      desc: data.desc ? data.desc : '', idea: data.idea ? data.idea : '',
-      links: data.links ? data.links : [], status: 'draft',
-      timeStamp: new Date()});
-    await ideaMembers.insertOne({user: req.userOId, role: 'admin',
-      idea: draft.insertedId});
-
-    if (members.length > 0) {
-      await inviteIdeaMembers(uniqueMembers, draft.insertedId);
-      uniqueMembers = uniqueMembers.map((i) => {
-        return {idea: draft.insertedId, email: i, timeStamp: new Date(),
-          role: members.find((j) => j.email == i)
-              .role};
-      });
-      await ideaInvites.insertMany(uniqueMembers);
-    }
-
-    rep.code(200).send({message: 'done', draftId: draft.insertedId});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.put('/ideas/:ideaId', updateIdeaDraft, async (req, rep) => {
-  if (req.token) {
-    const {ideaId} = req.params;
-    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-      return rep.code(400).send({error: 'invalid ID',
-        message: 'Draft ID must be a valid MongoDB ObjectID'});
-    }
-    const drafts = fastify.mongo.db.collection('ideas');
-    const members = fastify.mongo.db.collection('idea-members');
-    const ideaOId = new fastify.mongo.ObjectId(ideaId);
-    const idea = await drafts.findOne({_id: ideaOId});
-    if (!idea) {
-      return rep.code(400).send({error: 'draft does not exist'});
-    }
-    const member = await members.findOne({user: req.userOId, idea: ideaOId,
-      role: 'admin'});
-    if (!member) {
-      return rep.code(400).send({error: 'unauthorized',
-        message: 'Must be a member of the idea and have the *admin* role.'});
-    }
-    const data = req.body;
-    await drafts.updateOne({_id: ideaOId},
-        {$set: {name: data.name, desc: data.desc ? data.desc : '',
-          idea: data.idea ? data.idea : '',
-          links: data.links ? data.links : []}});
-    rep.code(200).send({message: 'done'});
-  } else {
-    rep.code(400).send({error: 'unauthorized', message: 'check auth token'});
-  }
-});
-
-fastify.delete('/ideas/:ideaId', deleteIdeaDraft, async (req, rep) => {
-  if (req.token) {
-    const {ideaId} = req.params;
-    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-      return rep.code(400).send({error: 'invalid ID',
-        message: 'Idea ID must be a valid MongoDB ObjectID'});
-    }
-    const ideaOId = new fastify.mongo.ObjectId(ideaId);
-    const members = fastify.mongo.db.collection('idea-members');
-    const ideas = fastify.mongo.db.collection('ideas');
-    const ideaInvites = fastify.mongo.db.collection('idea-invites');
-    const ideaMembers = await members.find({idea: ideaOId});
-    const membersDocs = await ideaMembers.toArray();
-    switch (membersDocs.length) {
-      case 0:
-        return rep.code(400).send({error: 'Idea does not exist'});
-        break;
-      case 1:
-        await ideas.deleteOne({_id: ideaOId});
-        await ideaInvites.deleteMany({idea: ideaOId});
-        await members.deleteOne({idea: ideaOId, user: req.userOId});
-        return rep.code(200).send({message: 'The idea was deleted as' +
-         ' you were the only member'});
-        break;
-      default:
-        await members.deleteOne({idea: ideaOId, user: req.userOId});
-        if (membersDocs.length == 2) {
-          await members.updateOne({idea: ideaOId}, {$set: {role: 'admin'}});
-        }
-        return rep.code(200).send({message: 'You have been removed' +
-         ' from the idea'});
-        break;
-    }
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
+fastify.register(cruIdeas);
 
 fastify.post('/ideas/:ideaId/invite', sendIdeaInvite, async (req, rep) => {
   if (req.token) {

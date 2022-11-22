@@ -5,7 +5,7 @@ import {getEmailSettings, updateEmailSettings} from '../../utils/schema.js';
  * @param {*} fastify
  * @param {*} _options
  */
-export default async function auth(fastify, _options) {
+export default async function email(fastify, _options) {
   fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
     if (req.token) {
       const users = fastify.mongo.db.collection('users');
