@@ -3,7 +3,7 @@
  * @param {*} fastify
  * @param {*} _options
  */
-export default async function routes(fastify, _options) {
+export default async function pages(fastify, _options) {
   fastify.get('/', (_req, rep) => {
     return rep.sendFile('index.html');
   });
@@ -12,10 +12,6 @@ export default async function routes(fastify, _options) {
   });
   fastify.get('/signup', (_req, rep) => {
     return rep.sendFile('signup.html');
-  });
-  // TODO change route
-  fastify.get('/home', (_req, rep) => {
-    return rep.view('home.hbs');
   });
   fastify.get('/backstage', (_req, rep) => {
     return rep.redirect('/backstage/profile');
@@ -28,5 +24,8 @@ export default async function routes(fastify, _options) {
   });
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.sendFile('backstage/security.html');
+  });
+  fastify.get('/just-an-idea', (_req, rep) => {
+    return rep.sendFile('ideas.html');
   });
 }

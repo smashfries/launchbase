@@ -24,7 +24,7 @@ fastify.register(fastifyStatic, {
 import pointOfView from '@fastify/view';
 import handlebars from 'handlebars';
 
-import routes from './routes.js';
+import pages from './routes/pages/pages.js';
 import auth from './routes/api/auth.js';
 
 import mongoConnector from './db/mongo-connector.js';
@@ -70,7 +70,7 @@ fastify.addHook('preHandler', async (req, rep) => {
   }
 });
 
-fastify.register(routes);
+fastify.register(pages);
 fastify.register(auth);
 
 fastify.post('/profile', updateProfileOpts, async (req, rep) => {

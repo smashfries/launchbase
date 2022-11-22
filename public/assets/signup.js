@@ -1,5 +1,5 @@
 if (localStorage.getItem('token')) {
-  window.location.replace('home');
+  window.location.replace('just-an-idea');
 }
 
 const loginBox = document.querySelector('.login-box');
@@ -122,7 +122,7 @@ form.addEventListener('submit', (e) => {
           } else {
             localStorage.clear();
             localStorage.setItem('token', data.token);
-            window.location.replace('home');
+            window.location.replace('just-an-idea');
           }
         });
   }
