@@ -38,8 +38,7 @@ dotenv.config({path: './.env'});
 
 import {validateEmail, inviteIdeaMembers} from './utils/email.js';
 import {verifyToken} from './utils/crypto.js';
-import {getEmailSettings, logoutOpts,
-  updateEmailSettings, createIdeaDraft, updateIdeaDraft, deleteIdeaDraft,
+import {logoutOpts, createIdeaDraft, updateIdeaDraft, deleteIdeaDraft,
   getIdeas, revokeIdeaInvite, sendIdeaInvite, acceptIdeaInvite,
   updateIdeaMemberRole, publishIdea, getIdea} from './utils/schema.js';
 
@@ -74,32 +73,6 @@ fastify.addHook('preHandler', async (req, rep) => {
 fastify.register(pages);
 fastify.register(auth);
 fastify.register(profile);
-
-fastify.get('/email-settings', getEmailSettings, async (req, rep) => {
-  if (req.token) {
-    const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({_id: req.userOId});
-    const publicEmail = user.hasOwnProperty('publicEmail') &&
-     user.publicEmail ? true : false;
-    const subscribed = user.hasOwnProperty('subscribed') &&
-     user.subscribed ? true : false;
-    rep.code(200).send({publicEmail, subscribed});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.post('/email-settings', updateEmailSettings, async (req, rep) => {
-  if (req.token) {
-    const users = fastify.mongo.db.collection('users');
-
-    await users.updateOne({_id: req.userOId}, {$set:
-      {publicEmail: req.body.publicEmail, subscribed: req.body.subscribed}});
-    rep.code(200).send({message: 'success'});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
 
 fastify.post('/ideas', createIdeaDraft, async (req, rep) => {
   if (req.token) {
