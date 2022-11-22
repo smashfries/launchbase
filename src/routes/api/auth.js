@@ -2,7 +2,8 @@ import {randomBytes} from 'crypto';
 
 import {hash, verify, generateToken, md5} from '../../utils/crypto.js';
 
-import {sendEmailVerificationOpts, verifyCodeOpts} from '../../utils/schema.js';
+import {sendEmailVerificationOpts, verifyCodeOpts,
+  getActiveTokens} from '../../utils/schema.js';
 
 import {sendEmailVerification} from '../../utils/email.js';
 
@@ -93,5 +94,15 @@ export default async function auth(fastify, _options) {
     const token = generateToken(id, md5(email));
     await redis.rpush(id, token);
     return rep.code(200).send({token});
+  });
+
+  fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
+    if (req.token) {
+      const {redis} = fastify;
+      const tokens = await redis.lrange(req.user, 0, -1);
+      rep.code(200).send({number: tokens.length});
+    } else {
+      rep.code(400).send({error: 'unauthorized'});
+    }
   });
 };

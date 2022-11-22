@@ -39,8 +39,8 @@ dotenv.config({path: './.env'});
 import {validateEmail, inviteIdeaMembers} from './utils/email.js';
 import {verifyToken} from './utils/crypto.js';
 import {getEmailSettings, logoutOpts,
-  updateEmailSettings, getActiveTokens, createIdeaDraft, updateIdeaDraft,
-  deleteIdeaDraft, getIdeas, revokeIdeaInvite, sendIdeaInvite, acceptIdeaInvite,
+  updateEmailSettings, createIdeaDraft, updateIdeaDraft, deleteIdeaDraft,
+  getIdeas, revokeIdeaInvite, sendIdeaInvite, acceptIdeaInvite,
   updateIdeaMemberRole, publishIdea, getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
@@ -96,16 +96,6 @@ fastify.post('/email-settings', updateEmailSettings, async (req, rep) => {
     await users.updateOne({_id: req.userOId}, {$set:
       {publicEmail: req.body.publicEmail, subscribed: req.body.subscribed}});
     rep.code(200).send({message: 'success'});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
-  if (req.token) {
-    const {redis} = fastify;
-    const tokens = await redis.lrange(req.user, 0, -1);
-    rep.code(200).send({number: tokens.length});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
