@@ -27,6 +27,7 @@ import handlebars from 'handlebars';
 import pages from './routes/pages/pages.js';
 import auth from './routes/api/auth.js';
 import profile from './routes/api/profile.js';
+import email from './routes/api/email.js';
 
 import mongoConnector from './db/mongo-connector.js';
 import redisConnector from './db/redis-connector.js';
@@ -73,6 +74,7 @@ fastify.addHook('preHandler', async (req, rep) => {
 fastify.register(pages);
 fastify.register(auth);
 fastify.register(profile);
+fastify.register(email);
 
 fastify.post('/ideas', createIdeaDraft, async (req, rep) => {
   if (req.token) {
