@@ -44,7 +44,7 @@ fastify.register(redisConnector);
 dotenv.config({path: './.env'});
 
 import {verifyToken} from './utils/crypto.js';
-import {logoutOpts, getIdeas, publishIdea, getIdea} from './utils/schema.js';
+import {getIdeas, publishIdea, getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -314,30 +314,6 @@ fastify.get('/ideas/:ideaId', getIdea, async (req, rep) => {
 
     const target = {members: arr};
     rep.code(200).send(Object.assign(target, idea));
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.post('/logout', logoutOpts, async (req, rep) => {
-  if (req.user) {
-    if (req.token) {
-      const {redis} = fastify;
-      await redis.lrem(req.user, 1, req.token);
-      rep.code(200).send({message: 'Logged out'});
-    } else {
-      rep.code(200).send({message: 'Already logged out'});
-    }
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.post('/logout-all', logoutOpts, async (req, rep) => {
-  if (req.token) {
-    const {redis} = fastify;
-    await redis.del(req.user);
-    rep.code(200).send({message: 'Successfully logged out of all devices'});
   } else {
     rep.code(400).send({error: 'unauthorized'});
   }
