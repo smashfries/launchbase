@@ -7,7 +7,7 @@ import {createIdeaDraft, updateIdeaDraft,
  * @param {*} fastify
  * @param {*} _options
  */
-export default async function cruIdeas(fastify, _options) {
+export default async function cudIdeas(fastify, _options) {
   fastify.post('/ideas', createIdeaDraft, async (req, rep) => {
     if (req.token) {
       const members = req.body.members ? req.body.members :

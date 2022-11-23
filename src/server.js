@@ -15,7 +15,7 @@ import pages from './routes/pages/pages.js';
 import auth from './routes/api/auth.js';
 import profile from './routes/api/profile.js';
 import email from './routes/api/email.js';
-import cruIdeas from './routes/api/ideas/cru-idea.js';
+import cudIdeas from './routes/api/ideas/cud-idea.js';
 import ideaInvites from './routes/api/ideas/idea-invites.js';
 import ideaMembers from './routes/api/ideas/idea-members.js';
 
@@ -78,7 +78,7 @@ fastify.register(pages);
 fastify.register(auth);
 fastify.register(profile);
 fastify.register(email);
-fastify.register(cruIdeas);
+fastify.register(cudIdeas);
 fastify.register(ideaInvites);
 fastify.register(ideaMembers);
 
