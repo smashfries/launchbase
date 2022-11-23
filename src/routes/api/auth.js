@@ -8,7 +8,6 @@ import {sendEmailVerificationOpts, verifyCodeOpts,
 import {sendEmailVerification} from '../../utils/email.js';
 
 /**
- * All routes that send statick html files
  * @param {*} fastify
  * @param {*} _options
  */

@@ -1,7 +1,6 @@
 import {updateIdeaMemberRole} from '../../../utils/schema.js';
 
 /**
- * All routes that send statick html files
  * @param {*} fastify
  * @param {*} _options
  */
