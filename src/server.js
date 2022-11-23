@@ -18,6 +18,7 @@ import email from './routes/api/email.js';
 import cudIdeas from './routes/api/ideas/cud-idea.js';
 import ideaInvites from './routes/api/ideas/idea-invites.js';
 import ideaMembers from './routes/api/ideas/idea-members.js';
+import ideaStatus from './routes/api/ideas/idea-status.js';
 
 /**
  * @type {import('fastify').FastifyInstance} Instance of Fastify
@@ -44,7 +45,7 @@ fastify.register(redisConnector);
 dotenv.config({path: './.env'});
 
 import {verifyToken} from './utils/crypto.js';
-import {getIdeas, publishIdea, getIdea} from './utils/schema.js';
+import {getIdeas, getIdea} from './utils/schema.js';
 
 fastify.register(pointOfView, {
   engine: {
@@ -81,57 +82,7 @@ fastify.register(email);
 fastify.register(cudIdeas);
 fastify.register(ideaInvites);
 fastify.register(ideaMembers);
-
-fastify.post('/ideas/:ideaId/publish', publishIdea, async (req, rep) => {
-  if (req.token) {
-    const {ideaId} = req.params;
-    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-      return rep.code(400).send({error: 'invalid ideaID', message:
-        'ideaId must be a valid MongoDB Object ID'});
-    }
-    const ideaOId = new fastify.mongo.ObjectId(ideaId);
-
-    const ideaMembers = fastify.mongo.db.collection('idea-members');
-    const ideas = fastify.mongo.db.collection('ideas');
-
-    const member = await ideaMembers.findOne({user: req.userOId,
-      idea: ideaOId, role: 'admin'});
-    if (!member) {
-      return rep.code(400).send({error: 'invalid user', message:
-        'you must be an *admin* user of this idea in order to publish it'});
-    }
-    await ideas.updateOne({_id: ideaOId}, {$set: {status: 'published'}});
-    rep.code(200).send({message: 'the idea was successfully published!'});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
-
-fastify.post('/ideas/:ideaId/rollback', publishIdea, async (req, rep) => {
-  if (req.token) {
-    const {ideaId} = req.params;
-    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-      return rep.code(400).send({error: 'invalid ideaID', message:
-        'ideaId must be a valid MongoDB Object ID'});
-    }
-    const ideaOId = new fastify.mongo.ObjectId(ideaId);
-
-    const ideaMembers = fastify.mongo.db.collection('idea-members');
-    const ideas = fastify.mongo.db.collection('ideas');
-
-    const member = await ideaMembers.findOne({user: req.userOId,
-      idea: ideaOId, role: 'admin'});
-    if (!member) {
-      return rep.code(400).send({error: 'invalid user', message:
-        'you must be an *admin* user of this idea in order to rollback'});
-    }
-    await ideas.updateOne({_id: ideaOId}, {$set: {status: 'draft'}});
-    rep.code(200).send({message:
-      'the idea was successfully reverted to draft!'});
-  } else {
-    rep.code(400).send({error: 'unauthorized'});
-  }
-});
+fastify.register(ideaStatus);
 
 fastify.get('/ideas/published', getIdeas, async (req, rep) => {
   if (req.token) {
