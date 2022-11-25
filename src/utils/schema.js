@@ -297,6 +297,13 @@ export const deleteIdeaDraft = {
 export const getIdeas = {
   schema: {
     headers,
+    querystring: {
+      type: 'object',
+      properties: {
+        page: {type: 'integer'},
+        filter: {type: 'string'},
+      },
+    },
     response: {
       200: {
         type: 'object',
@@ -305,6 +312,7 @@ export const getIdeas = {
             items: {
               type: 'object',
               properties: {
+                _id: {type: 'string'},
                 name: {type: 'string'},
                 desc: {type: 'string'},
                 timeStamp: {type: 'string'},
@@ -317,6 +325,7 @@ export const getIdeas = {
             items: {
               type: 'object',
               properties: {
+                _id: {type: 'string'},
                 name: {type: 'string'},
                 desc: {type: 'string'},
                 timeStamp: {type: 'string'},
@@ -328,6 +337,7 @@ export const getIdeas = {
             items: {
               type: 'object',
               properties: {
+                _id: {type: 'string'},
                 name: {type: 'string'},
                 desc: {type: 'string'},
                 timeStamp: {type: 'string'},

@@ -1,5 +1,5 @@
 /**
- * All routes that send statick html files
+ * All routes that send static html files
  * @param {*} fastify
  * @param {*} _options
  */
@@ -26,6 +26,6 @@ export default async function pages(fastify, _options) {
     return rep.sendFile('backstage/security.html');
   });
   fastify.get('/just-an-idea', (_req, rep) => {
-    return rep.sendFile('ideas.html');
+    return rep.sendFile('just-an-idea/ideas.html');
   });
 }

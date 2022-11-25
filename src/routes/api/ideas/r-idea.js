@@ -18,9 +18,9 @@ export default async function rIdeas(fastify, _options) {
 
       if (filter == 'display' || !filter) {
         const latestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({timeStamp: -1}).skip((page - 1)*20).limit(20);
+            .sort({timeStamp: -1}).limit(5);
         const hottestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({upvotes: 1}).skip((page - 1)*20).limit(5);
+            .sort({upvotes: 1}).limit(20);
 
         const latestIdeasArr = await latestIdeas.toArray();
         const hottestIdeasArr = await hottestIdeas.toArray();
@@ -29,7 +29,7 @@ export default async function rIdeas(fastify, _options) {
           hottestIdeas: hottestIdeasArr});
       }
 
-      if (filter == 'latest') {
+      if (filter == 'newest') {
         const latestIdeas = await ideasCollection.find({status: 'published'})
             .sort({timeStamp: -1}).skip((page - 1)*20).limit(20);
         const arr = await latestIdeas.toArray();
