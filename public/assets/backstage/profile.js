@@ -66,7 +66,7 @@ fetch('/profile', {
                 {
                   name: 'flip',
                   options: {
-                    fallbackPlacements: ['bottom'],
+                    fallbackPlacements: ['bottom', 'top'],
                     boundary: document.querySelector('.settings-content'),
                   },
                 },
