@@ -23,6 +23,9 @@ const twitterInput = document.querySelector('[name="twitter"]');
 const githubInput = document.querySelector('[name="github"]');
 const msg = document.querySelector('.msg');
 
+const showEvents = ['mouseenter', 'focus'];
+const hideEvents = ['mouseleave', 'blur'];
+
 fetch('/profile', {
   method: 'get',
   headers: {
@@ -47,6 +50,40 @@ fetch('/profile', {
           if (data.github) {
             githubInput.value = data.github;
           }
+          const inputList = document.querySelectorAll('input');
+          inputList.forEach((input) => {
+            const tooltip = document.
+                querySelector(`#${input.getAttribute('name')}-tooltip`);
+            const popperInstance = Popper.createPopper(input, tooltip, {
+              placement: 'right',
+              modifiers: [
+                {
+                  name: 'offset',
+                  options: {
+                    offset: [0, 5],
+                  },
+                },
+                {
+                  name: 'flip',
+                  options: {
+                    fallbackPlacements: ['bottom'],
+                    boundary: document.querySelector('.settings-content'),
+                  },
+                },
+              ],
+            });
+            showEvents.forEach((e) => {
+              input.addEventListener(e, () => {
+                tooltip.setAttribute('data-show', '');
+                popperInstance.update();
+              });
+            });
+            hideEvents.forEach((e) => {
+              input.addEventListener(e, () => {
+                tooltip.removeAttribute('data-show');
+              });
+            });
+          });
         } else {
           msg.textContent = 'Your profile is not complete.';
           msg.className = 'warning msg';
