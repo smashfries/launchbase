@@ -210,7 +210,8 @@ export const createIdeaDraft = {
         name: {type: 'string', maxLength: 80},
         desc: {type: 'string', maxLength: 300},
         idea: {type: 'string', maxLength: 5000},
-        links: {type: 'array', maxItems: 10, items: {type: 'string'}},
+        links: {type: 'array', maxItems: 10, items: {type: 'string',
+          maxLength: 2048}},
         members: {type: 'array', maxItems: 20, items: {
           type: 'object',
           properties: {
@@ -250,7 +251,8 @@ export const updateIdeaDraft = {
         name: {type: 'string', maxLength: 80},
         desc: {type: 'string', maxLength: 300},
         idea: {type: 'string', maxLength: 5000},
-        links: {type: 'array', maxItems: 10, items: {type: 'string'}},
+        links: {type: 'array', maxItems: 10, items: {type: 'string',
+          maxLength: 2048}},
       },
       required: ['name'],
     },

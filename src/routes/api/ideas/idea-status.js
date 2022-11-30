@@ -23,6 +23,10 @@ export default async function ideaStatus(fastify, _options) {
         return rep.code(400).send({error: 'invalid user', message:
           'you must be an *admin* user of this idea in order to publish it'});
       }
+      const idea = await ideas.findOne({_id: ideaOId});
+      if (!idea.desc || !idea.name || !idea.idea) {
+        return rep.code(400).send({error: 'idea is incomplete'});
+      }
       await ideas.updateOne({_id: ideaOId}, {$set: {status: 'published'}});
       rep.code(200).send({message: 'the idea was successfully published!'});
     } else {

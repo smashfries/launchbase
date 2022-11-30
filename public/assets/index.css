@@ -237,9 +237,17 @@ h2 {
 
 }
 
-#profile-form input {
+#profile-form input, #profile-form textarea {
   display: block;
   width: 410px !important;
+}
+
+textarea {
+  padding: 10px;
+  border: 1px solid black;
+  outline: none;
+  font-family: 'Fira Code', monospace;
+  margin-bottom: 10px;
 }
 
 .settings-content .error {
@@ -357,6 +365,27 @@ h5 {
   padding-bottom: 5px;
 }
 
+.settings-content h4 {
+  margin-bottom: 5px;
+}
+
+.link-item, .email-item {
+  display: flex;
+}
+
+.link-item button, .email-item button {
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+.new-btn {
+  margin-left: 0;
+}
+
+#create-btn {
+  margin-left: 0;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;
@@ -364,7 +393,7 @@ h5 {
 }
 
 @media only screen and (max-width: 828px) {
-  #profile-form input, .settings-content .error {
+  #profile-form input, #profile-form textarea, .settings-content .error {
     width: calc(100% - 40px) !important;
   }
 }

@@ -28,4 +28,7 @@ export default async function pages(fastify, _options) {
   fastify.get('/just-an-idea', (_req, rep) => {
     return rep.sendFile('just-an-idea/ideas.html');
   });
+  fastify.get('/just-an-idea/new', (_req, rep) => {
+    return rep.sendFile('just-an-idea/new-idea.html');
+  });
 }
