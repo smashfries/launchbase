@@ -122,6 +122,7 @@ export default async function rIdeas(fastify, _options) {
             'idea_details.name': 1,
             'idea_details.desc': 1,
             'idea_details.timeStamp': 1,
+            'idea_details.upvotes': 1,
           },
         },
       ]);
