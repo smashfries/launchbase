@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="/just-an-idea/ideas.js" defer></script>
-    <title>Launch Base | Ideas</title>
+    <script src="/just-an-idea/drafts.js" defer></script>
+    <title>Launch Base | Draft Ideas</title>
 </head>
 <body>
     <h1 class="logo-title"><a href="/">Launch Base</a></h1>
@@ -27,33 +27,15 @@
     <div class="container settings-box">
         <div class="side-panel">
             <h2>Just an Idea</h2>
-            <a href="/just-an-idea" class="panel-item active-panel-item">Community Ideas</a>
+            <a href="/just-an-idea" class="panel-item">Community Ideas</a>
             <a href="/just-an-idea/new" class="panel-item">Create New Idea</a>
-            <a href="/just-an-idea/drafts" class="panel-item">My Draft Ideas</a>
+            <a href="/just-an-idea/drafts" class="panel-item active-panel-item">My Draft Ideas</a>
             <a href="/just-an-idea/published" class="panel-item">My Published Ideas</a>
         </div>
         <div class="settings-content">
-            <h3>Explore ideas from the Launch Base Community</h3>
+            <h3>View your drafts</h3>
             <hr>
-            <div class="filter-container">
-                <a href="?filter=newest" class="filter-btn" id="filter-newest">Sort by Newest</a>
-                <a href="?filter=oldest" class="filter-btn" id="filter-oldest">Sort by Oldest</a>
-                <a href="?filter=upvotes" class="filter-btn" id="filter-upvotes">Sort by Popularity (Upvotes)</a>
-
-            </div>
-            <br>
-            <div class="pagination-container hide">
-                Page: 
-                <a href="#" id="prev" title="Previous page">👈</a>
-                <input type="text" min="1" id="page-in" required>
-                <a href="#" id="next" title="Next page">👉</a>
-            </div>
-            <h4>Latest Ideas 🚀</h4>
-            <div class="idea-container" id="latest-ideas">
-            </div>
-            <p class="info msg">Loading data...</p>
-            <h4>Hottest Ideas 🔥</h4>
-            <div class="idea-container" id="hottest-ideas"></div>
+            <div class="idea-container"></div>
             <p class="info msg">Loading data...</p>
         </div>
     </div>
