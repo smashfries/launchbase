@@ -5,7 +5,7 @@
 /* eslint-disable new-cap */
 const token = localStorage.getItem('token');
 if (!token) {
-  window.location.replace('/login');
+  window.location.replace('/login?redirect=' + encodeURI(window.location.href));
 }
 
 const payload = parseJwt(token);
