@@ -2,6 +2,9 @@ if (localStorage.getItem('token')) {
   window.location.replace('just-an-idea');
 }
 
+const params = new URLSearchParams(window.location.search);
+const redirect = params.get('redirect');
+
 const loginBox = document.querySelector('.login-box');
 const form = document.querySelector('form');
 const emailInput = document.querySelector('.email-input');
@@ -125,7 +128,11 @@ form.addEventListener('submit', (e) => {
           } else {
             localStorage.clear();
             localStorage.setItem('token', data.token);
-            window.location.replace('just-an-idea');
+            if (redirect) {
+              window.location.replace(redirect);
+            } else {
+              window.location.replace('just-an-idea');
+            }
           }
         });
   }
