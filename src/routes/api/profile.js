@@ -54,10 +54,18 @@ export default async function profile(fastify, _options) {
 
   fastify.get('/profile', getProfileOpts, async (req, rep) => {
     if (req.token) {
+      const query = req.query;
+      const limittedRes = query.only;
+
       const users = fastify.mongo.db.collection('users');
       const user = await users.findOne({_id: req.userOId});
       const isComplete = user.hasOwnProperty('name') ? true : false;
-      rep.code(200).send({...user, isComplete});
+
+      if (limittedRes == 'completionStatus') {
+        rep.code(200).send({isComplete});
+      } else {
+        rep.code(200).send({...user, isComplete});
+      }
     } else {
       rep.code(400).send({error: 'unauthorized'});
     }
