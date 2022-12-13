@@ -105,7 +105,13 @@ button {
   cursor: pointer;  
 }
 
-.submit-icon, .lock-icon, .logout-icon, .logoutall-icon {
+.light-btn {
+  color: #000;
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+.submit-icon, .lock-icon, .logout-icon, .logoutall-icon, .confirm-thumbsup, .invite-icon {
   display: inline-block;
   animation-name: none;
   animation-duration: 1s;
@@ -237,12 +243,20 @@ h2 {
 
 }
 
+#confirm-dialog {
+  width: 350px;
+  position: sticky;
+  bottom: 50%;
+  text-align: center;
+  margin: auto;
+}
+
 .settings-content input, .settings-content textarea {
   display: block;
   width: 410px !important;
 }
 
-.inline-input {
+.inline {
   display: inline !important;
 }
 

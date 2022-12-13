@@ -35,7 +35,7 @@ export default async function ideaInvites(fastify, _options) {
       const member = await ideaMembers.findOne({idea: ideaOId,
         user: req.userOId, role: 'admin'});
       if (!member) {
-        return rep.code(400).send({error: 'access denied', message:
+        return rep.code(400).send({error: 'not an admin', message:
           'You must be an admin of this idea to invite someone.'});
       }
 
@@ -69,7 +69,7 @@ export default async function ideaInvites(fastify, _options) {
                   'Invite was successfully revoked!'});
               } else {
                 rep.code(400).send({error:
-                  'You must be an admin to delete an invite'});
+                  'not an admind'});
               }
             } else {
               rep.code(400).send({error: 'Invite does not exists.'});

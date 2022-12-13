@@ -21,6 +21,8 @@ const pfpElement = document.querySelector('.pfp-container');
 const logoutBtn = document.querySelector('#logout-btn');
 const lockIcon = document.querySelector('.lock-icon');
 
+const confirmDialog = document.querySelector('#confirm-dialog');
+
 const loadingMsg = document.querySelector('.msg.info');
 const draftTemplate = document.querySelector('#pending-idea');
 const publicTemplate = document.querySelector('#public-idea');
@@ -39,8 +41,15 @@ const ideaInput = document.querySelector('[name="idea"]');
 const submitBtn = document.querySelector('#create-btn');
 const submitIcon = document.querySelector('.submit-icon');
 
+const inviteForm = document.querySelector('#invite-member');
+const inviteInput = document.querySelector('#invite-input');
+
+const publishBtn = document.querySelector('#publish');
+const leaveBtn = document.querySelector('#leave');
+
 const errorMessages = {
-  'invalid-emails': 'You have entered invalid emails. Please check them again.',
+  'invalid email': 'You have entered an invalid email. Please update it' +
+  ' try again.',
   'unauthorized': 'You need to log in again.',
   'invalid ideaId': 'We can not find an Idea with this ID because it is ' +
     'invalid. Please check the URL again',
@@ -49,7 +58,12 @@ const errorMessages = {
   'access denied': 'This idea is a private draft. You must be a member in ' +
     'order to access it. If you are part of the idea, ask an admin to send' +
     ' you an invite.',
-  'not an admin': 'Only admins can edit ideas',
+  'not an admin': 'You must be an admin.',
+  'only admins can change roles': 'Only admins can change roles',
+  'member does not exist for this idea':
+  'This member is not a part of the idea',
+  'insufficient admins': 'There must be atleast one admin for the idea',
+  'idea is incomplete': 'All fields must be complete before you publish!',
 };
 
 fetch(`/ideas/${ideaId}`, {
@@ -85,19 +99,62 @@ fetch(`/ideas/${ideaId}`, {
           data.members.forEach((member) => {
             createMemberItem(member);
           });
-        }
 
-        fetch(`/ideas/${ideaId}/invites`, {
-          method: 'get',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }).then((res) => res.json()).then((data) => {
-          document.querySelector('#invite-loader').classList.add('hide');
-          data.invites.forEach((invite) => {
-            createInviteItem(invite);
+          document.querySelectorAll('.edit-role').forEach((i) => {
+            i.addEventListener('click', () => {
+              confirmDialog.innerHTML = `<h1>Change member role</h1>` +
+              `<p>Are you sure you want to change ${i.dataset.nickname}'s` +
+              ` role to ${i.dataset.role == 'admin' ? 'Member' : 'Admin'}?` +
+              `</p> <button class="inline confirm-btn" ` +
+              `onclick="changeRole('${i.dataset.role}', '${i.dataset.userid}'` +
+              `)">Yes <span class="confirm-thumbsup">👍</span></button>` +
+              `<button class="inline" onclick="closeConfirmDialog()">No 👎` +
+              `</button>` +
+              `<div class="msg error hide" id="confirm-error"></div>`;
+              confirmDialog.showModal();
+            });
           });
-        });
+
+          fetch(`/ideas/${ideaId}/invites`, {
+            method: 'get',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }).then((res) => res.json()).then((data) => {
+            document.querySelector('#invite-loader').classList.add('hide');
+            data.invites.forEach((invite) => {
+              createInviteItem(invite);
+            });
+
+            document.querySelectorAll('.resend-invite').forEach((i) => {
+              i.addEventListener('click', () => {
+                confirmDialog.innerHTML = `<h1>Resend Invite</h1>` +
+                `<p>Do you want to resend an invite to ${i.dataset.email}` +
+                `?</p> <button class="inline confirm-btn" ` +
+                `onclick="resendInvite('${i.dataset.email}', ` +
+                `'${i.dataset.idea}')"> Yes <span class="confirm-thumbsup">` +
+                `👍</span></button> <button class="inline" ` +
+                `onclick="closeConfirmDialog()">No 👎</button>` +
+                `<div class="msg error hide" id="confirm-error"></div>`;
+                confirmDialog.showModal();
+              });
+            });
+
+            document.querySelectorAll('.del-invite').forEach((i) => {
+              i.addEventListener('click', () => {
+                confirmDialog.innerHTML = `<h1>Revoke Invite</h1>` +
+                `<p>Are you sure you want to revoke the invite that was ` +
+                `sent to ${i.dataset.email}?</p> <button ` +
+                `class="inline confirm-btn" onclick="revokeInvite` +
+                `('${i.dataset.id}')">Yes <span class="confirm-thumbsup">` +
+                `👍</span></button> <button class="inline" ` +
+                `onclick="closeConfirmDialog()">No 👎</button>` +
+                `<div class="msg error hide" id="confirm-error"></div>`;
+                confirmDialog.showModal();
+              });
+            });
+          });
+        }
       }
     });
 
@@ -136,9 +193,12 @@ function deleteInput(e) {
 function createMemberItem(member) {
   const mainText = document.createElement('p');
   mainText.innerHTML = `${member.user_details[0].nickname} ` +
-    `<span class="badge">@${member.user_details[0].url}</span> • ` +
+    `<a href="/u/${member.user_details[0].url}">` +
+    `<span class="badge">@${member.user_details[0].url}</span></a> • ` +
     `<em>${member.role == 'member' ? 'Member' : 'Admin'}</em> ` +
-    `<button class="small-emoji-btn">✏️</button>`;
+    `<button class="small-emoji-btn edit-role" data-role="${member.role}"` +
+    ` title="Change role" data-nickname="${member.user_details[0].nickname}" ` +
+    `data-userid="${member.user_details[0]._id}">✏️</button>`;
 
   membersDiv.appendChild(mainText);
 }
@@ -148,9 +208,13 @@ function createInviteItem(invite) {
   const formattedDate = new Intl.DateTimeFormat('en-US',
       {dateStyle: 'medium'}).format(date);
   const mainText = document.createElement('p');
-  mainText.innerHTML = `${invite.email} • ` +
-    `${formattedDate} <button class="small-emoji-btn">` +
-    `🗑️</button>`;
+  mainText.innerHTML = `${invite.email} • ${formattedDate}` +
+    ` <button class="small-emoji-btn resend-invite" ` +
+    `title="Resend Invite" data-email="${invite.email}" ` +
+    `data-idea="${ideaId}">🔃</button>` +
+    ` <button class="small-emoji-btn del-invite" ` +
+    `title="Revoke invite" data-email="${invite.email}" ` +
+    `data-id="${invite._id}">🗑️</button>`;
 
   invitesDiv.appendChild(mainText);
 }
@@ -205,6 +269,260 @@ pendingIdeaform.addEventListener('submit', async (e) => {
         }
       });
 });
+
+confirmDialog.addEventListener('click', (e) => {
+  const rect = confirmDialog.getBoundingClientRect();
+  const isInDialog=(rect.top <= e.clientY &&
+    e.clientY <= rect.top + rect.height &&
+    rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+  if (!isInDialog) {
+    confirmDialog.close();
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+function closeConfirmDialog() {
+  confirmDialog.close();
+}
+
+// eslint-disable-next-line no-unused-vars
+async function changeRole(currentRole, memberId) {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  const newRole = currentRole == 'admin' ? 'member' : 'admin';
+  await fetch(`/ideas/${ideaId}/members/${memberId}/role`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({role: newRole}),
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          confirmError.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            confirmError.textContent = errorMessages[data.error];
+          } else {
+            confirmError.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.reload();
+        }
+      });
+}
+
+// eslint-disable-next-line no-unused-vars
+async function resendInvite(email, ideaId) {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  await fetch(`/ideas/${ideaId}/invite`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({email, role: 'member'}),
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          confirmError.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            confirmError.textContent = errorMessages[data.error];
+          } else {
+            confirmError.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.reload();
+        }
+      });
+}
+
+// eslint-disable-next-line no-unused-vars
+async function revokeInvite(inviteId) {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  await fetch(`/ideas/invite/${inviteId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          confirmError.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            confirmError.textContent = errorMessages[data.error];
+          } else {
+            confirmError.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.reload();
+        }
+      });
+}
+
+inviteForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const okIcon = document.querySelector('.invite-icon');
+  const confirmBtn = document.querySelector('.invite-btn');
+  const error = document.querySelector('#invite-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+  fetch(`/ideas/${ideaId}/invite`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({email: inviteInput.value, role: 'member'}),
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          error.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            error.textContent = errorMessages[data.error];
+          } else {
+            error.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.reload();
+        }
+      });
+});
+
+publishBtn.addEventListener('click', () => {
+  confirmDialog.innerHTML = `<h1>Publish Idea</h1>` +
+  `<p>Are you sure you want to publish this idea?</p>` +
+  `<button class="inline confirm-btn" onclick="publishIdea()">` +
+  `Yes <span class="confirm-thumbsup">👍</span></button>` +
+  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
+  `<div class="msg error hide" id="confirm-error"></div>`;
+  confirmDialog.showModal();
+});
+
+leaveBtn.addEventListener('click', () => {
+  confirmDialog.innerHTML = `<h1>Leave this Idea</h1>` +
+  `<p>Are you sure you want to leave? If you say 'yes', you will` +
+  ` not be able to access any of this data anymore.</p>` +
+  `<button class="inline confirm-btn" onclick="leaveIdea()">` +
+  `Yes <span class="confirm-thumbsup">👍</span></button>` +
+  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
+  `<div class="msg error hide" id="confirm-error"></div>`;
+  confirmDialog.showModal();
+});
+
+// eslint-disable-next-line no-unused-vars
+async function publishIdea() {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  await fetch(`/ideas/${ideaId}/publish`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          confirmError.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            confirmError.textContent = errorMessages[data.error];
+          } else {
+            confirmError.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.reload();
+        }
+      });
+}
+
+// eslint-disable-next-line no-unused-vars
+async function leaveIdea() {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  await fetch(`/ideas/${ideaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json())
+      .then((data) => {
+        confirmBtn.disabled = false;
+        okIcon.style.animationName = 'none';
+        if (data.error) {
+          if (data.error == 'unauthorized') {
+            logout();
+          }
+          confirmError.classList.remove('hide');
+          if (errorMessages[data.error]) {
+            confirmError.textContent = errorMessages[data.error];
+          } else {
+            confirmError.textContent = 'Something wen\'t wrong. Please reload' +
+            ' and try again.';
+          }
+        } else {
+          window.location.href = '/just-an-idea/drafts';
+        }
+      });
+};
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {

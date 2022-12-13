@@ -28,7 +28,7 @@ export default async function ideaMembers(fastify, _options) {
             user: req.userOId, role: 'admin'});
           if (!currentMember) {
             return rep.code(400).send({error:
-              'you must be an admin of this idea to change roles'});
+              'only admins can change roles'});
           }
           const toUpdateMember = await ideaMembers.findOne({idea: ideaOId,
             user: memberOId});
@@ -43,7 +43,7 @@ export default async function ideaMembers(fastify, _options) {
           if (membersArray.length == 1 && req.body.role == 'member' &&
           toUpdateMember.role == 'admin') {
             return rep.code(400).send({error:
-              'there must be atleast one admin for every idea'});
+              'insufficient admins'});
           }
           await ideaMembers.updateOne({idea: ideaOId,
             user: memberOId}, {$set: {role: req.body.role}});

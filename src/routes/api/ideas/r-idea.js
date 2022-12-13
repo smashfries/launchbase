@@ -179,6 +179,7 @@ export default async function rIdeas(fastify, _options) {
           $project: {
             'user_details.nickname': 1,
             'user_details.url': 1,
+            'user_details._id': 1,
             'user': 1,
             'role': 1,
           },

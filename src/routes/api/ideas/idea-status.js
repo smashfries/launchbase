@@ -20,7 +20,7 @@ export default async function ideaStatus(fastify, _options) {
       const member = await ideaMembers.findOne({user: req.userOId,
         idea: ideaOId, role: 'admin'});
       if (!member) {
-        return rep.code(400).send({error: 'invalid user', message:
+        return rep.code(400).send({error: 'not an admin', message:
           'you must be an *admin* user of this idea in order to publish it'});
       }
       const idea = await ideas.findOne({_id: ideaOId});
