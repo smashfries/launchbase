@@ -14,6 +14,9 @@ codeInput.setAttribute('placeholder', 'Magic Code');
 codeInput.className = 'code-input';
 codeInput.setAttribute('required', '');
 
+document.querySelector('#login-link')
+    .setAttribute('href', '/login' + window.location.search);
+
 const errorCodes = {
   'account-invalid': 'An account with this email does not exist.',
   'account-exists': 'An account with this email already exists.',

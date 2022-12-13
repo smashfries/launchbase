@@ -23,6 +23,9 @@ const errorCodes = {
   'expired': 'Your code has expired. Resend the email and try again.',
 };
 
+document.querySelector('#signup-link')
+    .setAttribute('href', '/signup' + window.location.search);
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (!form.checkValidity()) {
