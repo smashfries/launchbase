@@ -30,7 +30,6 @@ fetch('/ideas/my/drafts', {
       if (data.error) {
         logout();
       } else {
-        console.log(data);
         msg.classList.add('hide');
         const ideas = data.latestIdeas;
         ideas.forEach((idea) => {

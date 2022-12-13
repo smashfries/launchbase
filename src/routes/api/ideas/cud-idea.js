@@ -58,7 +58,7 @@ export default async function cudIdeas(fastify, _options) {
     if (req.token) {
       const {ideaId} = req.params;
       if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-        return rep.code(400).send({error: 'invalid ID',
+        return rep.code(400).send({error: 'invalid ideaId',
           message: 'Draft ID must be a valid MongoDB ObjectID'});
       }
       const drafts = fastify.mongo.db.collection('ideas');
@@ -66,12 +66,12 @@ export default async function cudIdeas(fastify, _options) {
       const ideaOId = new fastify.mongo.ObjectId(ideaId);
       const idea = await drafts.findOne({_id: ideaOId});
       if (!idea) {
-        return rep.code(400).send({error: 'draft does not exist'});
+        return rep.code(400).send({error: 'idea does not exist'});
       }
       const member = await members.findOne({user: req.userOId, idea: ideaOId,
         role: 'admin'});
       if (!member) {
-        return rep.code(400).send({error: 'unauthorized',
+        return rep.code(400).send({error: 'not an admin',
           message: 'Must be a member of the idea and have the *admin* role.'});
       }
       const data = req.body;

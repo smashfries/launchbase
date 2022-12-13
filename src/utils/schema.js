@@ -375,6 +375,7 @@ export const getIdea = {
           upvotes: {type: 'number'},
           members: {type: 'array'},
           timeStamp: {type: 'string'},
+          status: {type: 'string'},
         },
       },
       400: {
@@ -426,6 +427,34 @@ export const revokeIdeaInvite = {
         type: 'object',
         properties: {
           message: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
+export const getIdeaInvites = {
+  schema: {
+    headers,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          invites: {
+            type: 'array',
+            properties: {
+              _id: {type: 'string'},
+              email: {type: 'string'},
+              timeStamp: {type: 'string'},
+            },
+          },
         },
       },
       400: {

@@ -40,6 +40,7 @@ fastify.register(fastifyStatic, {
 fastify.register(fastifyStatic, {
   root: resolve('./public/assets'),
   decorateReply: false,
+  prefix: '/static',
 });
 
 fastify.register(mongoConnector);

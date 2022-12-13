@@ -2,7 +2,7 @@ import {validateEmail, inviteIdeaMembers} from '../../../utils/email.js';
 import {verifyToken} from '../../../utils/crypto.js';
 
 import {revokeIdeaInvite, sendIdeaInvite,
-  acceptIdeaInvite} from '../../../utils/schema.js';
+  acceptIdeaInvite, getIdeaInvites} from '../../../utils/schema.js';
 
 /**
  * @param {*} fastify
@@ -30,6 +30,15 @@ export default async function ideaInvites(fastify, _options) {
       if (!idea) {
         return rep.code(400).send({error: 'Idea does not exist.'});
       }
+
+      const ideaMembers = fastify.mongo.db.collection('idea-members');
+      const member = await ideaMembers.findOne({idea: ideaOId,
+        user: req.userOId, role: 'admin'});
+      if (!member) {
+        return rep.code(400).send({error: 'access denied', message:
+          'You must be an admin of this idea to invite someone.'});
+      }
+
       await inviteIdeaMembers([req.body.email], ideaId);
       const newInvite = await ideaInvites.updateOne({email: req.body.email,
         idea: ideaOId}, {$set: {idea: ideaOId, email: req.body.email,
@@ -105,6 +114,34 @@ export default async function ideaInvites(fastify, _options) {
         user: req.userOId});
       await ideaInvites.deleteOne({idea: ideaId, email: decoded.email});
       rep.code(200).send({message: 'invite was accepted, you are a member!'});
+    } else {
+      rep.code(400).send({error: 'unauthorized'});
+    }
+  });
+
+  fastify.get('/ideas/:ideaId/invites', getIdeaInvites, async (req, rep) => {
+    if (req.token) {
+      const {ideaId} = req.params;
+      if (!fastify.mongo.ObjectId.isValid(ideaId)) {
+        return rep.code(400).send({error: 'invalid ideaId'});
+      }
+
+      const ideaOId = new fastify.mongo.ObjectId(ideaId);
+
+      const ideaMembers = fastify.mongo.db.collection('idea-members');
+      const member = await ideaMembers.findOne({idea: ideaOId,
+        user: req.userOId});
+      if (!member) {
+        return rep.code(400).send({error: 'access denied', message:
+          'You mus'});
+      }
+
+      const ideaInviteCollection = fastify.mongo.db.collection('idea-invites');
+      const ideaInvites = await ideaInviteCollection.find({idea: ideaOId});
+
+      const arr = await ideaInvites.toArray();
+
+      rep.code(200).send({invites: arr});
     } else {
       rep.code(400).send({error: 'unauthorized'});
     }
