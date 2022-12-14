@@ -87,7 +87,6 @@ export default async function rIdeas(fastify, _options) {
         },
       ]);
       const arr = await myIdeaDrafts.toArray();
-      console.log(arr);
       rep.code(200).send({latestIdeas: arr});
     } else {
       rep.code(400).send({error: 'unauthorized'});
@@ -127,7 +126,6 @@ export default async function rIdeas(fastify, _options) {
         },
       ]);
       const arr = await myIdeaDrafts.toArray();
-      console.log(arr);
       rep.code(200).send({latestIdeas: arr});
     } else {
       rep.code(400).send({error: 'unauthorized'});

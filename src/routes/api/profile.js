@@ -22,7 +22,6 @@ export default async function profile(fastify, _options) {
       if (req.body.github) {
         github = req.body.github;
       }
-      console.log(req.body.url);
       if (!req.body.url.match(/^[a-zA-Z0-9_-]+$/g)) {
         return rep.code(400).send({error: 'invalid-url'});
       }

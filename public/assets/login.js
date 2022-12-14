@@ -74,7 +74,6 @@ form.addEventListener('submit', (e) => {
             if (document.querySelector('.msg')) {
               document.querySelector('.msg').remove();
             }
-            console.log(data);
             const emailResendText = document.createElement('a');
             emailResendText.className = 'desc-link desc';
             emailResendText.innerHTML = `Click to resend email`;
