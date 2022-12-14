@@ -111,6 +111,8 @@ function deleteInput(e) {
 const errorMessages = {
   'invalid-emails': 'You have entered invalid emails. Please check them again.',
   'unauthorized': 'You need to log in again.',
+  'profile incomplete':
+    'You must complete your profile before creating an idea!',
 };
 
 form.addEventListener('submit', async (e) => {

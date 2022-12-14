@@ -85,7 +85,7 @@ fetch('/profile', {
             });
           });
         } else {
-          msg.textContent = 'Your profile is not complete.';
+          msg.textContent = 'Please complete your profile.';
           msg.className = 'warning msg';
         }
       }
