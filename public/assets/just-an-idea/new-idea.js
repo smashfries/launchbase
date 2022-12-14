@@ -30,6 +30,28 @@ const ideaInput = document.querySelector('[name="idea"]');
 const submitBtn = document.querySelector('#create-btn');
 const submitIcon = document.querySelector('.submit-icon');
 
+fetch('/profile?only=completionStatus', {
+  method: 'get',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+  },
+}).then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        logout();
+      }
+      const msg = document.querySelector('.msg');
+      if (data.isComplete) {
+        msg.classList.add('hide');
+      } else {
+        msg.classList.remove('info');
+        msg.classList.add('warning');
+        msg.innerHTML = `You must complete your profile before you` +
+        ` can create an idea. Click <u><a href="/backstage/profile">here</a>` +
+        `</u> to update your profile.`;
+      }
+    });
+
 linkBtn.addEventListener('click', () => {
   const linkItem = document.createElement('div');
   linkItem.classList.add('link-item');
