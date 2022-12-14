@@ -2,7 +2,8 @@ import {validateEmail, inviteIdeaMembers} from '../../../utils/email.js';
 import {verifyToken} from '../../../utils/crypto.js';
 
 import {revokeIdeaInvite, sendIdeaInvite,
-  acceptIdeaInvite, getIdeaInvites} from '../../../utils/schema.js';
+  acceptIdeaInvite, getIdeaInvites,
+  getIdeaInviteDetails} from '../../../utils/schema.js';
 
 /**
  * @param {*} fastify
@@ -133,7 +134,7 @@ export default async function ideaInvites(fastify, _options) {
         user: req.userOId});
       if (!member) {
         return rep.code(400).send({error: 'access denied', message:
-          'You mus'});
+          'You must be a member of this idea.'});
       }
 
       const ideaInviteCollection = fastify.mongo.db.collection('idea-invites');
@@ -146,4 +147,21 @@ export default async function ideaInvites(fastify, _options) {
       rep.code(400).send({error: 'unauthorized'});
     }
   });
+
+  fastify.get('/ideas/invite', getIdeaInviteDetails,
+      async (req, rep) => {
+        if (req.token) {
+          const {token} = req.query;
+          const decoded = verifyToken(token);
+          if (!decoded) {
+            return rep.code(400).send({error: 'invalid token'});
+          }
+          const ideaId = new fastify.mongo.ObjectId(decoded.ideaId);
+          const ideas = fastify.mongo.db.collection('ideas');
+          const idea = await ideas.findOne({_id: ideaId});
+          rep.code(200).send({name: idea.name});
+        } else {
+          rep.code(400).send({error: 'unauthorized'});
+        }
+      });
 };

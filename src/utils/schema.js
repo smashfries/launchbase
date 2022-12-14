@@ -468,6 +468,27 @@ export const getIdeaInvites = {
   },
 };
 
+export const getIdeaInviteDetails = {
+  schema: {
+    headers,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          name: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const acceptIdeaInvite = {
   schema: {
     headers,
