@@ -395,8 +395,8 @@ export const sendIdeaInvite = {
     body: {
       type: 'object',
       properties: {
-        email: {type: 'string'},
-        role: {type: 'string'},
+        email: {type: 'string', maxLength: 320},
+        role: {type: 'string', maxLength: 6},
       },
       required: ['email', 'role'],
     },
@@ -524,7 +524,7 @@ export const updateIdeaMemberRole = {
     body: {
       type: 'object',
       properties: {
-        role: {type: 'string'},
+        role: {type: 'string', maxLength: 6},
       },
       required: ['role'],
     },
