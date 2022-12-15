@@ -504,6 +504,7 @@ export const acceptIdeaInvite = {
         type: 'object',
         properties: {
           message: {type: 'string'},
+          ideaId: {type: 'string'},
         },
       },
       400: {

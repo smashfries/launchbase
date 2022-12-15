@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="/static/just-an-idea/accept-invite.js" defer></script>
+    <title>Launch Base | Accept Idea Invite</title>
+</head>
+<body>
+    <h1 class="logo-title"><a href="/">Launch Base</a></h1>
+
+    <div class="nav-full">
+        <a href="/just-an-idea" class="nav-item active">Just an Idea</a>
+        <a href="/real" class="nav-item">The Real Thing</a>
+        <a href="/perks" class="nav-item">Perks</a>
+        <a href="/backstage" class="nav-item">Backstage</a>
+    </div>
+
+    <button class="pfp-container"><img class="pfp" src="https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08?s=50&d=mp" alt="pfp"></button>
+   
+    <div class="container settings-box">
+        <div class="side-panel">
+            <h2>Just an Idea</h2>
+            <a href="/just-an-idea" class="panel-item">Community Ideas</a>
+            <a href="/just-an-idea/new" class="panel-item">Create New Idea</a>
+            <a href="/just-an-idea/drafts" class="panel-item">My Draft Ideas</a>
+            <a href="/just-an-idea/published" class="panel-item">My Published Ideas</a>
+        </div>
+        <div class="settings-content">
+            <h3>Accept Invite</h3>
+            <hr>
+            <p class="desc">You have been invited to join an Idea on Launch Base!</p>
+            <div class="msg info">Loading data...</div>
+        </div>
+    </div>
+
+    <dialog id="pfp-dropdown" class="container">
+        <a href="#" class="panel-item">Visit your profile</a>
+        <a role="button" id="logout-btn" class="panel-item">Logout <span class="lock-icon">🔒</span></a>
+    </dialog>
+</body>
+</html>

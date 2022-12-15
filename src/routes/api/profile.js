@@ -36,7 +36,7 @@ export default async function profile(fastify, _options) {
           }
         }
       } else {
-        const urlMatches = await users.find({url});
+        const urlMatches = await users.findOne({url});
         if (urlMatches) {
           return rep.code(400).send({error: 'url-exists'});
         }

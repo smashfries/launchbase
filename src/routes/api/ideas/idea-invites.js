@@ -103,18 +103,19 @@ export default async function ideaInvites(fastify, _options) {
         user: req.userOId});
       if (member) {
         return rep.code(400).send({error:
-          'you are already a member of this idea'});
+          'already member'});
       }
       const users = fastify.mongo.db.collection('users');
       const userDetails = await users.findOne({_id: req.userOId});
       const isComplete = userDetails.hasOwnProperty('name') ? true : false;
       if (!isComplete) {
-        return rep.code(400).send({error: 'profile is incomplete'});
+        return rep.code(400).send({error: 'profile incomplete'});
       }
       await ideaMembers.insertOne({idea: ideaId, role: invite.role,
         user: req.userOId});
       await ideaInvites.deleteOne({idea: ideaId, email: decoded.email});
-      rep.code(200).send({message: 'invite was accepted, you are a member!'});
+      rep.code(200).send({message: 'invite was accepted, you are a member!',
+        ideaId: decoded.ideaId});
     } else {
       rep.code(400).send({error: 'unauthorized'});
     }
