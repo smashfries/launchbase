@@ -14,7 +14,8 @@ export default async function email(fastify, _options) {
       user.publicEmail ? true : false;
       const subscribed = user.hasOwnProperty('subscribed') &&
       user.subscribed ? true : false;
-      rep.code(200).send({publicEmail, subscribed});
+      rep.code(200).send({publicEmail, subscribed, email: user.email,
+        backupEmail: user.backupEmail});
     } else {
       rep.code(400).send({error: 'unauthorized'});
     }

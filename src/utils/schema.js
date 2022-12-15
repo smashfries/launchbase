@@ -138,6 +138,8 @@ export const getEmailSettings = {
         properties: {
           publicEmail: {type: 'boolean'},
           subscribed: {type: 'boolean'},
+          email: {type: 'string'},
+          backupEmail: {type: 'string'},
         },
       },
       400: {
