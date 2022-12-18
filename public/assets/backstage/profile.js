@@ -8,6 +8,9 @@ if (!token) {
   window.location.replace('/login?redirect=' + encodeURI(window.location.href));
 }
 
+const params = new URLSearchParams(window.location.search);
+const redirect = params.get('redirect');
+
 const payload = parseJwt(token);
 const emailHash = payload.emailHash;
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`;
@@ -164,6 +167,9 @@ document.querySelector('form').addEventListener('submit', (e) => {
           msg.textContent = 'Profile updated!';
           if (document.querySelector('.error')) {
             document.querySelector('.error').remove();
+          }
+          if (redirect) {
+            window.location.replace();
           }
         }
       });
