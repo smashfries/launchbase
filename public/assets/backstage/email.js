@@ -15,6 +15,8 @@ document.querySelector('.pfp').setAttribute('src', pfp);
 
 const publicInput = document.querySelector('[name="publicEmail"]');
 const subInput = document.querySelector('[name="subscription"]');
+const primaryEmail = document.querySelector('#primary-email');
+const backupEmail = document.querySelector('#backup-email');
 const msg = document.querySelector('.msg');
 
 fetch('/email-settings', {
@@ -30,6 +32,8 @@ fetch('/email-settings', {
       msg.classList.add('hide');
       publicInput.checked = data.publicEmail;
       subInput.checked = data.subscribed;
+      primaryEmail.textContent = data.email;
+      backupEmail.textContent = data.backupEmail || 'Not set';
     });
 
 const pfpDropdown = document.querySelector('#pfp-dropdown');

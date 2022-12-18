@@ -42,10 +42,16 @@
               <input type="checkbox" name="publicEmail" class="inline"><br>
               <label for="subscription">Receive regular updates and announcements from Launch Base?</label>
               <input type="checkbox" name="subscription" class="inline"><br>
+              <p>Primary email: <span id="primary-email">...</span> <button class="small-emoji-btn">✏️</button></p>
+              <p>Backup email: <span id="backup-email">...</span> <button class="small-emoji-btn">✏️</button></p>
               <button type="submit" class="back-btn">Update <span class="submit-icon">👉</span></button>
             </form>
         </div>
     </div>
+
+    <dialog id="confirm-dialog" class="container">
+      <p>Hello world!</p>
+    </dialog>
 
     <dialog id="pfp-dropdown" class="container">
         <a href="#" class="panel-item">Visit your profile</a>
