@@ -25,7 +25,14 @@ const confirmDialog = document.querySelector('#confirm-dialog');
 
 const loadingMsg = document.querySelector('.msg.info');
 const draftTemplate = document.querySelector('#pending-idea');
-const publicTemplate = document.querySelector('#public-idea');
+
+const publicTemplate = document.querySelector('#published-idea');
+const ideaName = document.querySelector('#idea-name');
+const ideaDesc = document.querySelector('#idea-desc');
+const ideaContent = document.querySelector('#idea-content');
+const ideaMembers = document.querySelector('#idea-members');
+const ideaLinks = document.querySelector('#link-container');
+const upvoteCount = document.querySelector('#upvote-count');
 
 const linkDiv = document.querySelector('#link-inputs');
 const linkBtn = document.querySelector('#link-btn');
@@ -73,6 +80,7 @@ fetch(`/ideas/${ideaId}`, {
   },
 }).then((res) => res.json())
     .then((data) => {
+      console.log(data);
       if (data.error) {
         if (data.error == 'unauthorized') {
           logout();
@@ -154,6 +162,36 @@ fetch(`/ideas/${ideaId}`, {
               });
             });
           });
+        } else {
+          ideaName.textContent = data.name;
+          ideaDesc.textContent = data.desc;
+          if (data.upvotes) {
+            upvoteCount.textContent = data.upvotes;
+          }
+          ideaContent.innerHTML = data.idea.split('\n').join('<br>');
+          let memberContent = '';
+          data.members.forEach((member) => {
+            const handle = member.user_details[0].url;
+            const name = member.user_details[0].nickname;
+            const display = `${name} ` +
+              `<a href="/u/${handle}" class="public-member">` +
+              `<span class="badge">@${handle}</span></a>`;
+            memberContent += display;
+          });
+          ideaMembers.innerHTML = memberContent;
+          if (data.links.length > 0) {
+            document.querySelector('#link-title').classList.remove('hide');
+            data.links.forEach((link) => {
+              const linkItem = document.createElement('a');
+              linkItem.setAttribute('href', link);
+              linkItem.classList.add('idea-link');
+              linkItem.textContent = link + ' 🔗';
+              ideaLinks.appendChild(linkItem);
+              const lineBreak = document.createElement('br');
+              ideaLinks.appendChild(lineBreak);
+            });
+          }
+          publicTemplate.classList.remove('hide');
         }
       }
     });
