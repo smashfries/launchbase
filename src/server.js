@@ -20,6 +20,7 @@ import rIdeas from './routes/api/ideas/r-idea.js';
 import ideaInvites from './routes/api/ideas/idea-invites.js';
 import ideaMembers from './routes/api/ideas/idea-members.js';
 import ideaStatus from './routes/api/ideas/idea-status.js';
+import discuss from './routes/api/discuss.js';
 
 import {verifyToken} from './utils/crypto.js';
 
@@ -85,6 +86,7 @@ fastify.register(rIdeas);
 fastify.register(ideaInvites);
 fastify.register(ideaMembers);
 fastify.register(ideaStatus);
+fastify.register(discuss);
 
 /**
  * Build function

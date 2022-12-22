@@ -569,6 +569,50 @@ export const publishIdea = {
   },
 };
 
+export const createComment = {
+  schema: {
+    headers,
+    body: {
+      type: 'object',
+      properties: {
+        comment: {
+          type: 'string',
+          maxLength: 10000,
+        },
+        parent: {
+          type: 'string',
+          maxLength: 24,
+        },
+        superParent: {
+          type: 'string',
+          maxLength: 24,
+        },
+        superType: {
+          type: 'string',
+          maxLength: 20,
+        },
+      },
+      required: ['comment', 'parent', 'superParent', 'superType'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+          commentId: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const logoutOpts = {
   schema: {
     headers,
