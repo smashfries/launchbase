@@ -1,4 +1,4 @@
-import {createComment} from '../../utils/schema.js';
+import {createComment, getComments} from '../../utils/schema.js';
 
 /**
  * @param {*} fastify
@@ -53,4 +53,52 @@ export default async function discuss(fastify, _options) {
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId});
   });
+
+  fastify.get('/comments/:superParent/:parent', getComments,
+      async (req, rep) => {
+        if (!req.token) {
+          return rep.code(400).send({error: 'unauthorized'});
+        }
+
+        const {superParent, parent} = req.params;
+
+        if (!fastify.mongo.ObjectId.isValid(superParent)) {
+          return rep.code(400).send({error: 'invalid superParentId',
+            message: 'superParentId is an invalid MongoDB Object ID'});
+        }
+
+        if (!fastify.mongo.ObjectId.isValid(parent)) {
+          return rep.code(400).send({error: 'invalid parentId',
+            message: 'parentId is an invalid MongoDB Object ID'});
+        }
+
+        const superParentOId = new fastify.mongo.ObjectId(superParent);
+        const parentOId = new fastify.mongo.ObjectId(parent);
+
+        const comments = fastify.mongo.db.collection('comments');
+        const reqComments = await comments.find({superParent: superParentOId,
+          parent: parentOId});
+        const commentArray = await reqComments.toArray();
+
+        const parentComment = await comments.findOne({_id: parentOId});
+
+        if (superParent !== parent) {
+          if (parentComment.superType !== 'idea') {
+            return rep.code(400).send({error: 'method not supported',
+              message: 'Only comments for ideas are currently supported. ' +
+                'This feature is coming soon!'});
+          }
+        } else {
+          if (commentArray.length > 0) {
+            if (commentArray[0].superType !== 'idea') {
+              return rep.code(400).send({error: 'method not supported',
+                message: 'Only comments for ideas are currently supported. ' +
+                  'This feature is coming soon!'});
+            }
+          }
+        }
+
+        return rep.code(200).send({comment: parentComment,
+          replies: commentArray});
+      });
 };
