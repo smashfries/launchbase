@@ -94,11 +94,17 @@
             <h5 class="hide" id="link-title">Links</h5>
             <div id="link-container"></div>
             <br>
-            <button class="light-btn new-btn"><span class="submit-icon">👌</span> Upvote <span id="upvote-count"></span></button> <p class="no-margin">Like the idea? Give the creators an upvote to show your interest!</p>
+            <button class="light-btn new-btn">Upvote <span class="submit-icon">👌</span><span id="upvote-count"></span></button> <p class="no-margin">Like the idea? Give the creators an upvote to show your interest!</p>
             <br>
             <h5>Comments</h5>
             <div id="comment-container" class="container no-margin">
-              <p>Helloo!</p>
+              <div id="comment-loader" class="msg info">Loading data...</div>
+              <div id="comment-data" class="hide">
+                <p class="comment-count-div"><span id="comment-count"></span> Comments</p>
+                <textarea id="reply-box" class="full-width" placeholder="What do you think?" rows="5"></textarea>
+                <button class="no-margin" id="post-comment">Share a Comment</button>
+                <div class="v-spacer"></div>
+              </div>
             </div>
           </div>
         </div>

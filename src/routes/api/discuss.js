@@ -50,8 +50,12 @@ export default async function discuss(fastify, _options) {
       superType: req.body.superType, timeStamp: new Date(),
       author: req.userOId});
 
+    const author = await fastify.mongo.db.collection('users')
+        .findOne({_id: req.userOId});
+
     rep.code(200).send({message: 'comment was successfully created',
-      commentId: comment.insertedId});
+      commentId: comment.insertedId, authorName: author.nickname,
+      authorHandle: author.url});
   });
 
   fastify.get('/comments/:superParent/:parent', getComments,
@@ -76,8 +80,32 @@ export default async function discuss(fastify, _options) {
         const parentOId = new fastify.mongo.ObjectId(parent);
 
         const comments = fastify.mongo.db.collection('comments');
-        const reqComments = await comments.find({superParent: superParentOId,
-          parent: parentOId});
+        const reqComments = await comments.aggregate([
+          {
+            $match: {superParent: superParentOId,
+              parent: parentOId},
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'author',
+              foreignField: '_id',
+              as: 'author_details',
+            },
+          },
+          {
+            $project: {
+              'author_details.nickname': 1,
+              'author_details.url': 1,
+              'author_details._id': 1,
+              'comment': 1,
+              'superParent': 1,
+              'parent': 1,
+              'superType': 1,
+              'timeStamp': 1,
+            },
+          },
+        ]);
         const commentArray = await reqComments.toArray();
 
         const parentComment = await comments.findOne({_id: parentOId});

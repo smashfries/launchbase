@@ -12,6 +12,50 @@ p {
   margin: 0 !important;
 }
 
+.no-margin-bottom {
+  margin-bottom: 0 !important;
+}
+
+.no-margin-top {
+  margin-top: 0 !important;
+}
+
+.comment-item {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  margin-bottom: 20px !important;
+}
+
+.v-spacer {
+  height: 20px;
+}
+
+.small-font {
+  font-size: 12px !important;
+}
+
+.mini-btn {
+  padding-top: 2px !important;
+  padding-right: 2px !important;
+  padding-bottom: 2px !important;
+  padding-left: 5px !important;
+  font-size: 12px !important;
+  margin: 0 !important;
+  font-weight: normal !important;
+  border-radius: 10px;
+}
+
+.comment-count-div {
+  margin-top: 5px !important;
+  margin-left: 5px;
+  margin-bottom: 25px !important;
+}
+
+.full-width {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
 [role="tooltip"] {
   background: #333;
   color: white;
@@ -265,7 +309,7 @@ h2 {
 
 .settings-content input, .settings-content textarea {
   display: block;
-  width: 410px !important;
+  width: 410px;
 }
 
 .inline {

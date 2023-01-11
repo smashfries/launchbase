@@ -33,6 +33,9 @@ const ideaContent = document.querySelector('#idea-content');
 const ideaMembers = document.querySelector('#idea-members');
 const ideaLinks = document.querySelector('#link-container');
 const upvoteCount = document.querySelector('#upvote-count');
+const commentDataContainer = document.querySelector('#comment-data');
+const replyBox = document.querySelector('#reply-box');
+const submitReplyBtn = document.querySelector('#post-comment');
 
 const linkDiv = document.querySelector('#link-inputs');
 const linkBtn = document.querySelector('#link-btn');
@@ -192,6 +195,43 @@ fetch(`/ideas/${ideaId}`, {
             });
           }
           publicTemplate.classList.remove('hide');
+          fetch(`/comments/${ideaId}/${ideaId}`, {
+            method: 'get',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }).then((res) => res.json()).then((commentData) => {
+            commentDataContainer.classList
+                .remove('hide');
+            document.querySelector('#comment-loader').classList
+                .add('hide');
+            document.querySelector('#comment-count').textContent = commentData
+                .replies.length;
+            commentData.replies.forEach((reply) => {
+              const date = new Date(reply.timeStamp);
+              const formattedDate = new Intl.DateTimeFormat('en-US',
+                  {dateStyle: 'medium'}).format(date);
+              const authorDetails = reply['author_details'][0];
+              const container = document.createElement('div');
+              container.classList.add('container');
+              container.classList.add('comment-item');
+              container.innerHTML =
+              `<p class="no-margin-top">${authorDetails.nickname}` +
+              `<a href="/u/${authorDetails.url}" class="public-member">` +
+              `<span class="badge">@${authorDetails.url}</span></a>` +
+              `</p>` +
+              `<p>${reply.comment}</p>` +
+              `<p class="small-font no-margin-bottom">` +
+              `<button class="mini-btn light-btn"><span>` +
+              `${new Intl.NumberFormat('en', {notation: 'compact'})
+                  .format(reply.upvotes ? reply.upvotes : 0)} </span>` +
+              `${reply.upvotes == 1 ? 'Upvote' : 'Upvotes'} 👌</button>` +
+              ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
+              `class="idea-link small-font">Replies</a> • ${formattedDate}</p>`;
+              commentDataContainer.appendChild(container);
+            });
+            console.log(commentData);
+          });
         }
       }
     });
@@ -490,6 +530,52 @@ leaveBtn.addEventListener('click', () => {
   `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
   `<div class="msg error hide" id="confirm-error"></div>`;
   confirmDialog.showModal();
+});
+
+submitReplyBtn.addEventListener('click', async () => {
+  if (replyBox.value !== '') {
+    submitReplyBtn.textContent = '...';
+    submitReplyBtn.disabled = true;
+    fetch('/comments', {
+      method: 'post',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        comment: replyBox.value,
+        parent: ideaId,
+        superParent: ideaId,
+        superType: 'idea',
+      }),
+    }).then((res) => res.json()).then((data) => {
+      submitReplyBtn.textContent = 'Share a Comment';
+      submitReplyBtn.disabled = false;
+      if (!data.error) {
+        const date = new Date();
+        const formattedDate = new Intl.DateTimeFormat('en-US',
+            {dateStyle: 'medium'}).format(date);
+        const container = document.createElement('div');
+        container.classList.add('container');
+        container.classList.add('comment-item');
+        container.innerHTML =
+        `<p class="no-margin-top">${data.authorName}` +
+        `<a href="/u/${data.authorHandle}" class="public-member">` +
+        `<span class="badge">@${data.authorHandle}</span></a>` +
+        `</p>` +
+        `<p>${replyBox.value}</p>` +
+        `<p class="small-font no-margin-bottom">` +
+        `<button class="mini-btn light-btn"><span>` +
+        `0 </span>` +
+        `'Upvotes' 👌</button>` +
+        ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
+        `class="idea-link small-font">Replies</a> • ${formattedDate}</p>`;
+        commentDataContainer.appendChild(container);
+        replyBox.value = '';
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
+  }
 });
 
 // eslint-disable-next-line no-unused-vars
