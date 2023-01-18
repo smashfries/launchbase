@@ -176,7 +176,7 @@ fetch(`/ideas/${ideaId}`, {
           data.members.forEach((member) => {
             const handle = member.user_details[0].url;
             const name = member.user_details[0].nickname;
-            const display = `${name} ` +
+            const display = `<div class="idea-member-name">${name}</div> ` +
               `<a href="/u/${handle}" class="public-member">` +
               `<span class="badge">@${handle}</span></a>`;
             memberContent += display;
@@ -227,7 +227,11 @@ fetch(`/ideas/${ideaId}`, {
                   .format(reply.upvotes ? reply.upvotes : 0)} </span>` +
               `${reply.upvotes == 1 ? 'Upvote' : 'Upvotes'} 👌</button>` +
               ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
-              `class="idea-link small-font">Replies</a> • ${formattedDate}</p>`;
+              `class="idea-link small-font">Replies</a> ` +
+              `${payload.id === authorDetails._id ?
+                '• <button class="idea-link small-font">Delete</button>' :
+                ''}` +
+              ` • ${formattedDate}</p>`;
               commentDataContainer.appendChild(container);
             });
             console.log(commentData);
@@ -549,6 +553,7 @@ submitReplyBtn.addEventListener('click', async () => {
         superType: 'idea',
       }),
     }).then((res) => res.json()).then((data) => {
+      console.log(data);
       submitReplyBtn.textContent = 'Share a Comment';
       submitReplyBtn.disabled = false;
       if (!data.error) {

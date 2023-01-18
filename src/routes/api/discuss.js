@@ -55,7 +55,7 @@ export default async function discuss(fastify, _options) {
 
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId, authorName: author.nickname,
-      authorHandle: author.url});
+      authorHandle: author.url, authorId: author._id});
   });
 
   fastify.get('/comments/:superParent/:parent', getComments,

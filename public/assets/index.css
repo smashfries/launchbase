@@ -394,6 +394,10 @@ h5 {
   -webkit-box-orient: vertical;
 }
 
+.idea-member-name {
+  white-space: nowrap;
+}
+
 .minor-text {
   font-size: 12px;
   margin: 0;
@@ -494,6 +498,11 @@ h5 {
 .idea-link {
   font-size: 14px;
   text-decoration: underline dotted;
+  padding: 0;
+  margin: 0;
+  background-color: #fff;
+  color: #000;
+  font-weight: normal;
 }
 
 @media only screen and (max-width: 428px) {

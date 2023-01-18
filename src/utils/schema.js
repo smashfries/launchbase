@@ -600,6 +600,9 @@ export const createComment = {
         properties: {
           message: {type: 'string'},
           commentId: {type: 'string'},
+          authorName: {type: 'string'},
+          authorHandle: {type: 'string'},
+          authorId: {type: 'string'},
         },
       },
       400: {
