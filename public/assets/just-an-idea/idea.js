@@ -229,7 +229,9 @@ fetch(`/ideas/${ideaId}`, {
               ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
               `class="idea-link small-font">Replies</a> ` +
               `${payload.id === authorDetails._id ?
-                '• <button class="idea-link small-font">Delete</button>' :
+                '• <button class="idea-link small-font" ' +
+                'onclick="deleteCommentConfirm(\'${reply.commentId}\')"' +
+                '>Delete</button>' :
                 ''}` +
               ` • ${formattedDate}</p>`;
               commentDataContainer.appendChild(container);
@@ -574,7 +576,10 @@ submitReplyBtn.addEventListener('click', async () => {
         `0 </span>` +
         `'Upvotes' 👌</button>` +
         ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
-        `class="idea-link small-font">Replies</a> • ${formattedDate}</p>`;
+        `class="idea-link small-font">Replies</a> ` +
+        `• <button class="idea-link small-font" ` +
+        `onclick="deleteCommentConfirm('${data.commentId}')">Delete</button> ` +
+        `• ${formattedDate}</p>`;
         commentDataContainer.appendChild(container);
         replyBox.value = '';
         window.scrollTo(0, document.body.scrollHeight);
@@ -582,6 +587,24 @@ submitReplyBtn.addEventListener('click', async () => {
     });
   }
 });
+
+// eslint-disable-next-line no-unused-vars
+function deleteCommentConfirm(commentId) {
+  confirmDialog.innerHTML = `<h1>Delete this Comment</h1>` +
+  `<p>Are you sure you want to delete this comment? ` +
+  `If you say 'yes', the contents of this comment will be ` +
+  `permanently deleted. However, others can still reply to it.</p>` +
+  `<button class="inline confirm-btn" ` +
+  `onclick="deleteComment('${commentId}')">` +
+  `Yes <span class="confirm-thumbsup">👍</span></button>` +
+  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
+  `<div class="msg error hide" id="confirm-error"></div>`;
+  confirmDialog.showModal();
+}
+
+// async function deleteComment(commentId) {
+
+// }
 
 // eslint-disable-next-line no-unused-vars
 async function publishIdea() {
