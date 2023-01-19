@@ -50,6 +50,8 @@ export default async function discuss(fastify, _options) {
       superType: req.body.superType, timeStamp: new Date(),
       author: req.userOId});
 
+    await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
+
     const author = await fastify.mongo.db.collection('users')
         .findOne({_id: req.userOId});
 
