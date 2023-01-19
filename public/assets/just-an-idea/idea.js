@@ -215,6 +215,7 @@ fetch(`/ideas/${ideaId}`, {
               const container = document.createElement('div');
               container.classList.add('container');
               container.classList.add('comment-item');
+              container.dataset.id = reply._id;
               container.innerHTML =
               `<p class="no-margin-top">${authorDetails.nickname}` +
               `<a href="/u/${authorDetails.url}" class="public-member">` +
@@ -228,7 +229,7 @@ fetch(`/ideas/${ideaId}`, {
               `${reply.upvotes == 1 ? 'Upvote' : 'Upvotes'} 👌</button>` +
               ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
               `class="idea-link small-font">Replies</a> ` +
-              `${payload.id === authorDetails._id ?
+              `${(payload.id === authorDetails._id) && !reply.deleted ?
                 '• <button class="idea-link small-font" ' +
                 'onclick="deleteCommentConfirm(' + '\'' + reply._id +
                 '\'' + ')">Delete</button>' : ''}` +
@@ -564,6 +565,7 @@ submitReplyBtn.addEventListener('click', async () => {
         const container = document.createElement('div');
         container.classList.add('container');
         container.classList.add('comment-item');
+        container.dataset.id = data.commentId;
         container.innerHTML =
         `<p class="no-margin-top">${data.authorName}` +
         `<a href="/u/${data.authorHandle}" class="public-member">` +
@@ -601,9 +603,36 @@ function deleteCommentConfirm(commentId) {
   confirmDialog.showModal();
 }
 
-// async function deleteComment(commentId) {
+// eslint-disable-next-line no-unused-vars
+async function deleteComment(commentId) {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
 
-// }
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  await fetch(`/comments/${commentId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((data) => {
+    confirmBtn.disabled = false;
+    okIcon.style.animationName = 'none';
+    if (data.error) {
+      confirmError.classList.remove('hide');
+      confirmError.textContent = 'Something wen\' wrong. Please try again.';
+    } else {
+      closeConfirmDialog();
+      const commentElement = document.querySelector(`[data-id="${commentId}"]`);
+      commentElement.firstChild.nextSibling.textContent =
+        'This comment was deleted.';
+      commentElement.lastChild.lastChild.previousSibling.remove();
+      commentElement.lastChild.lastChild.previousSibling.remove();
+    }
+  });
+}
 
 // eslint-disable-next-line no-unused-vars
 async function publishIdea() {

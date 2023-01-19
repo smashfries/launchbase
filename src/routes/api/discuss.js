@@ -103,6 +103,7 @@ export default async function discuss(fastify, _options) {
               'parent': 1,
               'superType': 1,
               'timeStamp': 1,
+              'deleted': 1,
             },
           },
         ]);
