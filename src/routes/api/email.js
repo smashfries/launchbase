@@ -1,7 +1,7 @@
 import {getEmailSettings, updateEmailSettings} from '../../utils/schema.js';
 
 /**
- * All routes that send statick html files
+ * API endpoints for email settings
  * @param {*} fastify
  * @param {*} _options
  */

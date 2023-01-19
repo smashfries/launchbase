@@ -1,7 +1,7 @@
 import {updateProfileOpts, getProfileOpts} from '../../utils/schema.js';
 
 /**
- * All routes that send statick html files
+ * API endpoints for user profile
  * @param {*} fastify
  * @param {*} _options
  */

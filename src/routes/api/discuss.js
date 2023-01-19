@@ -1,6 +1,7 @@
 import {createComment, getComments, deleteComment} from '../../utils/schema.js';
 
 /**
+ * API endpoint for comments
  * @param {*} fastify
  * @param {*} _options
  */

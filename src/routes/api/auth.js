@@ -8,6 +8,7 @@ import {sendEmailVerificationOpts, verifyCodeOpts,
 import {sendEmailVerification} from '../../utils/email.js';
 
 /**
+ * API endpoints for authentication
  * @param {*} fastify
  * @param {*} _options
  */
