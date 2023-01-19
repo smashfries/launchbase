@@ -230,9 +230,8 @@ fetch(`/ideas/${ideaId}`, {
               `class="idea-link small-font">Replies</a> ` +
               `${payload.id === authorDetails._id ?
                 '• <button class="idea-link small-font" ' +
-                'onclick="deleteCommentConfirm(\'${reply.commentId}\')"' +
-                '>Delete</button>' :
-                ''}` +
+                'onclick="deleteCommentConfirm(' + '\'' + reply._id +
+                '\'' + ')">Delete</button>' : ''}` +
               ` • ${formattedDate}</p>`;
               commentDataContainer.appendChild(container);
             });
@@ -574,7 +573,7 @@ submitReplyBtn.addEventListener('click', async () => {
         `<p class="small-font no-margin-bottom">` +
         `<button class="mini-btn light-btn"><span>` +
         `0 </span>` +
-        `'Upvotes' 👌</button>` +
+        `Upvotes 👌</button>` +
         ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
         `class="idea-link small-font">Replies</a> ` +
         `• <button class="idea-link small-font" ` +

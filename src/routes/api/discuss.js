@@ -1,4 +1,4 @@
-import {createComment, getComments} from '../../utils/schema.js';
+import {createComment, getComments, deleteComment} from '../../utils/schema.js';
 
 /**
  * @param {*} fastify
@@ -129,4 +129,37 @@ export default async function discuss(fastify, _options) {
         return rep.code(200).send({comment: parentComment,
           replies: commentArray});
       });
+
+  fastify.delete('/comments/:commentId', deleteComment, async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+
+    const {commentId} = req.params;
+
+    if (!fastify.mongo.ObjectId.isValid(commentId)) {
+      return rep.code(400).send({error: 'invalid comment ID',
+        message: 'Must be a valid MongoDB ObjectID'});
+    }
+
+    const commentOId = new fastify.mongo.ObjectId(commentId);
+
+    const comments = fastify.mongo.db.collection('comments');
+    const comment = await comments.findOne({_id: commentOId});
+
+    if (!comment) {
+      return rep.code(404).send({error: 'comment does not exist',
+        message: 'A comment with this ID was not found'});
+    }
+
+    if (!comment.author.equals(req.userOId)) {
+      return rep.code(400).send({error: 'not an author',
+        message: 'Only the authors can delete their own comments.'});
+    }
+
+    await comments.updateOne({_id: commentOId}, {$set:
+      {comment: 'This comment was deleted.', deleted: true}});
+
+    rep.code(200).send({message: 'The comment was successfully deleted!'});
+  });
 };
