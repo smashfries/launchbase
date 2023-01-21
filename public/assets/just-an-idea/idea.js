@@ -36,6 +36,8 @@ const upvoteCount = document.querySelector('#upvote-count');
 const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
+const commentCount = document.querySelector('#comment-count');
+let replyCount = 0;
 
 const linkDiv = document.querySelector('#link-inputs');
 const linkBtn = document.querySelector('#link-btn');
@@ -166,8 +168,14 @@ fetch(`/ideas/${ideaId}`, {
             });
           });
         } else {
-          document.querySelector('#comment-count').textContent = data
-              .replyCount || '0';
+          if (data.replyCount) {
+            replyCount = data.replyCount;
+            commentCount.textContent = replyCount == 0||
+            replyCount > 1 ? replyCount +
+               ' Comments' : '1 Comment';
+          } else {
+            commentCount.textContent = '0 Comments';
+          }
           ideaName.textContent = data.name;
           ideaDesc.textContent = data.desc;
           if (data.upvotes) {
@@ -559,6 +567,7 @@ submitReplyBtn.addEventListener('click', async () => {
       submitReplyBtn.textContent = 'Share a Comment';
       submitReplyBtn.disabled = false;
       if (!data.error) {
+        replyCount++;
         const date = new Date();
         const formattedDate = new Intl.DateTimeFormat('en-US',
             {dateStyle: 'medium'}).format(date);
@@ -583,6 +592,9 @@ submitReplyBtn.addEventListener('click', async () => {
         `• ${formattedDate}</p>`;
         commentDataContainer.appendChild(container);
         replyBox.value = '';
+        // console.log(replyCount, commentCount);
+        commentCount.textContent = replyCount == 1 ?
+          '1 Comment' : `${replyCount} Comments`;
         window.scrollTo(0, document.body.scrollHeight);
       }
     });
@@ -624,12 +636,15 @@ async function deleteComment(commentId) {
       confirmError.classList.remove('hide');
       confirmError.textContent = 'Something wen\' wrong. Please try again.';
     } else {
+      replyCount--;
       closeConfirmDialog();
       const commentElement = document.querySelector(`[data-id="${commentId}"]`);
       commentElement.firstChild.nextSibling.textContent =
         'This comment was deleted.';
       commentElement.lastChild.lastChild.previousSibling.remove();
       commentElement.lastChild.lastChild.previousSibling.remove();
+      commentCount.textContent = replyCount == 1 ?
+        '1 Comment' : `${replyCount} Comments`;
     }
   });
 }
