@@ -51,7 +51,12 @@ export default async function discuss(fastify, _options) {
       superType: req.body.superType, timeStamp: new Date(),
       author: req.userOId});
 
-    await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
+    if (parentId === superParentId) {
+      await ideas.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
+    } else {
+      await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
+    }
+
 
     const author = await fastify.mongo.db.collection('users')
         .findOne({_id: req.userOId});
@@ -149,6 +154,7 @@ export default async function discuss(fastify, _options) {
     const commentOId = new fastify.mongo.ObjectId(commentId);
 
     const comments = fastify.mongo.db.collection('comments');
+    const ideas = fastify.mongo.db.collection('ideas');
     const comment = await comments.findOne({_id: commentOId});
 
     if (!comment) {
@@ -159,6 +165,12 @@ export default async function discuss(fastify, _options) {
     if (!comment.author.equals(req.userOId)) {
       return rep.code(400).send({error: 'not an author',
         message: 'Only the authors can delete their own comments.'});
+    }
+
+    if (comment.parent.equals(comment.superParent)) {
+      ideas.updateOne({_id: comment.superParent}, {$inc: {replyCount: -1}});
+    } else {
+      comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1}});
     }
 
     await comments.updateOne({_id: commentOId}, {$set:

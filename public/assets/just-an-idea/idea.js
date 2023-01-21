@@ -166,6 +166,8 @@ fetch(`/ideas/${ideaId}`, {
             });
           });
         } else {
+          document.querySelector('#comment-count').textContent = data
+              .replyCount || '0';
           ideaName.textContent = data.name;
           ideaDesc.textContent = data.desc;
           if (data.upvotes) {
@@ -205,8 +207,6 @@ fetch(`/ideas/${ideaId}`, {
                 .remove('hide');
             document.querySelector('#comment-loader').classList
                 .add('hide');
-            document.querySelector('#comment-count').textContent = commentData
-                .replies.length;
             commentData.replies.forEach((reply) => {
               const date = new Date(reply.timeStamp);
               const formattedDate = new Intl.DateTimeFormat('en-US',

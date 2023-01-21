@@ -378,6 +378,7 @@ export const getIdea = {
           members: {type: 'array'},
           timeStamp: {type: 'string'},
           status: {type: 'string'},
+          replyCount: {type: 'number'},
         },
       },
       400: {
