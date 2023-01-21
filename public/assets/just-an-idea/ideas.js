@@ -109,6 +109,7 @@ switch (filter) {
       },
     }).then((res) => res.json())
         .then((data) => {
+          console.log(data);
           if (data.error) {
             logout();
           }
@@ -171,7 +172,7 @@ function addIdeaItems(filter, idea) {
   ideaUpvotes.classList.add('minor-text');
   ideaUpvotes.innerHTML = `${new Intl.NumberFormat('en',
       {notation: 'compact'})
-      .format(idea.upvotes ? ideaUpvotes : 0)} ${idea.upvotes == 1 ?
+      .format(idea.upvotes || 0)} ${idea.upvotes == 1 ?
         'Upvote' : 'Upvotes'} 👌`;
   ideaUpvotes.appendChild(ideaDate);
   ideaItem.appendChild(ideaTitle);
