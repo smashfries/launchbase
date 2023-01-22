@@ -102,6 +102,29 @@ export default async function discuss(fastify, _options) {
             },
           },
           {
+            $lookup: {
+              from: 'upvotes',
+              let: {comment_id: '$_id'},
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        {
+                          $eq: ['$user', req.userOId],
+                        },
+                        {
+                          $eq: ['$$comment_id', '$resource'],
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: 'upvote_details',
+            },
+          },
+          {
             $project: {
               'author_details.nickname': 1,
               'author_details.url': 1,
@@ -112,6 +135,8 @@ export default async function discuss(fastify, _options) {
               'superType': 1,
               'timeStamp': 1,
               'deleted': 1,
+              'upvotes': 1,
+              'upvote_details._id': 1,
             },
           },
         ]);
