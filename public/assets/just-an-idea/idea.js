@@ -190,7 +190,14 @@ fetch(`/ideas/${ideaId}`, {
             upvoteBtn.classList.add('dark-btn');
             upvoteText.textContent = 'Upvoted';
           }
-          ideaContent.innerHTML = data.idea.split('\n').join('<br>');
+          const ideaFragments = data.idea.split('\n');
+          ideaFragments.forEach((fragment) => {
+            const fragmentText = document.createElement('span');
+            fragmentText.textContent = fragment;
+            const lineBreak = document.createElement('br');
+            ideaContent.appendChild(fragmentText);
+            ideaContent.appendChild(lineBreak);
+          });
           let memberContent = '';
           data.members.forEach((member) => {
             const handle = member.user_details[0].url;
