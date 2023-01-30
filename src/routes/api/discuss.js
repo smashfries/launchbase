@@ -198,8 +198,12 @@ export default async function discuss(fastify, _options) {
       comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1}});
     }
 
-    await comments.updateOne({_id: commentOId}, {$set:
-      {comment: 'This comment was deleted.', deleted: true}});
+    if (!comment.replyCount) {
+      await comments.deleteOne({_id: commentOId});
+    } else {
+      await comments.updateOne({_id: commentOId}, {$set:
+        {comment: 'This comment was deleted.', deleted: true}});
+    }
 
     rep.code(200).send({message: 'The comment was successfully deleted!'});
   });
