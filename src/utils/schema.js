@@ -375,6 +375,7 @@ export const getIdea = {
           idea: {type: 'string'},
           links: {type: 'array'},
           upvotes: {type: 'number'},
+          upvoted: {type: 'boolean'},
           members: {type: 'array'},
           timeStamp: {type: 'string'},
           status: {type: 'string'},

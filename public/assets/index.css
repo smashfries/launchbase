@@ -167,6 +167,11 @@ button {
   border: 1px solid #000;
 }
 
+.dark-btn {
+  color: #fff;
+  background-color: #000;
+}
+
 .submit-icon, .lock-icon, .logout-icon, .logoutall-icon, .confirm-thumbsup, .invite-icon {
   display: inline-block;
   animation-name: none;

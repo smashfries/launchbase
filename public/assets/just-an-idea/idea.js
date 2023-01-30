@@ -33,6 +33,8 @@ const ideaContent = document.querySelector('#idea-content');
 const ideaMembers = document.querySelector('#idea-members');
 const ideaLinks = document.querySelector('#link-container');
 const upvoteCount = document.querySelector('#upvote-count');
+const upvoteBtn = document.querySelector('#idea-upvote');
+const upvoteText = document.querySelector('#upvote-text');
 const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
@@ -179,7 +181,14 @@ fetch(`/ideas/${ideaId}`, {
           ideaName.textContent = data.name;
           ideaDesc.textContent = data.desc;
           if (data.upvotes) {
-            upvoteCount.textContent = data.upvotes;
+            const upvoteFormatted = new Intl.NumberFormat('en-us',
+                {notation: 'compact'}).format(data.upvotes);
+            upvoteCount.textContent = upvoteFormatted;
+          }
+          if (data.upvoted) {
+            upvoteBtn.classList.remove('light-btn');
+            upvoteBtn.classList.add('dark-btn');
+            upvoteText.textContent = 'Upvoted';
           }
           ideaContent.innerHTML = data.idea.split('\n').join('<br>');
           let memberContent = '';
@@ -231,10 +240,13 @@ fetch(`/ideas/${ideaId}`, {
               `</p>` +
               `<p>${reply.comment}</p>` +
               `<p class="small-font no-margin-bottom">` +
-              `<button class="mini-btn light-btn"><span>` +
-              `${new Intl.NumberFormat('en', {notation: 'compact'})
-                  .format(reply.upvotes ? reply.upvotes : 0)} </span>` +
-              `${reply.upvotes == 1 ? 'Upvote' : 'Upvotes'} 👌</button>` +
+              `<button class="mini-btn${reply['upvote_details'].length === 1 ?
+               ' dark-btn' : ' light-btn'}">` +
+              `${reply['upvote_details'].length === 1 ?
+                'Upvoted' : 'Upvote'} ` +
+              `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
+                  .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
+              ` 👌</button>` +
               ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
               `class="idea-link small-font">Replies</a> ` +
               `${(payload.id === authorDetails._id) && !reply.deleted ?

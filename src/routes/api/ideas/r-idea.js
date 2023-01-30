@@ -185,7 +185,18 @@ export default async function rIdeas(fastify, _options) {
       ]);
       const arr = await members.toArray();
 
-      const target = {members: arr};
+      let target;
+
+      const upvotes = fastify.mongo.db.collection('upvotes');
+      const upvote = await upvotes.findOne({user: req.userOId,
+        resource: ideaOId, resourceType: 'idea'});
+
+      if (upvote) {
+        target = {members: arr, upvoted: true};
+      } else {
+        target = {members: arr};
+      }
+
       rep.code(200).send(Object.assign(target, idea));
     } else {
       rep.code(400).send({error: 'unauthorized'});
