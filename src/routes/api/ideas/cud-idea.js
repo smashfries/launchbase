@@ -83,6 +83,16 @@ export default async function cudIdeas(fastify, _options) {
           message: 'Must be a member of the idea and have the *admin* role.'});
       }
       const data = req.body;
+      if (idea.status === 'published') {
+        if (!data.desc) {
+          return rep.code(400).send({error: 'incomplete',
+            message: 'Provide a description'});
+        }
+        if (!data.idea) {
+          return rep.code(400).send({error: 'incomplete',
+            message: 'Provide the idea explanation'});
+        }
+      }
       await drafts.updateOne({_id: ideaOId},
           {$set: {name: data.name, desc: data.desc ? data.desc : '',
             idea: data.idea ? data.idea : '',
