@@ -225,6 +225,15 @@ fetch(`/ideas/${ideaId}`, {
             document.querySelector('#comment-loader').classList
                 .add('hide');
             commentData.replies.forEach((reply) => {
+              const commentBody = document.createElement('p');
+              const commentFragments = reply.comment.split('\n');
+              commentFragments.forEach((fragment) => {
+                const fragmentText = document.createElement('span');
+                fragmentText.textContent = fragment;
+                commentBody.appendChild(fragmentText);
+                const lineBreak = document.createElement('br');
+                commentBody.appendChild(lineBreak);
+              });
               const date = new Date(reply.timeStamp);
               const formattedDate = new Intl.DateTimeFormat('en-US',
                   {dateStyle: 'medium'}).format(date);
@@ -238,7 +247,7 @@ fetch(`/ideas/${ideaId}`, {
               `<a href="/u/${authorDetails.url}" class="public-member">` +
               `<span class="badge">@${authorDetails.url}</span></a>` +
               `</p>` +
-              `<p>${reply.comment}</p>` +
+              commentBody.outerHTML +
               `<p class="small-font no-margin-bottom">` +
               `<button class="mini-btn${reply['upvote_details'].length === 1 ?
                ' dark-btn' : ' light-btn'}">` +
