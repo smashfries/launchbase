@@ -769,10 +769,12 @@ upvoteBtn.addEventListener('click', async () => {
       upvoteIcon.style.animationName = 'none';
       upvoteBtn.dataset.upvoted = upvoted == 'true' ? false : true;
       if (upvoted == 'true') {
+        upvoteText.textContent = 'Upvote';
         upvoteCount.textContent = Number(upvoteCount.textContent) - 1;
         upvoteBtn.classList.remove('dark-btn');
         upvoteBtn.classList.add('light-btn');
       } else {
+        upvoteText.textContent = 'Upvoted';
         upvoteCount.textContent = Number(upvoteCount.textContent) + 1;
         upvoteBtn.classList.remove('light-btn');
         upvoteBtn.classList.add('dark-btn');
