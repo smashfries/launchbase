@@ -258,12 +258,14 @@ fetch(`/ideas/${ideaId}`, {
               commentBody.outerHTML +
               `<p class="small-font no-margin-bottom">` +
               `<button class="mini-btn${reply['upvote_details'].length === 1 ?
-               ' dark-btn' : ' light-btn'}">` +
-              `${reply['upvote_details'].length === 1 ?
-                'Upvoted' : 'Upvote'} ` +
+               ' dark-btn' : ' light-btn'}" ` +
+               `onclick="upvoteComment(event)">` +
+              `<span class="upvote-text">${reply['upvote_details']
+                  .length === 1 ?
+                'Upvoted' : 'Upvote'}</span> ` +
               `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
                   .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
-              ` 👌</button>` +
+              ` <span class="submit-icon">👌</span></button>` +
               ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
               `class="idea-link small-font">Replies</a> ` +
               `${(payload.id === authorDetails._id) && !reply.deleted ?
@@ -778,6 +780,50 @@ upvoteBtn.addEventListener('click', async () => {
     }
   });
 });
+
+// eslint-disable-next-line no-unused-vars
+async function upvoteComment(e) {
+  console.log(e);
+  let commentUpvoteBtn = e.target;
+  if (e.target.localName !== 'button') {
+    commentUpvoteBtn = e.target.parentElement;
+  }
+  const icon = commentUpvoteBtn.lastChild;
+  const commentUpvoteCount = icon.previousElementSibling;
+  const upvoteNumber = Number(commentUpvoteCount.textContent);
+  const text = commentUpvoteBtn.firstChild;
+  const commentId = commentUpvoteBtn.parentElement.parentElement.dataset.id;
+  const upvoted = commentUpvoteBtn.classList.contains('dark-btn') ?
+    true : false;
+
+  commentUpvoteBtn.disabled = true;
+  icon.style.animationName = 'loading';
+
+  fetch(`/${upvoted ? 'downvote' : 'upvote'}/comment/${commentId}`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((data) => {
+    if (data.error) {
+      window.location.reload();
+    } else {
+      commentUpvoteBtn.disabled = false;
+      icon.style.animationName = 'none';
+      if (upvoted) {
+        commentUpvoteCount.textContent = upvoteNumber - 1;
+        text.textContent = 'Upvote ';
+        commentUpvoteBtn.classList.remove('dark-btn');
+        commentUpvoteBtn.classList.add('light-btn');
+      } else {
+        text.textContent = 'Upvoted ';
+        commentUpvoteCount.textContent = upvoteNumber + 1;
+        commentUpvoteBtn.classList.add('dark-btn');
+        commentUpvoteBtn.classList.remove('light-btn');
+      }
+    }
+  });
+}
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
