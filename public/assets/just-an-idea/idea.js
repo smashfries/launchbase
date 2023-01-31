@@ -189,6 +189,7 @@ fetch(`/ideas/${ideaId}`, {
             upvoteBtn.classList.remove('light-btn');
             upvoteBtn.classList.add('dark-btn');
             upvoteText.textContent = 'Upvoted';
+            upvoteBtn.dataset.upvoted = true;
           }
           const ideaFragments = data.idea.split('\n');
           ideaFragments.forEach((fragment) => {
@@ -746,6 +747,37 @@ async function leaveIdea() {
         }
       });
 };
+
+upvoteBtn.addEventListener('click', async () => {
+  const upvoted = upvoteBtn.dataset.upvoted;
+  upvoteBtn.disabled = true;
+  const upvoteIcon = document.querySelector('.submit-icon#idea-upvote-icon');
+  upvoteIcon.style.animationName = 'loading';
+
+  fetch(`/${upvoted == 'true' ? 'downvote' : 'upvote'}/idea/${ideaId}`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((data) => {
+    if (data.error) {
+      window.location.reload();
+    } else {
+      upvoteBtn.disabled = false;
+      upvoteIcon.style.animationName = 'none';
+      upvoteBtn.dataset.upvoted = upvoted == 'true' ? false : true;
+      if (upvoted == 'true') {
+        upvoteCount.textContent = Number(upvoteCount.textContent) - 1;
+        upvoteBtn.classList.remove('dark-btn');
+        upvoteBtn.classList.add('light-btn');
+      } else {
+        upvoteCount.textContent = Number(upvoteCount.textContent) + 1;
+        upvoteBtn.classList.remove('light-btn');
+        upvoteBtn.classList.add('dark-btn');
+      }
+    }
+  });
+});
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
