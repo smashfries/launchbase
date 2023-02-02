@@ -627,6 +627,14 @@ submitReplyBtn.addEventListener('click', async () => {
         commentCount.textContent = replyCount == 1 ?
           '1 Comment' : `${replyCount} Comments`;
         window.scrollTo(0, document.body.scrollHeight);
+      } else {
+        if (data.error === 'profile incomplete') {
+          const commentError = document.querySelector('#comment-error');
+          commentError.classList.remove('hide');
+          commentError.innerHTML = 'Please complete your profile before' +
+            ` posting a comment. Click <u><a href="/backstage/profile?` +
+            `redirect=${window.location.href}">here</a></u> to update it!`;
+        }
       }
     });
   }

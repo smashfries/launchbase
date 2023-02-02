@@ -46,6 +46,14 @@ export default async function discuss(fastify, _options) {
       }
     }
 
+    const users = fastify.mongo.db.collection('users');
+    const user = await users.findOne({_id: req.userOId});
+    const isComplete = user.hasOwnProperty('name') ? true : false;
+    if (!isComplete) {
+      return rep.code(400).send({error: 'profile incomplete',
+        message: 'Profile must be complete before posting a comment.'});
+    }
+
     const comment = await comments.insertOne({comment: req.body.comment,
       parent: parentOId, superParent: superParentOId,
       superType: req.body.superType, timeStamp: new Date(),
