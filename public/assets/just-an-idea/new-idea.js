@@ -47,7 +47,8 @@ fetch('/profile?only=completionStatus', {
         msg.classList.remove('info');
         msg.classList.add('warning');
         msg.innerHTML = `You must complete your profile before you` +
-        ` can create an idea. Click <u><a href="/backstage/profile">here</a>` +
+        ` can create an idea. Click <u><a href="/backstage/profile` +
+        `?redirect=${window.location.href}">here</a>` +
         `</u> to update your profile.`;
       }
     });

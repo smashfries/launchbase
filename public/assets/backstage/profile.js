@@ -169,7 +169,7 @@ document.querySelector('form').addEventListener('submit', (e) => {
             document.querySelector('.error').remove();
           }
           if (redirect) {
-            window.location.replace();
+            window.location.replace(redirect);
           }
         }
       });
