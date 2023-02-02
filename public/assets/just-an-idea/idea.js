@@ -13,8 +13,22 @@ const emailHash = payload.emailHash;
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`;
 document.querySelector('.pfp').setAttribute('src', pfp);
 
-const url = new URL(window.location);
+let url = new URL(window.location);
 const ideaId = url.pathname.split('/')[2];
+
+let params = url.searchParams;
+let page = params.get('page') ? Number(params.get('page')) : 1;
+const pageInput = document.querySelector('#page-in');
+const nextPage = document.querySelector('#next');
+const previousPage = document.querySelector('#prev');
+
+if (!Number.isInteger(Number(page)) || Number(page) < 1) {
+  window.location.replace(url.pathname);
+}
+pageInput.value = page;
+if (page == 1) {
+    previousPage.classList.add('hide');
+}
 
 const pfpDropdown = document.querySelector('#pfp-dropdown');
 const pfpElement = document.querySelector('.pfp-container');
@@ -39,6 +53,7 @@ const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
 const commentCount = document.querySelector('#comment-count');
+const commentError = document.querySelector('#comment-error');
 let replyCount = 0;
 
 const linkDiv = document.querySelector('#link-inputs');
@@ -222,65 +237,130 @@ fetch(`/ideas/${ideaId}`, {
             });
           }
           publicTemplate.classList.remove('hide');
-          fetch(`/comments/${ideaId}/${ideaId}`, {
-            method: 'get',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }).then((res) => res.json()).then((commentData) => {
-            commentDataContainer.classList
-                .remove('hide');
-            document.querySelector('#comment-loader').classList
-                .add('hide');
-            commentData.replies.forEach((reply) => {
-              const commentBody = document.createElement('p');
-              const commentFragments = reply.comment.split('\n');
-              commentFragments.forEach((fragment) => {
-                const fragmentText = document.createElement('span');
-                fragmentText.textContent = fragment;
-                commentBody.appendChild(fragmentText);
-                const lineBreak = document.createElement('br');
-                commentBody.appendChild(lineBreak);
-              });
-              const date = new Date(reply.timeStamp);
-              const formattedDate = new Intl.DateTimeFormat('en-US',
-                  {dateStyle: 'medium'}).format(date);
-              const authorDetails = reply['author_details'][0];
-              const container = document.createElement('div');
-              container.classList.add('container');
-              container.classList.add('comment-item');
-              container.dataset.id = reply._id;
-              container.innerHTML =
-              `<p class="no-margin-top">${authorDetails.nickname}` +
-              `<a href="/u/${authorDetails.url}" class="public-member">` +
-              `<span class="badge">@${authorDetails.url}</span></a>` +
-              `</p>` +
-              commentBody.outerHTML +
-              `<p class="small-font no-margin-bottom">` +
-              `<button class="mini-btn${reply['upvote_details'].length === 1 ?
-               ' dark-btn' : ' light-btn'}" ` +
-               `onclick="upvoteComment(event)">` +
-              `<span class="upvote-text">${reply['upvote_details']
-                  .length === 1 ?
-                'Upvoted' : 'Upvote'}</span> ` +
-              `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
-                  .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
-              ` <span class="submit-icon">👌</span></button>` +
-              ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
-              `class="idea-link small-font">Replies</a> ` +
-              `${(payload.id === authorDetails._id) && !reply.deleted ?
-                '• <button class="idea-link small-font" ' +
-                'onclick="deleteCommentConfirm(' + '\'' + reply._id +
-                '\'' + ')">Delete</button>' : ''}` +
-              ` • ${formattedDate}</p>`;
-              commentDataContainer.appendChild(container);
-            });
-            console.log(commentData);
-          });
+          setupComments();
         }
       }
     });
 
+pageInput.addEventListener('keyup', (e) => {
+  if (e.key == 'Enter') {
+    const newPage = Number(pageInput.value);
+    if (Number.isInteger(newPage) && newPage > 0) {
+      window.location.href = `?page=${newPage}`;
+    }
+  }
+});
+
+nextPage.addEventListener('click', () => {
+  commentError.classList.remove('hide');
+  commentError.classList.replace('error', 'info');
+  commentError.textContent = 'Loading...'
+  setPage(page + 1)
+  if (page != 1) {
+    previousPage.classList.remove('hide');
+  }
+  setupComments(page);
+})
+
+previousPage.addEventListener('click', () => {
+  commentError.classList.remove('hide');
+  commentError.classList.replace('error', 'info');
+  commentError.textContent = 'Loading...'
+  setPage(page - 1)
+  if (page == 1) {
+    previousPage.classList.add('hide');
+  }
+  setupComments(page);
+})
+
+function setPage(newPage) {
+  page = newPage;
+  params.set('page', page);
+  pageInput.value = page
+  params.set('page', page);
+  history.pushState({page}, '', url);
+}
+
+window.addEventListener('popstate', (event) => {
+  url = new URL(event.target.location)
+  params = url.searchParams;
+  page = params.get('page') ? Number(params.get('page')) : 1;
+  if (!Number.isInteger(Number(page)) || Number(page) < 1) {
+    window.location.replace(url.pathname);
+  }
+  pageInput.value = page;
+  if (page == 1) {
+      previousPage.classList.add('hide');
+  } else {
+    previousPage.classList.remove('hide');
+  }
+  setupComments();
+});
+
+function setupComments() {
+  document.querySelectorAll('.comment-item').forEach((i) => {
+    i.remove();
+  })
+  fetch(`/comments/${ideaId}/${ideaId}?page=${page}`, {
+    method: 'get',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((commentData) => {
+    if (commentData.error) {
+      window.location.reload();
+      return;
+    }
+    commentError.classList.add('hide');
+    commentDataContainer.classList
+        .remove('hide');
+    document.querySelector('#comment-loader').classList
+        .add('hide');
+    commentData.replies.forEach((reply) => {
+      const commentBody = document.createElement('p');
+      const commentFragments = reply.comment.split('\n');
+      commentFragments.forEach((fragment) => {
+        const fragmentText = document.createElement('span');
+        fragmentText.textContent = fragment;
+        commentBody.appendChild(fragmentText);
+        const lineBreak = document.createElement('br');
+        commentBody.appendChild(lineBreak);
+      });
+      const date = new Date(reply.timeStamp);
+      const formattedDate = new Intl.DateTimeFormat('en-US',
+          {dateStyle: 'medium'}).format(date);
+      const authorDetails = reply['author_details'][0];
+      const container = document.createElement('div');
+      container.classList.add('container');
+      container.classList.add('comment-item');
+      container.dataset.id = reply._id;
+      container.innerHTML =
+      `<p class="no-margin-top">${authorDetails.nickname}` +
+      `<a href="/u/${authorDetails.url}" class="public-member">` +
+      `<span class="badge">@${authorDetails.url}</span></a>` +
+      `</p>` +
+      commentBody.outerHTML +
+      `<p class="small-font no-margin-bottom">` +
+      `<button class="mini-btn${reply['upvote_details'].length === 1 ?
+        ' dark-btn' : ' light-btn'}" ` +
+        `onclick="upvoteComment(event)">` +
+      `<span class="upvote-text">${reply['upvote_details']
+          .length === 1 ?
+        'Upvoted' : 'Upvote'}</span> ` +
+      `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
+          .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
+      ` <span class="submit-icon">👌</span></button>` +
+      ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
+      `class="idea-link small-font">Replies</a> ` +
+      `${(payload.id === authorDetails._id) && !reply.deleted ?
+        '• <button class="idea-link small-font" ' +
+        'onclick="deleteCommentConfirm(' + '\'' + reply._id +
+        '\'' + ')">Delete</button>' : ''}` +
+      ` • ${formattedDate}</p>`;
+      commentDataContainer.appendChild(container);
+    });
+  })
+};
 
 linkBtn.addEventListener('click', () => {
   createLinkItem('');
@@ -629,7 +709,6 @@ submitReplyBtn.addEventListener('click', async () => {
         window.scrollTo(0, document.body.scrollHeight);
       } else {
         if (data.error === 'profile incomplete') {
-          const commentError = document.querySelector('#comment-error');
           commentError.classList.remove('hide');
           commentError.innerHTML = 'Please complete your profile before' +
             ` posting a comment. Click <u><a href="/backstage/profile?` +

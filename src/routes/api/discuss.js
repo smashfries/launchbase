@@ -92,6 +92,14 @@ export default async function discuss(fastify, _options) {
             message: 'parentId is an invalid MongoDB Object ID'});
         }
 
+        const query = req.query;
+        const page = query.page || 1;
+
+        if (page < 1) {
+          return rep.code(400).send({error:
+            'page must be a number greater than or equal to 1'});
+      }
+
         const superParentOId = new fastify.mongo.ObjectId(superParent);
         const parentOId = new fastify.mongo.ObjectId(parent);
 
@@ -147,11 +155,18 @@ export default async function discuss(fastify, _options) {
               'upvote_details._id': 1,
             },
           },
+          {
+            $skip: (page - 1)*20,
+          },
+          {
+            $limit: 20,
+          },
         ]);
         const commentArray = await reqComments.toArray();
 
         const parentComment = await comments.findOne({_id: parentOId});
 
+        // can be removed. Remeber to test after removing this block!
         if (superParent !== parent) {
           if (parentComment.superType !== 'idea') {
             return rep.code(400).send({error: 'method not supported',
@@ -169,7 +184,7 @@ export default async function discuss(fastify, _options) {
         }
 
         return rep.code(200).send({comment: parentComment,
-          replies: commentArray});
+          replies: commentArray, page});
       });
 
   fastify.delete('/comments/:commentId', deleteComment, async (req, rep) => {
