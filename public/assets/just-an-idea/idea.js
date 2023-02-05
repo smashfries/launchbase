@@ -27,7 +27,7 @@ if (!Number.isInteger(Number(page)) || Number(page) < 1) {
 }
 pageInput.value = page;
 if (page == 1) {
-    previousPage.classList.add('hide');
+  previousPage.classList.add('hide');
 }
 
 const pfpDropdown = document.querySelector('#pfp-dropdown');
@@ -254,35 +254,35 @@ pageInput.addEventListener('keyup', (e) => {
 nextPage.addEventListener('click', () => {
   commentError.classList.remove('hide');
   commentError.classList.replace('error', 'info');
-  commentError.textContent = 'Loading...'
-  setPage(page + 1)
+  commentError.textContent = 'Loading...';
+  setPage(page + 1);
   if (page != 1) {
     previousPage.classList.remove('hide');
   }
   setupComments(page);
-})
+});
 
 previousPage.addEventListener('click', () => {
   commentError.classList.remove('hide');
   commentError.classList.replace('error', 'info');
-  commentError.textContent = 'Loading...'
-  setPage(page - 1)
+  commentError.textContent = 'Loading...';
+  setPage(page - 1);
   if (page == 1) {
     previousPage.classList.add('hide');
   }
   setupComments(page);
-})
+});
 
 function setPage(newPage) {
   page = newPage;
   params.set('page', page);
-  pageInput.value = page
+  pageInput.value = page;
   params.set('page', page);
   history.pushState({page}, '', url);
 }
 
 window.addEventListener('popstate', (event) => {
-  url = new URL(event.target.location)
+  url = new URL(event.target.location);
   params = url.searchParams;
   page = params.get('page') ? Number(params.get('page')) : 1;
   if (!Number.isInteger(Number(page)) || Number(page) < 1) {
@@ -290,7 +290,7 @@ window.addEventListener('popstate', (event) => {
   }
   pageInput.value = page;
   if (page == 1) {
-      previousPage.classList.add('hide');
+    previousPage.classList.add('hide');
   } else {
     previousPage.classList.remove('hide');
   }
@@ -300,8 +300,8 @@ window.addEventListener('popstate', (event) => {
 function setupComments() {
   document.querySelectorAll('.comment-item').forEach((i) => {
     i.remove();
-  })
-  fetch(`/comments/${ideaId}/${ideaId}?page=${page}`, {
+  });
+  fetch(`/comments/${ideaId}?page=${page}`, {
     method: 'get',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -314,8 +314,8 @@ function setupComments() {
     commentError.classList.add('hide');
     commentDataContainer.classList
         .remove('hide');
-    document.querySelector('#comment-loader').classList
-        .add('hide');
+    // document.querySelector('#comment-loader').classList
+    //     .add('hide');
     commentData.replies.forEach((reply) => {
       const commentBody = document.createElement('p');
       const commentFragments = reply.comment.split('\n');
@@ -350,7 +350,7 @@ function setupComments() {
       `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
           .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
       ` <span class="submit-icon">👌</span></button>` +
-      ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
+      ` • <a href="/discuss/${reply._id}" ` +
       `class="idea-link small-font">Replies</a> ` +
       `${(payload.id === authorDetails._id) && !reply.deleted ?
         '• <button class="idea-link small-font" ' +
@@ -359,7 +359,7 @@ function setupComments() {
       ` • ${formattedDate}</p>`;
       commentDataContainer.appendChild(container);
     });
-  })
+  });
 };
 
 linkBtn.addEventListener('click', () => {
@@ -696,7 +696,7 @@ submitReplyBtn.addEventListener('click', async () => {
         `<button class="mini-btn light-btn"><span>` +
         `0 </span>` +
         `Upvotes 👌</button>` +
-        ` • <a href="/discussion/${ideaId}/${ideaId}" ` +
+        ` • <a href="/discuss/${data.commentId}" ` +
         `class="idea-link small-font">Replies</a> ` +
         `• <button class="idea-link small-font" ` +
         `onclick="deleteCommentConfirm('${data.commentId}')">Delete</button> ` +

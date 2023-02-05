@@ -43,4 +43,7 @@ export default async function pages(fastify, _options) {
   fastify.get('/just-an-idea/*', (_req, rep) => {
     return rep.sendFile('just-an-idea/idea.html');
   });
+  fastify.get('/discuss/:commentId', (_req, rep) => {
+    return rep.sendFile('discuss/discuss.html');
+  });
 }

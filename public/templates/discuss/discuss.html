@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="/static/discuss/discuss.js" defer></script>
+    <title>Launch Base | Discuss</title>
+</head>
+<body>
+    <h1 class="logo-title"><a href="/">Launch Base</a></h1>
+
+    <div class="nav-full">
+        <a href="/just-an-idea" class="nav-item">Just an Idea</a>
+        <a href="/real" class="nav-item">The Real Thing</a>
+        <a href="/perks" class="nav-item">Perks</a>
+        <a href="/backstage" class="nav-item">Backstage</a>
+    </div>
+
+    <button class="pfp-container"><img class="pfp" src="https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08?s=50&d=mp" alt="pfp"></button>
+   
+    <div class="container settings-box">
+        <div class="side-panel">
+            <h2>Just an Idea</h2>
+            <a href="/just-an-idea" class="panel-item">Community Ideas</a>
+            <a href="/just-an-idea/new" class="panel-item">Create New Idea</a>
+            <a href="/just-an-idea/drafts" class="panel-item">My Draft Ideas</a>
+            <a href="/just-an-idea/published" class="panel-item">My Published Ideas</a>
+        </div>
+        <div class="settings-content">
+          <h3>Discuss</h3>
+          <hr>
+          <div class="msg info">Loading data...</div>
+          <div id="main-content" class="hide">
+            <a class="mini-btn idea-link" href="#" id="parent">Go back up (1-level) 👆</a>
+            <a class="mini-btn idea-link" href="#" id="super-parent">Go to the top of the thread 👆👆</a>
+            <div id="parent-comment">
+              <p id="parent-text"></p>
+              <button id="idea-upvote" data-upvoted="false" class="light-btn new-btn"><span id="upvote-text">Upvote</span> <span id="upvote-count"></span><span id="idea-upvote-icon" class="submit-icon">👌</span></button> <p class="no-margin">Like the comment? Give the creators an upvote!</p>
+              <br>
+              <button id="delete-main" class="mini-btn light-btn">Delete 🗑️</button>
+            </div>
+            <br>
+            <h5>Replies</h5>
+            <div id="comment-container" class="container no-margin">
+              <div id="comment-data" class="hide">
+                <p class="comment-count-div"><span id="comment-count"></span></p>
+                <textarea id="reply-box" class="full-width" placeholder="What do you think?" rows="5"></textarea>
+                <button class="no-margin" id="post-comment">Share a Comment</button>
+                <div class="v-spacer"></div>
+                <div class="msg error hide" id="comment-error">This is an error message!</div>
+                  <div class="pagination-container">
+                    Page: 
+                    <a id="prev" title="Previous page">👈</a>
+                    <input type="text" min="1" id="page-in" required class="inline">
+                    <a id="next" title="Next page">👉</a>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <dialog id="confirm-dialog" class="container">
+      <p>Hello world!</p>
+    </dialog>
+
+    <dialog id="pfp-dropdown" class="container">
+        <a href="#" class="panel-item">Visit your profile</a>
+        <a role="button" id="logout-btn" class="panel-item">Logout <span class="lock-icon">🔒</span></a>
+    </dialog>
+</body>
+</html>

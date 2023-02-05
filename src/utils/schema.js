@@ -628,6 +628,7 @@ export const getComments = {
           comment: {},
           replies: {type: 'array'},
           page: {type: 'integer'},
+          upvoted: {type: 'boolean'},
         },
       },
       400: {

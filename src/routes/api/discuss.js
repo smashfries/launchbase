@@ -44,6 +44,9 @@ export default async function discuss(fastify, _options) {
       if (!parentComment) {
         return rep.code(400).send({error: 'parent comment does not exist'});
       }
+      if (!parentComment.superParent.equals(superParentOId)) {
+        return rep.code(400).send({error: 'invalid super-parent'});
+      }
     }
 
     const users = fastify.mongo.db.collection('users');
@@ -74,18 +77,13 @@ export default async function discuss(fastify, _options) {
       authorHandle: author.url, authorId: author._id});
   });
 
-  fastify.get('/comments/:superParent/:parent', getComments,
+  fastify.get('/comments/:parent', getComments,
       async (req, rep) => {
         if (!req.token) {
           return rep.code(400).send({error: 'unauthorized'});
         }
 
-        const {superParent, parent} = req.params;
-
-        if (!fastify.mongo.ObjectId.isValid(superParent)) {
-          return rep.code(400).send({error: 'invalid superParentId',
-            message: 'superParentId is an invalid MongoDB Object ID'});
-        }
+        const {parent} = req.params;
 
         if (!fastify.mongo.ObjectId.isValid(parent)) {
           return rep.code(400).send({error: 'invalid parentId',
@@ -98,16 +96,14 @@ export default async function discuss(fastify, _options) {
         if (page < 1) {
           return rep.code(400).send({error:
             'page must be a number greater than or equal to 1'});
-      }
+        }
 
-        const superParentOId = new fastify.mongo.ObjectId(superParent);
         const parentOId = new fastify.mongo.ObjectId(parent);
 
         const comments = fastify.mongo.db.collection('comments');
         const reqComments = await comments.aggregate([
           {
-            $match: {superParent: superParentOId,
-              parent: parentOId},
+            $match: {parent: parentOId},
           },
           {
             $lookup: {
@@ -166,25 +162,16 @@ export default async function discuss(fastify, _options) {
 
         const parentComment = await comments.findOne({_id: parentOId});
 
-        // can be removed. Remeber to test after removing this block!
-        if (superParent !== parent) {
-          if (parentComment.superType !== 'idea') {
-            return rep.code(400).send({error: 'method not supported',
-              message: 'Only comments for ideas are currently supported. ' +
-                'This feature is coming soon!'});
-          }
-        } else {
-          if (commentArray.length > 0) {
-            if (commentArray[0].superType !== 'idea') {
-              return rep.code(400).send({error: 'method not supported',
-                message: 'Only comments for ideas are currently supported. ' +
-                  'This feature is coming soon!'});
-            }
-          }
+        let upvote;
+
+        const upvotes = fastify.mongo.db.collection('upvotes');
+        if (parentComment) {
+          upvote = await upvotes.findOne({user: req.userOId,
+            resourceType: 'comment', resource: parentOId});
         }
 
         return rep.code(200).send({comment: parentComment,
-          replies: commentArray, page});
+          replies: commentArray, page, upvoted: upvote ? true : false});
       });
 
   fastify.delete('/comments/:commentId', deleteComment, async (req, rep) => {
