@@ -131,7 +131,19 @@ function setupComments() {
   }).then((res) => res.json()).then((commentData) => {
     console.log(commentData);
     if (commentData.error) {
+      if (commentData.error === 'invalid parentId') {
+        loadingMsg.classList.replace('info', 'error');
+        loadingMsg.textContent =
+          'This is an invalid comment ID.';
+        return;
+      }
       window.location.reload();
+      return;
+    }
+    if (commentData.comment === null) {
+      loadingMsg.classList.replace('info', 'error');
+      loadingMsg.textContent =
+        'We couldn\'t find a comment with this ID. It might have been deleted.';
       return;
     }
     loadingMsg.classList.add('hide');
