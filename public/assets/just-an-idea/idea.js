@@ -935,6 +935,7 @@ revertBtn.addEventListener('click', () => {
   confirmDialog.showModal();
 });
 
+// eslint-disable-next-line no-unused-vars
 async function revertDraft() {
   const okIcon = document.querySelector('.confirm-thumbsup');
   const confirmBtn = document.querySelector('.confirm-btn');

@@ -15,20 +15,36 @@ import {sendEmailVerification} from '../../utils/email.js';
 export default async function auth(fastify, _options) {
   fastify.post('/send-email-verification', sendEmailVerificationOpts,
       async (req, rep) => {
-        let email = req.body.email;
-        const valid = (req.body.type == 'login' || req.body.type == 'signup') ?
-          true : false;
-        if (!valid) {
+        const email = req.body.email.toLowerCase();
+        const validTypes = ['login', 'signup', 'changePrimary', 'changeBackup'];
+        if (!validTypes.includes(req.body.type)) {
           return rep.code(400).send({error: 'invalid-type'});
         }
-        email = email.toLowerCase();
         const users = fastify.mongo.db.collection('users');
-        const user = await users.findOne({email: req.body.email.toLowerCase()});
-        if (req.body.type == 'login' && !user) {
+        const user = await users.findOne({email});
+        const backup = await users.findOne({backupEmail: email});
+        console.log(req.body.type == 'login' && !backup);
+        if ((req.body.type == 'login' && !user) &&
+          (req.body.type == 'login' && !backup)) {
           return rep.code(400).send({error: 'account-invalid'});
         }
-        if (req.body.type == 'signup' && user) {
+        if ((req.body.type == 'signup' && user) ||
+          (req.body.type == 'signup' && backup)) {
           return rep.code(400).send({error: 'account-exists'});
+        }
+        if ((req.body.type == 'changePrimary' && !req.token) ||
+          (req.body.type == 'changeBackup' && !req.token)) {
+          return rep.code(400).send({error: 'unauthorized'});
+        }
+        if (req.body.type == 'changePrimary' ||
+          req.body.type == 'changeBackup') {
+          const currentUser = await users.findOne({_id: req.userOId});
+          if (currentUser.email == email || currentUser.backup == email) {
+            return rep.code(400).send({error: 'same email was provided'});
+          }
+          if (user || backup) {
+            return rep.code(400).send({error: 'account-exists'});
+          }
         }
         const result = await sendEmailVerification(email);
         if (result == 'error') {
@@ -36,15 +52,9 @@ export default async function auth(fastify, _options) {
         }
         const deviceIdentifier = randomBytes(24).toString('hex');
         const codes = fastify.mongo.db.collection('verification-codes');
-        const item = await codes.findOne({email});
         const expiresOn = new Date().getTime() + 300000;
-        if (item) {
-          codes.updateOne({email}, {$set: {code: hash(result), expiresOn,
-            deviceIdentifier: hash(deviceIdentifier)}});
-        } else {
-          codes.insertOne({email, code: hash(result), expiresOn,
-            deviceIdentifier: hash(deviceIdentifier)});
-        }
+        codes.updateOne({email}, {$set: {email, code: hash(result), expiresOn,
+          deviceIdentifier: hash(deviceIdentifier)}}, {upsert: true});
         return rep.code(200).send({deviceIdentifier});
       });
 
