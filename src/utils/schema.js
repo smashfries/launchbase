@@ -52,6 +52,7 @@ export const verifyCodeOpts = {
         type: 'object',
         properties: {
           token: {type: 'string'},
+          message: {type: 'string'},
         },
       },
       400: {

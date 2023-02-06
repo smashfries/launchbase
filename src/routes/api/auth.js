@@ -23,7 +23,6 @@ export default async function auth(fastify, _options) {
         const users = fastify.mongo.db.collection('users');
         const user = await users.findOne({email});
         const backup = await users.findOne({backupEmail: email});
-        console.log(req.body.type == 'login' && !backup);
         if ((req.body.type == 'login' && !user) &&
           (req.body.type == 'login' && !backup)) {
           return rep.code(400).send({error: 'account-invalid'});
@@ -60,19 +59,35 @@ export default async function auth(fastify, _options) {
 
   fastify.post('/verify-code', verifyCodeOpts, async (req, rep) => {
     const {redis} = fastify;
-    const valid = (req.body.type == 'login' || req.body.type == 'signup') ?
-      true : false;
-    if (!valid) {
+    const validTypes = ['login', 'signup', 'changePrimary', 'changeBackup'];
+    if (!validTypes.includes(req.body.type)) {
       return rep.code(400).send({error: 'invalid-type'});
     }
     const users = fastify.mongo.db.collection('users');
     const email = req.body.email.toLowerCase();
     const user = await users.findOne({email});
-    if (req.body.type == 'login' && !user) {
+    const backup = await users.findOne({backupEmail: email});
+    if ((req.body.type == 'login' && !user) &&
+      (req.body.type == 'login' && !backup)) {
       return rep.code(400).send({error: 'account-invalid'});
     }
-    if (req.body.type == 'signup' && user) {
+    if ((req.body.type == 'signup' && user) ||
+      (req.body.type == 'signup' && backup)) {
       return rep.code(400).send({error: 'account-exists'});
+    }
+    if ((req.body.type == 'changePrimary' && !req.token) ||
+      (req.body.type == 'changeBackup' && !req.token)) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    if (req.body.type == 'changePrimary' ||
+      req.body.type == 'changeBackup') {
+      const currentUser = await users.findOne({_id: req.userOId});
+      if (currentUser.email == email || currentUser.backup == email) {
+        return rep.code(400).send({error: 'same email was provided'});
+      }
+      if (user || backup) {
+        return rep.code(400).send({error: 'account-exists'});
+      }
     }
     const codes = fastify.mongo.db.collection('verification-codes');
     const code = await codes.findOne({email});
@@ -98,12 +113,29 @@ export default async function auth(fastify, _options) {
       const newUser = await fastify.mongo.db.collection('users')
           .insertOne({email});
       id = newUser.insertedId;
-    } else {
-      id = user._id;
+      const token = generateToken(id, md5(email));
+      await redis.rpush(id, token);
+      return rep.code(200).send({token});
+    } else if (req.body.type == 'login') {
+      if (user) {
+        id = user._id;
+      } else {
+        id = backup._id;
+      }
+      const token = generateToken(id, md5(email));
+      await redis.rpush(id, token);
+      return rep.code(200).send({token});
+    } else if (req.body.type == 'changePrimary') {
+      await users.updateOne({_id: req.userOId}, {$set: {email}});
+      const token = generateToken(id, md5(email));
+      await redis.lrem(req.user, 1, req.token);
+      await redis.rpush(req.user, token);
+      return rep.code(200).send({token});
+    } else if (req.body.type == 'changeBackup') {
+      await users.updateOne({_id: req.userOId}, {$set: {backupEmail: email}});
+      return rep.code(200).send({message:
+        'backup email was successfully set!'});
     }
-    const token = generateToken(id, md5(email));
-    await redis.rpush(id, token);
-    return rep.code(200).send({token});
   });
 
   fastify.get('/active-tokens', getActiveTokens, async (req, rep) => {
