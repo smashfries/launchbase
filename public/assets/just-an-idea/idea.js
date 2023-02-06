@@ -54,6 +54,7 @@ const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
 const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
+const revertBtn = document.querySelector('#revert-draft');
 let replyCount = 0;
 
 const linkDiv = document.querySelector('#link-inputs');
@@ -215,7 +216,11 @@ fetch(`/ideas/${ideaId}`, {
             ideaContent.appendChild(lineBreak);
           });
           let memberContent = '';
+          let isAdmin = false;
           data.members.forEach((member) => {
+            if (member.user === payload.id && member.role === 'admin') {
+              isAdmin = true;
+            }
             const handle = member.user_details[0].url;
             const name = member.user_details[0].nickname;
             const display = `<div class="idea-member-name">${name}</div> ` +
@@ -223,6 +228,9 @@ fetch(`/ideas/${ideaId}`, {
               `<span class="badge">@${handle}</span></a>`;
             memberContent += display;
           });
+          if (isAdmin) {
+            revertBtn.classList.remove('hide');
+          }
           ideaMembers.innerHTML = memberContent;
           if (data.links.length > 0) {
             document.querySelector('#link-title').classList.remove('hide');
@@ -910,6 +918,45 @@ async function upvoteComment(e) {
         commentUpvoteBtn.classList.add('dark-btn');
         commentUpvoteBtn.classList.remove('light-btn');
       }
+    }
+  });
+}
+
+revertBtn.addEventListener('click', () => {
+  confirmDialog.innerHTML = `<h1>Revert to Draft?</h1>` +
+  `<p>Are you sure you want to revert this idea to a draft? ` +
+  `If you say 'yes', this idea will become private and will only be visible ` +
+  `to its members.</p>` +
+  `<button class="inline confirm-btn" ` +
+  `onclick="revertDraft()">` +
+  `Yes <span class="confirm-thumbsup">👍</span></button>` +
+  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
+  `<div class="msg error hide" id="confirm-error"></div>`;
+  confirmDialog.showModal();
+});
+
+async function revertDraft() {
+  const okIcon = document.querySelector('.confirm-thumbsup');
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const confirmError = document.querySelector('#confirm-error');
+
+  confirmBtn.disabled = true;
+  okIcon.style.animationName = 'loading';
+
+  fetch(`/ideas/${ideaId}/rollback`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((data) => {
+    confirmBtn.disabled = false;
+    okIcon.style.animationName = 'none';
+    if (data.error) {
+      console.log(data.error);
+      confirmError.classList.remove('hide');
+      confirmError.textContent = 'Something wen\' wrong. Please try again.';
+    } else {
+      window.location.reload();
     }
   });
 }
