@@ -108,6 +108,7 @@ export default async function auth(fastify, _options) {
       return rep.code(400).send({error: 'expired'});
     }
     let id;
+    let mainEmail;
     await fastify.mongo.db.collection('verification-codes').deleteMany({email});
     if (req.body.type == 'signup') {
       const newUser = await fastify.mongo.db.collection('users')
@@ -119,10 +120,12 @@ export default async function auth(fastify, _options) {
     } else if (req.body.type == 'login') {
       if (user) {
         id = user._id;
+        mainEmail = user.email;
       } else {
         id = backup._id;
+        mainEmail = backup.email;
       }
-      const token = generateToken(id, md5(email));
+      const token = generateToken(id, md5(mainEmail));
       await redis.rpush(id, token);
       return rep.code(200).send({token});
     } else if (req.body.type == 'changePrimary') {

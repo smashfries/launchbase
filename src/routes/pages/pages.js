@@ -25,6 +25,9 @@ export default async function pages(fastify, _options) {
   fastify.get('/backstage/email/update-primary', (_req, rep) => {
     return rep.sendFile('backstage/email/update-primary.html');
   });
+  fastify.get('/backstage/email/update-backup', (_req, rep) => {
+    return rep.sendFile('backstage/email/update-backup.html');
+  });
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.sendFile('backstage/security.html');
   });
