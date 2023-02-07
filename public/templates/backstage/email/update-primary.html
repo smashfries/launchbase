@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="/static/backstage/email.js" defer></script>
-    <title>Launch Base | Email</title>
+    <script src="/static/backstage/email/update-primary.js" defer></script>
+    <title>Launch Base | Update Primary Email</title>
 </head>
 <body>
     <h1 class="logo-title"><a href="/">Launch Base</a></h1>
@@ -34,18 +34,18 @@
             <a href="/backstage/notifications" class="panel-item">Notifications</a>
         </div>
         <div class="settings-content">
-            <h3>Email Settings</h3>
+            <h3>Update Primary Email</h3>
             <hr>
-            <p class="info msg">Loading data...</p>
-            <form>
-              <label for="publicEmail">Display your email address publicly?</label>
-              <input type="checkbox" name="publicEmail" class="inline"><br>
-              <label for="subscription">Receive regular updates and announcements from Launch Base?</label>
-              <input type="checkbox" name="subscription" class="inline"><br>
-              <button type="submit" class="back-btn">Update <span class="submit-icon">👉</span></button>
-            </form>
-            <p>Primary email: <span id="primary-email">...</span> <a href="/backstage/email/update-primary" class="small-emoji-btn">✏️</a></p>
-            <p>Backup email: <span id="backup-email">...</span> <a href="/backstage/email/update-backup" class="small-emoji-btn">✏️</a></p>
+            <div>
+              <h2 class="login-title">Verify your new email</h2>
+              <p class="desc">This will be the main email associated with your account.</p>
+
+              <form id="login-form" data-step="verify-email">
+                <input type="email" placeholder="New primary email" class="email-input" required>
+                <button type="submit" class="no-margin">Next <span class="submit-icon">👉</span></button>
+              </form>
+            </div>
+            <br>
         </div>
     </div>
 

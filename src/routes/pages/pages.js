@@ -20,7 +20,10 @@ export default async function pages(fastify, _options) {
     return rep.sendFile('backstage/profile.html');
   });
   fastify.get('/backstage/email', (_req, rep) => {
-    return rep.sendFile('backstage/email.html');
+    return rep.sendFile('backstage/email/email.html');
+  });
+  fastify.get('/backstage/email/update-primary', (_req, rep) => {
+    return rep.sendFile('backstage/email/update-primary.html');
   });
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.sendFile('backstage/security.html');

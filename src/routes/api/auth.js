@@ -127,7 +127,7 @@ export default async function auth(fastify, _options) {
       return rep.code(200).send({token});
     } else if (req.body.type == 'changePrimary') {
       await users.updateOne({_id: req.userOId}, {$set: {email}});
-      const token = generateToken(id, md5(email));
+      const token = generateToken(req.user, md5(email));
       await redis.lrem(req.user, 1, req.token);
       await redis.rpush(req.user, token);
       return rep.code(200).send({token});

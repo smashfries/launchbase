@@ -13,7 +13,7 @@ export const sendEmailVerificationOpts = {
       required: ['email', 'type'],
       properties: {
         email: {type: 'string', maxLength: 320},
-        type: {type: 'string', maxLength: 6},
+        type: {type: 'string', maxLength: 13},
 
       },
     },
@@ -42,7 +42,7 @@ export const verifyCodeOpts = {
       required: ['email', 'type', 'code', 'identifier'],
       properties: {
         code: {type: 'string', maxLength: 6},
-        type: {type: 'string', maxLength: 6},
+        type: {type: 'string', maxLength: 13},
         identifier: {type: 'string', maxLength: 48},
         email: {type: 'string', maxLength: 320},
       },
