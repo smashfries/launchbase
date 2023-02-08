@@ -17,6 +17,7 @@ const publicInput = document.querySelector('[name="publicEmail"]');
 const subInput = document.querySelector('[name="subscription"]');
 const primaryEmail = document.querySelector('#primary-email');
 const backupEmail = document.querySelector('#backup-email');
+const switchEmails = document.querySelector('#switch-emails');
 const msg = document.querySelector('.msg');
 
 fetch('/email-settings', {
@@ -34,6 +35,9 @@ fetch('/email-settings', {
       subInput.checked = data.subscribed;
       primaryEmail.textContent = data.email;
       backupEmail.textContent = data.backupEmail || 'Not set';
+      if (data.backupEmail) {
+        switchEmails.classList.remove('hide');
+      }
     });
 
 const pfpDropdown = document.querySelector('#pfp-dropdown');
@@ -41,6 +45,23 @@ const pfpElement = document.querySelector('.pfp-container');
 const logoutBtn = document.querySelector('#logout-btn');
 const lockIcon = document.querySelector('.lock-icon');
 const submitIcon = document.querySelector('.submit-icon');
+const swapIcons = document.querySelector('.swap-icon');
+
+switchEmails.addEventListener('click', async () => {
+  switchEmails.disabled = true;
+  swapIcons.style.animationName = 'loading';
+  fetch('/email-settings/swap-emails', {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then((res) => res.json()).then((data) => {
+    if (data.error) {
+      console.log(data);
+    }
+    window.location.reload();
+  });
+});
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
