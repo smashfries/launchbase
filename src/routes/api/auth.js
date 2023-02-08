@@ -38,16 +38,34 @@ export default async function auth(fastify, _options) {
         if (req.body.type == 'changePrimary' ||
           req.body.type == 'changeBackup') {
           const currentUser = await users.findOne({_id: req.userOId});
-          if (currentUser.email == email || currentUser.backup == email) {
+          if (currentUser.email == email || currentUser.backupEmail == email) {
             return rep.code(400).send({error: 'same email was provided'});
           }
           if (user || backup) {
             return rep.code(400).send({error: 'account-exists'});
           }
         }
-        const result = await sendEmailVerification(email);
-        if (result == 'error') {
-          return rep.code(400).send({error: 'invalid-email'});
+        let result;
+        if (req.body.type == 'login') {
+          let emailList = [];
+          if (user) {
+            if (user.backupEmail) {
+              emailList = [user.email, user.backupEmail];
+            } else {
+              emailList = [user.email];
+            }
+          } else {
+            emailList = [email, backup.email];
+          }
+          result = await sendEmailVerification(emailList);
+          if (result == 'error') {
+            return rep.code(400).send({error: 'invalid-email'});
+          }
+        } else {
+          result = await sendEmailVerification([email]);
+          if (result == 'error') {
+            return rep.code(400).send({error: 'invalid-email'});
+          }
         }
         const deviceIdentifier = randomBytes(24).toString('hex');
         const codes = fastify.mongo.db.collection('verification-codes');
@@ -82,7 +100,7 @@ export default async function auth(fastify, _options) {
     if (req.body.type == 'changePrimary' ||
       req.body.type == 'changeBackup') {
       const currentUser = await users.findOne({_id: req.userOId});
-      if (currentUser.email == email || currentUser.backup == email) {
+      if (currentUser.email == email || currentUser.backupEmail == email) {
         return rep.code(400).send({error: 'same email was provided'});
       }
       if (user || backup) {

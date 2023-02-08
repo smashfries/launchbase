@@ -15,13 +15,19 @@ export const validateEmail = function(email) {
   return re.test(String(email).toLowerCase());
 };
 
-export const sendEmailVerification = function(email) {
+export const sendEmailVerification = function(emailList) {
   return new Promise((resolve) => {
-    if (validateEmail(email)) {
+    const validEmails = emailList.map((i) => {
+      return validateEmail(i);
+    });
+    if (!validEmails.includes(false)) {
       const code = nanoid();
+      const personalizations = emailList.map((i) => {
+        return {to: [{email: i}]};
+      });
       const msg = {
-        to: email,
-        from: 'aditya@adityaone.com',
+        personalizations,
+        from: {email: 'aditya@adityaone.com', name: 'Aditya'},
         template_id: 'd-0d96eccea78c4d9987615cc15774bc42',
         dynamic_template_data: {
           code,

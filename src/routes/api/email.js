@@ -32,4 +32,19 @@ export default async function email(fastify, _options) {
       rep.code(400).send({error: 'unauthorized'});
     }
   });
+
+  fastify.patch('/email-settings/swap-emails', async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const users = fastify.mongo.db.collection('users');
+    const user = await users.findOne({_id: req.userOId});
+    if (!user.backupEmail) {
+      return rep.code(400).send({error: 'backup email not set'});
+    }
+    await users.updateOne({_id: req.userOId}, {$set:
+      {email: user.backupEmail, backupEmail: user.email}});
+
+    rep.code(200).send({message: 'emails successfully swapped!'});
+  });
 };
