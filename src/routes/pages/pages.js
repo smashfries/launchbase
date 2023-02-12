@@ -1,3 +1,5 @@
+import {jsPath} from '../../utils/path.js';
+
 /**
  * All routes that send static html files
  * @param {*} fastify
@@ -58,7 +60,15 @@ export default async function pages(fastify, _options) {
   fastify.get('/discuss/:commentId', (_req, rep) => {
     return rep.sendFile('discuss/discuss.html');
   });
+  fastify.get('/the-real-thing', (_req, rep) => {
+    return rep.view('coming-soon.hbs', {jsPath: jsPath('coming-soon'),
+      title: 'The Real Thing', realSection: true});
+  });
+  fastify.get('/perks', (_req, rep) => {
+    return rep.view('coming-soon.hbs', {jsPath: jsPath('coming-soon'),
+      title: 'Perks', perksSection: true});
+  });
   fastify.get('/*', (_req, rep) => {
-    return rep.sendFile('404.html');
+    return rep.code(404).sendFile('404.html');
   });
 }

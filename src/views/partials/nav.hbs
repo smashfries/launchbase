@@ -1,0 +1,35 @@
+<div class="side-panel">
+    {{#if backstageSection}}
+
+    <h2>Backstage</h2>
+    <a href="/backstage/profile" class="panel-item">Your profile</a>
+    <a href="/backstage/email" class="panel-item">Email settings</a>
+    <a href="/backstage/security" class="panel-item">Security</a>
+    <a href="/backstage/dms" class="panel-item">DMs</a>
+    <a href="/backstage/notifications" class="panel-item">Notifications</a>
+
+    {{else if realSection}}
+
+    <h2>The Real Thing</h2>
+    <a href="#" class="panel-item">Community Businesses</a>
+    <a href="#" class="panel-item">Launch a new Business</a>
+    <a href="#" class="panel-item">My businesses</a>
+    <a href="#" class="panel-item">Subscrived businesses</a>
+
+    {{else if perksSection}}
+
+    <h2>Perks</h2>
+    <a href="#" class="panel-item">View Perks</a>
+    <a href="#" class="panel-item">Activated Perks</a>
+    <a href="#" class="panel-item">Request Assistance</a>
+
+    {{else if ideaSection}}
+
+    <h2>Just an Idea</h2>
+    <a href="/just-an-idea" class="panel-item">Community Ideas</a>
+    <a href="/just-an-idea/new" class="panel-item">Create New Idea</a>
+    <a href="/just-an-idea/drafts" class="panel-item">My Draft Ideas</a>
+    <a href="/just-an-idea/published" class="panel-item">My Published Ideas</a>
+
+    {{/if}}
+</div>

@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 
 import {resolve} from 'path';
+import minifier from 'html-minifier';
 
 import fastifyStatic from '@fastify/static';
 import pointOfView from '@fastify/view';
@@ -56,6 +57,15 @@ fastify.register(pointOfView, {
     handlebars,
   },
   root: resolve('./src/views'),
+  layout: 'layout.hbs',
+  options: {
+    useHtmlMinifier: minifier,
+    partials: {
+      header: 'partials/header.hbs',
+      profilePic: 'partials/profile-pic.hbs',
+      nav: 'partials/nav.hbs',
+    },
+  },
 });
 
 fastify.decorateRequest('user', null);
