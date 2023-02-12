@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A startup community to help get transform an idea to a business with real users!">
+  <link rel="stylesheet" href="/static/index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>Launch Base | Contact</title>
+</head>
+<body>
+  
+  <a href="/"><h1 class="logo-title">Launch Base</h1></a>
+
+  <div class="nav">
+    <a href="contact" class="nav-link"><u>Contact/Support</u></a>
+    <a href="login" class="nav-link">Log In</a>
+    <a href="signup" class="nav-link">Sign Up</a>
+  </div>
+  <br>
+  <center>
+    <p>Email: <b><a href="mailto:aditya@launchbase.app">aditya@launchbase.app</a></b></p>
+    <p>Expect an immediate response within 8 hours.</p>
+
+    <br>
+    <p>or</p>
+    <br>
+
+    <p><b>Schedule a callback</b></p>
+    <p>Receive a phone call at any time as per your convenience.</p>
+    <p>Working hours: 9am - 9pm Indian Standard Time (All days of the week)</p>
+    <input type="text" id="name" placeholder="Your name">
+    <input type="text" id="phone" placeholder="Phone number">
+    <p class="desc">Please include your country code (Example: +91 for India)</p>
+    <input type="datetime-local" id="date">
+    <p class="desc">Please give atleast 5 minutes of buffer time.</p>
+    <br>
+    <button>Schedule a call</button>
+  </center>
+
+<script>
+  const button = document.querySelector('button');
+  const name = document.querySelector('#name')
+  const phoneNumber = document.querySelector('#phone');
+  const time = document.querySelector('#date');
+
+  const currentTime = new Date().getTime();
+  const timezoneOffset = new Date().getTimezoneOffset();
+
+  const minTime = currentTime + 300000 -(timezoneOffset*60*1000);
+  let minTimeFormatted = new Date(minTime).toISOString().split('Z')[0].split(':');
+  minTimeFormatted.pop();
+  minTimeFormatted = minTimeFormatted.join(':');
+  time.setAttribute('min', minTimeFormatted);
+
+  button.addEventListener('click', async () => {
+    if (phoneNumber.value === '' || time.value === '' || name.value === '') {
+      return alert('Please enter your name, phone number, and the time you want to be called.')
+    }
+    if (!time.checkValidity()) {
+      return alert('Please enter a valid time that is within working hours. We need atleast 5 min of buffer in order to call you back.')
+    }
+    const phoneRegex = /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+    if (!phoneRegex.test(phoneNumber.value)) {
+      return alert('Please enter a valid phone number')
+    }
+
+    const UTCTime = new Date(time.value).toUTCString();
+    
+    fetch('/request-callback', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name.value,
+        phone: phoneNumber.value,
+        time: UTCTime
+      })
+    }).then((res) => res.json()).then((data) => {
+      if (data.error) {
+        switch (data.error) {
+          case 'invalid-phone':
+            alert('Phone number is invalid.')
+            break;
+      
+          case 'invalid-time':
+            alert('Date was invalid')
+            break;
+          case 'outside-working-hours':
+            alert('Please select a time that is within our working hours.')
+          default:
+            break;
+        }
+      } else {
+        window.location.href = `/callback-confirmation?id=${data.requestId}&phone=${encodeURIComponent(phoneNumber.value)}&time=${encodeURIComponent(UTCTime)}`;
+      }
+    })
+  })
+</script>
+</body>
+</html>

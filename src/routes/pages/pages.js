@@ -13,6 +13,12 @@ export default async function pages(fastify, _options) {
   fastify.get('/signup', (_req, rep) => {
     return rep.sendFile('signup.html');
   });
+  fastify.get('/contact', (_req, rep) => {
+    return rep.sendFile('contact.html');
+  });
+  fastify.get('/callback-confirmation', (_req, rep) => {
+    return rep.sendFile('confirm-callback.html');
+  });
   fastify.get('/backstage', (_req, rep) => {
     return rep.redirect('/backstage/profile');
   });

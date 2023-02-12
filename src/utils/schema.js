@@ -664,6 +664,37 @@ export const deleteComment = {
   },
 };
 
+
+export const requestCallbackOpts = {
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        phone: {type: 'string'},
+        name: {type: 'string'},
+        time: {type: 'string'},
+      },
+      required: ['phone', 'name', 'time'],
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          message: {type: 'string'},
+          requestId: {type: 'string'},
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const logoutOpts = {
   schema: {
     headers,

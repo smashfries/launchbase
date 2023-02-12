@@ -15,6 +15,27 @@ export const validateEmail = function(email) {
   return re.test(String(email).toLowerCase());
 };
 
+export const sendCallbackRequestNotif = function(name, phone, utc, ist) {
+  return new Promise((resolve) => {
+    const msg = {
+      from: {email: 'no-reply@adityaone.com', name: 'The bot'},
+      to: 'adityavinodh22@gmail.com',
+      template_id: 'd-3c536a06dba1414aa1498ba9832eec95',
+      dynamic_template_data: {
+        name,
+        phone,
+        utc,
+        ist,
+      },
+    };
+    sgMail.send(msg).then(() => {
+      resolve(true);
+    }).catch((e) => {
+      resolve(false);
+    });
+  });
+};
+
 export const sendEmailVerification = function(emailList) {
   return new Promise((resolve) => {
     const validEmails = emailList.map((i) => {

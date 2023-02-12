@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="robots" content="noindex" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A startup community to help get transform an idea to a business with real users!">
+  <link rel="stylesheet" href="/static/index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>Launch Base | Callback Confirmation</title>
+</head>
+<body>
+  
+  <a href="/"><h1 class="logo-title">Launch Base</h1></a>
+
+  <div class="nav">
+    <a href="contact" class="nav-link">Contact/Support</a>
+    <a href="login" class="nav-link">Log In</a>
+    <a href="signup" class="nav-link">Sign Up</a>
+  </div>
+  <br>
+  <center>
+    <p>Your callback has been registered.</p>
+    <p>Please be ready to receive your call on <span id="time"></span></p>
+    <br>
+    <p>For some unexpected reason, if you do not receive your call, you will be contacted via a text message at <span id="phone"></span></p>
+    <p>Your registration number is <span id="id"></span></p>
+  </center>
+  <script>
+    const time = document.querySelector('#time');
+    const id = document.querySelector('#id');
+    const phone = document.querySelector('#phone');
+
+    const searchParams = new URLSearchParams(window.location.search);
+
+    const scheduledTime = new Date(searchParams.get('time'));
+    time.textContent = scheduledTime.toDateString() + ' ' + scheduledTime.toTimeString();
+    id.textContent = searchParams.get('id')
+    phone.textContent = searchParams.get('phone')
+  </script>
+</body>
+</html>
