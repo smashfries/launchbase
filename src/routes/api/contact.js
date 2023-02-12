@@ -53,6 +53,7 @@ export default async function contact(fastify, _options) {
       console.log(data);
     }).catch((err) => {
       console.log(err);
+      return rep.code(400).send({error: 'notification-failed'});
     });
 
     rep.code(200).send({message: 'your request was registered',
