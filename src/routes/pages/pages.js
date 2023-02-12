@@ -58,4 +58,7 @@ export default async function pages(fastify, _options) {
   fastify.get('/discuss/:commentId', (_req, rep) => {
     return rep.sendFile('discuss/discuss.html');
   });
+  fastify.get('/*', (_req, rep) => {
+    return rep.sendFile('404.html');
+  });
 }
