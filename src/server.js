@@ -119,12 +119,12 @@ async function start() {
   const port = process.env.PORT || 3000;
 
   // You must listen on all IPV4 addresses in Cloud Run
-  const address = '0.0.0.0';
+  const host = '0.0.0.0';
 
   try {
     const server = build();
-    await server.listen({port});
-    console.log(`Listening on ${address}:${port}`);
+    await server.listen({port, host});
+    console.log(`Listening on ${host}:${port}`);
   } catch (err) {
     console.error(err);
     process.exit(1);

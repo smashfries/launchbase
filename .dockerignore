@@ -3,3 +3,8 @@ README.md
 node_modules
 npm-debug.log
 pnpm-lock.yaml
+.env
+.eslintrc.json
+.gitignore
+.git
+.vscode
