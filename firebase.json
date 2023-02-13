@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "server-image",
+          "region": "asia-south1"
+        }
+      }
+    ]
+  }
+}
