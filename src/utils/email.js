@@ -18,7 +18,7 @@ export const validateEmail = function(email) {
 export const sendCallbackRequestNotif = function(name, phone, utc, ist) {
   return new Promise((resolve) => {
     const msg = {
-      from: {email: 'no-reply@adityaone.com', name: 'The bot'},
+      from: {email: 'no-reply@launchbase.app', name: 'Launch Base'},
       to: 'adityavinodh22@gmail.com',
       template_id: 'd-3c536a06dba1414aa1498ba9832eec95',
       dynamic_template_data: {
@@ -48,7 +48,7 @@ export const sendEmailVerification = function(emailList) {
       });
       const msg = {
         personalizations,
-        from: {email: 'aditya@adityaone.com', name: 'Aditya'},
+        from: {email: 'no-reply@launchbase.app', name: 'Launch Base'},
         template_id: 'd-0d96eccea78c4d9987615cc15774bc42',
         dynamic_template_data: {
           code,
@@ -73,7 +73,7 @@ export const inviteIdeaMembers = function(emailList, ideaId) {
     });
     const msg = {
       personalizations,
-      from: 'aditya@adityaone.com',
+      from: {email: 'no-reply@launchbase.app', name: 'Launch Base'},
       template_id: 'd-4533f15b05714033952240af1da8729e',
     };
     sgMail.send(msg).then(() => {
