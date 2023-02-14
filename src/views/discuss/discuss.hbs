@@ -1,0 +1,28 @@
+<h3>Discuss</h3>
+<hr>
+<div class="msg info">Loading data...</div>
+<div id="main-content" class="hide">
+  <div id="parent-comment">
+    <p id="parent-text"></p>
+    <button id="idea-upvote" data-upvoted="false" class="light-btn new-btn"><span id="upvote-text">Upvote</span> <span id="upvote-count"></span><span id="idea-upvote-icon" class="submit-icon">👌</span></button> <p class="no-margin">Like the comment? Give the creators an upvote!</p>
+    <br>
+    <button id="delete-main" class="mini-btn light-btn">Delete 🗑️</button>
+  </div>
+  <br>
+  <h5>Replies</h5>
+  <div id="comment-container" class="container no-margin">
+    <div id="comment-data" class="hide">
+      <p class="comment-count-div"><span id="comment-count"></span></p>
+      <textarea id="reply-box" class="full-width" placeholder="What do you think?" rows="5"></textarea>
+      <button class="no-margin" id="post-comment">Share a Comment</button>
+      <div class="v-spacer"></div>
+      <div class="msg error hide" id="comment-error">This is an error message!</div>
+        <div class="pagination-container">
+          Page: 
+          <a id="prev" title="Previous page">👈</a>
+          <input type="text" min="1" id="page-in" required class="inline">
+          <a id="next" title="Next page">👉</a>
+        </div>
+    </div>
+  </div>
+</div>

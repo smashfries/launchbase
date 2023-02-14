@@ -74,7 +74,8 @@ export default async function pages(fastify, _options) {
     return rep.sendFile('just-an-idea/idea.html');
   });
   fastify.get('/discuss/:commentId', (_req, rep) => {
-    return rep.sendFile('discuss/discuss.html');
+    return rep.view('discuss/discuss.hbs', {jsPath: 'discuss/discuss',
+      title: 'Discuss', discussSection: true});
   });
   fastify.get('/the-real-thing', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',

@@ -31,5 +31,12 @@
     <a href="/just-an-idea/drafts" class="panel-item{{#if draftIdeasPage}} active-panel-item{{/if}}">My Draft Ideas</a>
     <a href="/just-an-idea/published" class="panel-item{{#if publishedIdeasPage}} active-panel-item{{/if}}">My Published Ideas</a>
 
+
+    {{else if discussSection}}
+    <h2>Navigate the Discussion 🧵</h2>
+    <a href="#" class="panel-item" id="parent">Parent discussion</a>
+    <a href="#" class="panel-item" id="super-parent">Start of the discussion</a>
+
+
     {{/if}}
 </div>
