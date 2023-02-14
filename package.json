@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "deploy": "docker build -t asia-south1-docker.pkg.dev/launch-base-349605/launchbase-server/server-image . && docker tag asia-south1-docker.pkg.dev/launch-base-349605/launchbase-server/server-image asia-south1-docker.pkg.dev/launch-base-349605/launchbase-server/server-image && docker push asia-south1-docker.pkg.dev/launch-base-349605/launchbase-server/server-image"
   },
   "author": "Aditya",
   "dependencies": {
