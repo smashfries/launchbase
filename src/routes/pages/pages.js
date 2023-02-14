@@ -36,7 +36,8 @@ export default async function pages(fastify, _options) {
     return rep.sendFile('backstage/email/update-backup.html');
   });
   fastify.get('/backstage/security', (_req, rep) => {
-    return rep.sendFile('backstage/security.html');
+    return rep.view('backstage/security.hbs', {jsPath: 'backstage/security',
+      title: 'Security', backstageSection: true, securityPage: true});
   });
   fastify.get('/backstage/dms', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
