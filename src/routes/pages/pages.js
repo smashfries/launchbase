@@ -27,13 +27,21 @@ export default async function pages(fastify, _options) {
       title: 'Profile', backstageSection: true, profilePage: true});
   });
   fastify.get('/backstage/email', (_req, rep) => {
-    return rep.sendFile('backstage/email/email.html');
+    return rep.view('backstage/email/email.hbs',
+        {jsPath: 'backstage/email/email', title: 'Email',
+          backstageSection: true, emailPage: true});
   });
   fastify.get('/backstage/email/update-primary', (_req, rep) => {
-    return rep.sendFile('backstage/email/update-primary.html');
+    return rep.view('backstage/email/update-primary.hbs',
+        {jsPath: 'backstage/email/update-primary',
+          title: 'Update Primary Email', backstageSection: true,
+          emailPage: true});
   });
   fastify.get('/backstage/email/update-backup', (_req, rep) => {
-    return rep.sendFile('backstage/email/update-backup.html');
+    return rep.view('backstage/email/update-backup.hbs',
+        {jsPath: 'backstage/email/update-backup',
+          title: 'Update Backup Email', backstageSection: true,
+          emailPage: true});
   });
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.view('backstage/security.hbs', {jsPath: 'backstage/security',

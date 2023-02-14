@@ -1,0 +1,13 @@
+<h3>Email Settings</h3>
+<hr>
+<p class="info msg">Loading data...</p>
+<form>
+  <label for="publicEmail">Display your email address publicly?</label>
+  <input type="checkbox" name="publicEmail" class="inline"><br>
+  <label for="subscription">Receive regular updates and announcements from Launch Base?</label>
+  <input type="checkbox" name="subscription" class="inline"><br>
+  <button type="submit" class="back-btn">Update <span class="submit-icon">👉</span></button>
+</form>
+<p>Primary email: <span id="primary-email">...</span> <a href="/backstage/email/update-primary" class="small-emoji-btn">✏️</a></p>
+<p>Backup email: <span id="backup-email">...</span> <a href="/backstage/email/update-backup" class="small-emoji-btn">✏️</a></p>
+<button id="switch-emails" class="mini-btn light-btn hide">Swap primary and backup emails? <span class="submit-icon swap-icon">🔃</span></button>
