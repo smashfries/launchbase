@@ -23,7 +23,8 @@ export default async function pages(fastify, _options) {
     return rep.redirect('/backstage/profile');
   });
   fastify.get('/backstage/profile', (_req, rep) => {
-    return rep.sendFile('backstage/profile.html');
+    return rep.view('backstage/profile.hbs', {jsPath: 'backstage/profile',
+      title: 'Profile', backstageSection: true, profilePage: true});
   });
   fastify.get('/backstage/email', (_req, rep) => {
     return rep.sendFile('backstage/email/email.html');

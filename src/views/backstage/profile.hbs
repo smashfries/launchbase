@@ -1,0 +1,33 @@
+<h3>Your Profile</h3>
+<hr>
+<p class="desc">All information excluding your email is public by default. Email can be made public explicitly if required.</p>
+<p class="info msg">Loading data...</p>
+<form>
+    <h4>Who I am</h4>
+    <input type="text" placeholder="Full Name*" name="name" required maxlength="256">
+    <div id="name-tooltip" role="tooltip">Full Name</div>
+
+    <input type="text" name="nick" placeholder="Display Name*" required maxlength="256">
+    <div id="nick-tooltip" role="tooltip">Display Name</div>
+
+    <input type="text" name="url" placeholder="Handle*" required maxlength="256">
+    <div id="url-tooltip" role="tooltip">Handle</div>
+
+    <input type="text" name="occ" placeholder="Occupation*" required maxlength="256">
+    <div id="occ-tooltip" role="tooltip">Occupation</div>
+
+    <input type="text" name="skills" placeholder="Skills*" required maxlength="256">
+    <div id="skills-tooltip" role="tooltip">Skills</div>
+
+    <input type="text" name="interests" placeholder="Interests*" required maxlength="256">
+    <div id="interests-tooltip" role="tooltip">Interests</div>
+
+    <h4>Social</h4>
+    <input type="text" name="twitter" placeholder="Twitter handle" maxlength="16">
+    <div id="twitter-tooltip" role="tooltip">Twitter handle</div>
+
+    <input type="text" name="github" placeholder="GitHub username" maxlength="39">
+    <div id="github-tooltip" role="tooltip">GitHub Username</div>
+
+    <button type="submit" class="back-btn">Update <span class="submit-icon">👉</span></button>
+</form>
