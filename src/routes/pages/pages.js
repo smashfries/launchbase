@@ -1,5 +1,3 @@
-import {jsPath} from '../../utils/path.js';
-
 /**
  * All routes that send static html files
  * @param {*} fastify
@@ -39,6 +37,14 @@ export default async function pages(fastify, _options) {
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.sendFile('backstage/security.html');
   });
+  fastify.get('/backstage/dms', (_req, rep) => {
+    return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
+      title: 'DMs', backstageSection: true, dmsPage: true});
+  });
+  fastify.get('/backstage/notifications', (_req, rep) => {
+    return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
+      title: 'Notifications', backstageSection: true, notificationsPage: true});
+  });
   fastify.get('/just-an-idea', (_req, rep) => {
     return rep.sendFile('just-an-idea/ideas.html');
   });
@@ -61,11 +67,11 @@ export default async function pages(fastify, _options) {
     return rep.sendFile('discuss/discuss.html');
   });
   fastify.get('/the-real-thing', (_req, rep) => {
-    return rep.view('coming-soon.hbs', {jsPath: jsPath('coming-soon'),
+    return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
       title: 'The Real Thing', realSection: true});
   });
   fastify.get('/perks', (_req, rep) => {
-    return rep.view('coming-soon.hbs', {jsPath: jsPath('coming-soon'),
+    return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
       title: 'Perks', perksSection: true});
   });
   fastify.get('/*', (_req, rep) => {
