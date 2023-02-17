@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
-
     <script src="/static/{{jsPath}}.js" defer></script>
     <title>Launch Base | {{title}}</title>
 </head>
@@ -23,5 +22,8 @@
       {{{body}}}
     </div>
   </div>
+  {{#if profilePage}}
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  {{/if}}
 </body>
 </html>
