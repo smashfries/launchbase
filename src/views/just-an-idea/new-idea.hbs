@@ -1,0 +1,40 @@
+<h3>Create a New Idea</h3>
+<hr>
+<p class="desc">Add the details for your new idea! When you hit submit, it will be saved as a draft, waiting for you to publish it to the entire Launch Base community.</p>
+<div class="msg info">Loading data...</div>
+<form>
+  <input type="text" placeholder="Idea Name" name="name" required maxlength="256">
+  <p class="desc">Give your idea a short and catchy name</p>
+
+  <input type="text" placeholder="Description" name="desc" maxlength="256">
+  <p class="desc">Provide a very brief explanation of your idea. No more than 2 or 3 sentences.</p>
+
+  <textarea name="idea" id="idea" cols="30" rows="10" placeholder="What is it?" maxlength="10000"></textarea>
+  <p class="desc">Explain every part of your idea with details</p>
+
+  <h4>Additional Links</h4>
+  <p class="desc">You can add external links to give the community more information about your ideas.</p>
+  <div id="link-inputs">
+    <!-- <div class="link-item">
+        <input type="text" placeholder="https://..." maxlength="2048">
+        <button>🗑️</button>
+    </div> -->
+  </div>
+  <button class="new-btn" id="link-btn" type="button">Add a link</button>
+
+  <h4>Invite Team Members</h4>
+  <p class="desc">Invite members to work on your idea by adding their email address. Tell them to check their email!</p>
+  <div id="email-inputs">
+    <!-- <div class="link-item">
+        <input type="email" placeholder="johndoe@example.com" maxlength="320">
+        <button>🗑️</button>
+    </div> -->
+  </div>
+  <button class="new-btn" id="email-btn" type="button">Add a member</button>
+
+  <br>
+  <hr>
+  <p class="msg error hide">There is an error.</p>
+  <button id="create-btn" type="submit">Save Draft <span class="submit-icon">👉</span></button>
+  <p class="desc">Submit and save this idea as a draft!</p>
+</form>

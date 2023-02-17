@@ -60,7 +60,9 @@ export default async function pages(fastify, _options) {
       title: 'Ideas', ideaSection: true, communityIdeasPage: true});
   });
   fastify.get('/just-an-idea/new', (_req, rep) => {
-    return rep.sendFile('just-an-idea/new-idea.html');
+    return rep.view('just-an-idea/new-idea.hbs',
+        {jsPath: 'just-an-idea/new-idea', title: 'Create Idea',
+          ideaSection: true, newIdeaPage: true});
   });
   fastify.get('/just-an-idea/drafts', (_req, rep) => {
     return rep.view('just-an-idea/drafts.hbs', {jsPath: 'just-an-idea/drafts',
