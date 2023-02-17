@@ -1,0 +1,83 @@
+<h3>The Idea</h3>
+<hr>
+<div class="msg info">Loading data...</div>
+<div id="pending-idea" class="hide">
+  <p><strong>Status:</strong> Draft (Private)</p>
+  <form id="pending-idea-form">
+    <input type="text" placeholder="Idea Name" name="name" required maxlength="256">
+    <p class="desc">Give your idea a short and catchy name</p>
+
+    <input type="text" placeholder="Description" name="desc" maxlength="256">
+    <p class="desc">Provide a very brief explanation of your idea. No more than 2 or 3 sentences.</p>
+
+    <textarea name="idea" id="idea" cols="30" rows="10" placeholder="What is it?" maxlength="10000"></textarea>
+    <p class="desc">Explain every part of your idea with details</p>
+
+    <h4>Additional Links</h4>
+    <p class="desc">You can add external links to give the community more information about your ideas.</p>
+    <div id="link-inputs">
+      <!-- <div class="link-item">
+          <input type="text" placeholder="https://..." maxlength="2048">
+          <button>🗑️</button>
+      </div> -->
+    </div>
+    <button class="new-btn" id="link-btn" type="button">Add a link</button>
+    
+    <br>
+    <p class="msg error hide">There is an error.</p>
+    <button id="create-btn" type="submit">Save Draft <span class="submit-icon">👉</span></button>
+    <p class="desc">Remember to save every time you make a change!</p>
+  </form>
+  <hr>
+  <h4>Team Members</h4>
+  <div id="member-list">
+  </div>
+  <hr>
+  <h4>Pending Invites</h4>
+  <div id="invite-list">
+    <div class="msg info" id="invite-loader">Loading data...</div>
+  </div>
+  <form id="invite-member">
+    <p style="margin-bottom: 0"><strong>Invite another member</strong></p>
+    <div class="email-item">
+      <input type="email" name="member" required id="invite-input" placeholder="johndoe@example.com">
+      <button type="submit" class="normal-btn invite-btn">Send Invite <span class="invite-icon">👉</span></button>
+    </div>
+    <div class="msg error hide" id="invite-error"></div>
+  </form>
+  <hr>
+  <h4>Executive Actions</h4>
+  <button class="new-btn" style="background-color: #ff5050;" id="leave">Leave this idea 👉</button>
+  <button class="new-btn" style="background-color: #04e569;" id="publish">Publish this idea 👉</button>
+</div>
+<div id="published-idea" class="hide">
+  <h4 id="idea-name" class="text-center"></h4>
+  <p class="desc" id="idea-desc"></p>
+  <p id="idea-members"></p>
+  <p id="idea-content"></p>
+  <br>
+  <h5 class="hide" id="link-title">Links</h5>
+  <div id="link-container"></div>
+  <br>
+  <button id="idea-upvote" data-upvoted="false" class="light-btn new-btn"><span id="upvote-text">Upvote</span> <span id="upvote-count"></span><span id="idea-upvote-icon" class="submit-icon">👌</span></button> <p class="no-margin">Like the idea? Give the creators an upvote to show your interest!</p>
+  <br><br>
+  <button id="revert-draft" class="mini-btn light-btn hide">Revert to Draft 🗒️</button>
+  <br>
+  <br>
+  <h5>Comments</h5>
+  <div id="comment-container" class="container no-margin">
+    <div id="comment-data">
+      <p class="comment-count-div"><span id="comment-count"></span></p>
+      <textarea id="reply-box" class="full-width" placeholder="What do you think?" rows="5"></textarea>
+      <button class="no-margin" id="post-comment">Share a Comment</button>
+      <div class="v-spacer"></div>
+      <div class="msg error hide" id="comment-error">This is an error message!</div>
+        <div class="pagination-container">
+          Page: 
+          <a id="prev" title="Previous page">👈</a>
+          <input type="text" min="1" id="page-in" required class="inline">
+          <a id="next" title="Next page">👉</a>
+        </div>
+    </div>
+  </div>
+</div>

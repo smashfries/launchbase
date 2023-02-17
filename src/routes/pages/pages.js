@@ -74,7 +74,8 @@ export default async function pages(fastify, _options) {
           ideaSection: true});
   });
   fastify.get('/just-an-idea/*', (_req, rep) => {
-    return rep.sendFile('just-an-idea/idea.html');
+    return rep.view('just-an-idea/idea.hbs', {jsPath: 'just-an-idea/idea',
+      title: 'The Idea', ideaSection: true});
   });
   fastify.get('/discuss/:commentId', (_req, rep) => {
     return rep.view('discuss/discuss.hbs', {jsPath: 'discuss/discuss',
