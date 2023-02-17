@@ -69,7 +69,9 @@ export default async function pages(fastify, _options) {
       title: 'Draft Ideas', ideaSection: true, draftIdeasPage: true});
   });
   fastify.get('/just-an-idea/published', (_req, rep) => {
-    return rep.sendFile('just-an-idea/published.html');
+    return rep.view('just-an-idea/published.hbs',
+        {jsPath: 'just-an-idea/published', title: 'Published Ideas',
+          ideaSection: true, publishedIdeasPage: true});
   });
   fastify.get('/just-an-idea/accept-invite', (_req, rep) => {
     return rep.view('just-an-idea/accept-invite.hbs',
