@@ -89,7 +89,7 @@ export default async function ideaInvites(fastify, _options) {
       const token = req.body.token;
       const decoded = verifyToken(token);
       if (!decoded) {
-        return rep.code(400).send({error: 'invalid token'});
+        return rep.code(400).send({error: 'invalid tokens'});
       }
       const ideaId = new fastify.mongo.ObjectId(decoded.ideaId);
       const ideaInvites = fastify.mongo.db.collection('idea-invites');
@@ -155,11 +155,14 @@ export default async function ideaInvites(fastify, _options) {
           const {token} = req.query;
           const decoded = verifyToken(token);
           if (!decoded) {
-            return rep.code(400).send({error: 'invalid token'});
+            return rep.code(400).send({error: 'invalid tokens'});
           }
           const ideaId = new fastify.mongo.ObjectId(decoded.ideaId);
           const ideas = fastify.mongo.db.collection('ideas');
           const idea = await ideas.findOne({_id: ideaId});
+          if (!idea) {
+            return rep.code(400).send({error: 'invalid tokens'});
+          }
           rep.code(200).send({name: idea.name});
         } else {
           rep.code(400).send({error: 'unauthorized'});
