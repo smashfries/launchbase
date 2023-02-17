@@ -718,6 +718,8 @@ submitReplyBtn.addEventListener('click', async () => {
       } else {
         if (data.error === 'profile incomplete') {
           commentError.classList.remove('hide');
+          commentError.classList.remove('info');
+          commentError.classList.add('error');
           commentError.innerHTML = 'Please complete your profile before' +
             ` posting a comment. Click <u><a href="/backstage/profile?` +
             `redirect=${window.location.href}">here</a></u> to update it!`;
