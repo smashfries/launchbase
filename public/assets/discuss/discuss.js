@@ -243,7 +243,9 @@ function setupComments() {
           .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
       ` <span class="submit-icon">👌</span></button>` +
       ` • <a href="/discuss/${reply._id}" ` +
-      `class="idea-link small-font">Replies</a> ` +
+      `class="idea-link small-font">${reply.replyCount || 0} ` +
+      `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}` +
+      `</a> ` +
       `${(payload.id === authorDetails._id) && !reply.deleted ?
         '• <button class="idea-link small-font" ' +
         'onclick="deleteCommentConfirm(' + '\'' + reply._id +

@@ -148,6 +148,7 @@ export default async function discuss(fastify, _options) {
               'timeStamp': 1,
               'deleted': 1,
               'upvotes': 1,
+              'replyCount': 1,
               'upvote_details._id': 1,
             },
           },
