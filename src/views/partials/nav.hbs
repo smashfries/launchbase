@@ -37,6 +37,13 @@
     <a href="#" class="panel-item" id="parent">Parent discussion</a>
     <a href="#" class="panel-item" id="super-parent">Start of the discussion</a>
 
+    {{else if talentSection}}
+    <h2>Talent</h2>
+    <a href="#" class="panel-item{{#if talentSearchPage}} active-panel-item{{/if}}">Search for Talent</a>
+    <a href="#" class="panel-item{{#if talentFollowingPage}} active-panel-item{{/if}}">Following Talent</a>
+    <a href="#" class="panel-item{{#if talentHirePage}} active-panel-item{{/if}}">Hire Talent</a>
+    <a href="#" class="panel-item{{#if talentOpportunitiesPage}} active-panel-item{{/if}}">Talent Opportunities</a>
+
 
     {{/if}}
 </div>

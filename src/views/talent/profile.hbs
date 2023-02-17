@@ -1,0 +1,30 @@
+<h3>Talent Profile</h3>
+<hr>
+{{#if user}}
+  <div class="profile-header">
+    <div class="right-col">
+      <h4>{{user.name}}</h4>
+      <p>{{user.nickname}} <span class="badge">@{{user.url}}</span></p>
+    </div>
+    <div class="left-col">
+      <img class="pfp" src="https://www.gravatar.com/avatar/{{emailHash}}?s=100&d=mp" alt="profile pic">
+    </div>
+  </div>
+  <center style="margin-top: 20px; margin-bottom: 20px;">
+    <u>{{user.occ}}</u>
+    <p>Skills: {{user.skills}}</p>
+    <p>Interests: {{user.interests}}</p>
+    <br>
+    {{#if user.publicEmail}}
+      <p>Email: <a href="mailto:{{user.email}}">{{user.email}}</a></p>
+    {{/if}}
+    {{#if user.twitter}}
+      <p>Twitter: <a href="https://twitter.com/{{user.twitter}}" target="_blank">{{user.twitter}}</a></p>
+    {{/if}}
+    {{#if user.github}}
+      <p>GitHub: <a href="https://github.com/{{user.github}}" target="_blank">{{user.github}}</a></p>
+    {{/if}}
+  </center>
+{{else}}
+  <div class="msg error">There is no user with this handle. Please check the URL again.</div>
+{{/if}}

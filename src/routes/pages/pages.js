@@ -1,3 +1,5 @@
+import {md5} from '../../utils/crypto.js';
+
 /**
  * All routes that send static html files
  * @param {*} fastify
@@ -93,6 +95,21 @@ export default async function pages(fastify, _options) {
   fastify.get('/perks', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
       title: 'Perks', perksSection: true});
+  });
+  fastify.get('/u/:handle', async (req, rep) => {
+    const {handle} = req.params;
+
+    const users = fastify.mongo.db.collection('users');
+    const user = await users.findOne({url: handle});
+
+    return rep.view('talent/profile.hbs', {jsPath: 'talent/profile',
+      title: user ? user.nickname + '\'s Talent Profile' : 'Talent Profile',
+      talentSection: true, talentProfilePage: true, user,
+      emailHash: user ? md5(user.email) : null});
+  });
+  fastify.get('/talent', (_req, rep) => {
+    return rep.view('coming-soon', {jsPath: 'coming-soon',
+      title: 'Talent', talentSection: true});
   });
   fastify.get('/*', (_req, rep) => {
     return rep.code(404).sendFile('404.html');

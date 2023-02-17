@@ -531,6 +531,18 @@ h5 {
   font-size: 24px;
 }
 
+.profile-header {
+  display: flex;
+  flex-wrap: wrap;
+  vertical-align: middle;
+  justify-content:center;
+}
+
+.profile-header .left-col, .profile-header .right-col {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;
