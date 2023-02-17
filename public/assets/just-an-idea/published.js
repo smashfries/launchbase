@@ -32,6 +32,11 @@ fetch('/ideas/my/published', {
       } else {
         msg.classList.add('hide');
         const ideas = data.latestIdeas;
+        if (ideas.length == 0) {
+          draftContainer.innerHTML = '<p>No published ideas to display! ' +
+          'Click <a style="margin:0" href="/just-an-idea/new"><u>here</u></a>' +
+          ' to create one first. Don\'t forget to publish it!</p>';
+        }
         ideas.forEach((idea) => {
           addIdeaItems(idea);
         });

@@ -32,6 +32,11 @@ fetch('/ideas/my/drafts', {
       } else {
         msg.classList.add('hide');
         const ideas = data.latestIdeas;
+        if (ideas.length == 0) {
+          draftContainer.innerHTML = '<p>No drafts to display! Click ' +
+          '<a style="margin:0" href="/just-an-idea/new"><u>here</u></a> ' +
+          'to create one.</p>';
+        }
         ideas.forEach((idea) => {
           addIdeaItems(idea);
         });
