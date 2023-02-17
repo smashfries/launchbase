@@ -41,10 +41,11 @@ export const verify = function(str, hash) {
  * Generates a jwt with email in the payload
  * @param {string} id user ID that is added to payload
  * @param {string} emailHash MD5 emailHash that is added to the payload
+ * @param {string} handle user's handle that is added to the payload
  * @return {string} jwt
  */
-export const generateToken = function(id, emailHash) {
-  const token = jwt.sign({id, emailHash}, process.env.SECRET);
+export const generateToken = function(id, emailHash, handle) {
+  const token = jwt.sign({id, emailHash, handle}, process.env.SECRET);
   return token;
 };
 

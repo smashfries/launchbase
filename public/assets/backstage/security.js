@@ -13,6 +13,13 @@ const emailHash = payload.emailHash;
 const pfp = `https://www.gravatar.com/avatar/${emailHash}?s=50&d=mp`;
 document.querySelector('.pfp').setAttribute('src', pfp);
 
+const publicProfileLink = document.querySelector('#public-profile');
+if (payload.handle) {
+  publicProfileLink.setAttribute('href', `/u/${payload.handle}`);
+} else {
+  publicProfileLink.setAttribute('href', '/backstage/profile');
+}
+
 const msg = document.querySelector('.msg');
 
 fetch('/active-tokens', {

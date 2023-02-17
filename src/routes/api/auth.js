@@ -127,28 +127,40 @@ export default async function auth(fastify, _options) {
     }
     let id;
     let mainEmail;
+    let handle;
     await fastify.mongo.db.collection('verification-codes').deleteMany({email});
     if (req.body.type == 'signup') {
       const newUser = await fastify.mongo.db.collection('users')
           .insertOne({email});
       id = newUser.insertedId;
-      const token = generateToken(id, md5(email));
+      const token = generateToken(id, md5(email), null);
       await redis.rpush(id, token);
       return rep.code(200).send({token});
     } else if (req.body.type == 'login') {
       if (user) {
         id = user._id;
         mainEmail = user.email;
+        handle = user.url;
       } else {
         id = backup._id;
         mainEmail = backup.email;
+        handle = backup.url;
       }
-      const token = generateToken(id, md5(mainEmail));
+      const token = generateToken(id, md5(mainEmail), handle);
       await redis.rpush(id, token);
       return rep.code(200).send({token});
     } else if (req.body.type == 'changePrimary') {
+      if (user) {
+        if (user.url) {
+          handle = user.url;
+        }
+      } else {
+        if (backup.url) {
+          handle = backup.url;
+        }
+      }
       await users.updateOne({_id: req.userOId}, {$set: {email}});
-      const token = generateToken(req.user, md5(email));
+      const token = generateToken(req.user, md5(email), handle);
       await redis.lrem(req.user, 1, req.token);
       await redis.rpush(req.user, token);
       return rep.code(200).send({token});
