@@ -56,7 +56,8 @@ export default async function pages(fastify, _options) {
       title: 'Notifications', backstageSection: true, notificationsPage: true});
   });
   fastify.get('/just-an-idea', (_req, rep) => {
-    return rep.sendFile('just-an-idea/ideas.html');
+    return rep.view('just-an-idea/ideas.hbs', {jsPath: 'just-an-idea/ideas',
+      title: 'Ideas', ideaSection: true, communityIdeasPage: true});
   });
   fastify.get('/just-an-idea/new', (_req, rep) => {
     return rep.sendFile('just-an-idea/new-idea.html');
