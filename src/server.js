@@ -64,6 +64,7 @@ fastify.register(pointOfView, {
       header: 'partials/header.hbs',
       profilePic: 'partials/profile-pic.hbs',
       nav: 'partials/nav.hbs',
+      confirmDialog: 'partials/confirm-dialog.hbs',
     },
   },
 });
