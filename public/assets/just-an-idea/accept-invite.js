@@ -39,7 +39,7 @@ fetch('/ideas/invite?token=' + inviteToken, {
         }
         msg.classList.remove('info');
         msg.classList.add('error');
-        if (data.error == 'invalid tokens') {
+        if (errorMessages[data.error]) {
           msg.textContent = errorMessages[data.error];
         } else {
           msg.textContent = 'Something wen\'t wrong. Please try again.';
@@ -62,6 +62,8 @@ fetch('/ideas/invite?token=' + inviteToken, {
 
 const errorMessages = {
   'invalid tokens': 'This invite is invalid.',
+  'idea does not exist': 'This idea does not exist. ' +
+  'The owner of the idea might have deleted it.',
   'unauthorized': 'You need to log in again.',
   'profile incomplete':
     `You must complete your profile before creating an idea! ` +

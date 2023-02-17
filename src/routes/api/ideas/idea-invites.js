@@ -161,7 +161,7 @@ export default async function ideaInvites(fastify, _options) {
           const ideas = fastify.mongo.db.collection('ideas');
           const idea = await ideas.findOne({_id: ideaId});
           if (!idea) {
-            return rep.code(400).send({error: 'invalid tokens'});
+            return rep.code(400).send({error: 'idea does not exist'});
           }
           rep.code(200).send({name: idea.name});
         } else {
