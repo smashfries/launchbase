@@ -244,6 +244,7 @@ fetch(`/ideas/${ideaId}`, {
             data.links.forEach((link) => {
               const linkItem = document.createElement('a');
               linkItem.setAttribute('href', link);
+              linkItem.setAttribute('target', '_blank');
               linkItem.classList.add('idea-link');
               linkItem.textContent = link + ' 🔗';
               ideaLinks.appendChild(linkItem);
