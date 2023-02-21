@@ -704,12 +704,21 @@ submitReplyBtn.addEventListener('click', async () => {
         container.classList.add('container');
         container.classList.add('comment-item');
         container.dataset.id = data.commentId;
+
+        const commentFragments = replyBox.value.split('\n');
+        let formattedCommentBody = '';
+        commentFragments.forEach((fragment) => {
+          formattedCommentBody = formattedCommentBody + '<span>' +
+            fragment + '</span><br>';
+        });
+
+
         container.innerHTML =
         `<p class="no-margin-top">${data.authorName}` +
         `<a href="/u/${data.authorHandle}" class="public-member">` +
         `<span class="badge">@${data.authorHandle}</span></a>` +
         `</p>` +
-        `<p>${replyBox.value}</p>` +
+        `<p>${formattedCommentBody}</p>` +
         `<p class="small-font no-margin-bottom">` +
         `<button class="mini-btn light-btn"><span>` +
         `0 </span>` +
