@@ -138,13 +138,14 @@ function setupComments() {
   }).then((res) => res.json()).then((commentData) => {
     console.log(commentData);
     if (commentData.error) {
+      loadingMsg.classList.replace('info', 'error');
       if (commentData.error === 'invalid parentId') {
-        loadingMsg.classList.replace('info', 'error');
         loadingMsg.textContent =
           'This is an invalid comment ID.';
-        return;
+      } else {
+        loadingMsg.textContent =
+          'Something wen\'t wrong. Please try again.';
       }
-      window.location.reload();
       return;
     }
     if (commentData.comment === null) {
@@ -155,6 +156,12 @@ function setupComments() {
     }
     loadingMsg.classList.add('hide');
     mainContent.classList.remove('hide');
+    const authorDetails = document.querySelector('#comment-author');
+    authorDetails.innerHTML =
+      `<span>${commentData['author_details'].displayName}</span>` +
+      `<a href="/u/${commentData['author_details'].handle}"` +
+      ` class="public-member">` +
+      `<span class="badge">${commentData['author_details'].handle}</span></a>`;
     const parentComment = document.querySelector('#parent');
     const superParentComment = document.querySelector('#super-parent');
     if (commentData.comment.parent === commentData.comment.superParent) {

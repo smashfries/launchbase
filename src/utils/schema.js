@@ -626,6 +626,10 @@ export const getComments = {
       200: {
         type: 'object',
         properties: {
+          author_details: {type: 'object', properties: {
+            displayName: {type: 'string'},
+            handle: {type: 'string'},
+          }},
           comment: {},
           replies: {type: 'array'},
           page: {type: 'integer'},

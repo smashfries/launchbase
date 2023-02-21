@@ -101,6 +101,10 @@ export default async function discuss(fastify, _options) {
         const parentOId = new fastify.mongo.ObjectId(parent);
 
         const comments = fastify.mongo.db.collection('comments');
+        const users = fastify.mongo.db.collection('users');
+
+        const parentComment = await comments.findOne({_id: parentOId});
+
         const reqComments = await comments.aggregate([
           {
             $match: {parent: parentOId},
@@ -161,7 +165,6 @@ export default async function discuss(fastify, _options) {
         ]);
         const commentArray = await reqComments.toArray();
 
-        const parentComment = await comments.findOne({_id: parentOId});
 
         let upvote;
 
@@ -171,7 +174,17 @@ export default async function discuss(fastify, _options) {
             resourceType: 'comment', resource: parentOId});
         }
 
-        return rep.code(200).send({comment: parentComment,
+        // eslint-disable-next-line camelcase
+        let author_details;
+        if (parentComment) {
+          const parentAuthor = await users.findOne({_id: parentComment.author});
+          // eslint-disable-next-line camelcase
+          author_details = {displayName: parentAuthor.nickname,
+            handle: parentAuthor.url};
+        }
+
+        // eslint-disable-next-line camelcase
+        return rep.code(200).send({author_details, comment: parentComment,
           replies: commentArray, page, upvoted: upvote ? true : false});
       });
 
