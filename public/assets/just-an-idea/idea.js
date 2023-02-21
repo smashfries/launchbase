@@ -63,6 +63,7 @@ const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
 const revertBtn = document.querySelector('#revert-draft');
 let replyCount = 0;
+let upvoteCounter = 0;
 
 const linkDiv = document.querySelector('#link-inputs');
 const linkBtn = document.querySelector('#link-btn');
@@ -196,7 +197,8 @@ fetch(`/ideas/${ideaId}`, {
           if (data.replyCount) {
             replyCount = data.replyCount;
             commentCount.textContent = replyCount == 0||
-            replyCount > 1 ? replyCount +
+            replyCount > 1 ? new Intl
+                .NumberFormat('en', {notation: 'compact'}).format(replyCount) +
                ' Comments' : '1 Comment';
           } else {
             commentCount.textContent = '0 Comments';
@@ -204,9 +206,12 @@ fetch(`/ideas/${ideaId}`, {
           ideaName.textContent = data.name;
           ideaDesc.textContent = data.desc;
           if (data.upvotes) {
+            upvoteCounter = data.upvotes;
             const upvoteFormatted = new Intl.NumberFormat('en-us',
                 {notation: 'compact'}).format(data.upvotes);
             upvoteCount.textContent = upvoteFormatted;
+          } else {
+            upvoteCounter = 0;
           }
           if (data.upvoted) {
             upvoteBtn.classList.remove('light-btn');
@@ -350,6 +355,8 @@ function setupComments() {
       container.classList.add('container');
       container.classList.add('comment-item');
       container.dataset.id = reply._id;
+      container.dataset.replies = reply.replyCount || 0;
+      container.dataset.upvotes = reply.upvotes || 0;
       container.innerHTML =
       `<p class="no-margin-top">${authorDetails.nickname}` +
       `<a href="/u/${authorDetails.url}" class="public-member">` +
@@ -364,10 +371,12 @@ function setupComments() {
           .length === 1 ?
         'Upvoted' : 'Upvote'}</span> ` +
       `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
-          .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
+          .format(reply.upvotes || 0)}</span>` +
       ` <span class="submit-icon">👌</span></button>` +
       ` • <a href="/discuss/${reply._id}" ` +
-      `class="idea-link small-font">${reply.replyCount || 0} ` +
+      `class="idea-link small-font">${
+        new Intl.NumberFormat('en', {notation: 'compact'}).
+            format(reply.replyCount || 0)} ` +
       `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}` +
       `</a> ` +
       `${(payload.id === authorDetails._id) && !reply.deleted ?
@@ -704,6 +713,8 @@ submitReplyBtn.addEventListener('click', async () => {
         container.classList.add('container');
         container.classList.add('comment-item');
         container.dataset.id = data.commentId;
+        container.dataset.replies = 0;
+        container.dataset.upvotes = 0;
 
         const commentFragments = replyBox.value.split('\n');
         let formattedCommentBody = '';
@@ -720,9 +731,10 @@ submitReplyBtn.addEventListener('click', async () => {
         `</p>` +
         `<p>${formattedCommentBody}</p>` +
         `<p class="small-font no-margin-bottom">` +
-        `<button class="mini-btn light-btn"><span>` +
-        `0 </span>` +
-        `Upvotes 👌</button>` +
+        `<button class="mini-btn light-btn" ` +
+        `onclick="upvoteComment(event)"><span class="upvote-text">` +
+        `Upvote</span>` +
+        ` <span>0</span> <span class="submit-icon">👌</span></button>` +
         ` • <a href="/discuss/${data.commentId}" ` +
         `class="idea-link small-font">0 Replies</a> ` +
         `• <button class="idea-link small-font" ` +
@@ -732,7 +744,8 @@ submitReplyBtn.addEventListener('click', async () => {
         replyBox.value = '';
         // console.log(replyCount, commentCount);
         commentCount.textContent = replyCount == 1 ?
-          '1 Comment' : `${replyCount} Comments`;
+          '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
+              .format(replyCount)} Comments`;
         window.scrollTo(0, document.body.scrollHeight);
       } else {
         if (data.error === 'profile incomplete') {
@@ -791,7 +804,8 @@ async function deleteComment(commentId) {
       commentElement.lastChild.lastChild.previousSibling.remove();
       commentElement.lastChild.lastChild.previousSibling.remove();
       commentCount.textContent = replyCount == 1 ?
-        '1 Comment' : `${replyCount} Comments`;
+        '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
+            .format(replyCount)} Comments`;
     }
   });
 }
@@ -885,32 +899,35 @@ upvoteBtn.addEventListener('click', async () => {
       upvoteIcon.style.animationName = 'none';
       upvoteBtn.dataset.upvoted = upvoted == 'true' ? false : true;
       if (upvoted == 'true') {
+        upvoteCounter--;
         upvoteText.textContent = 'Upvote';
-        upvoteCount.textContent = Number(upvoteCount.textContent) - 1;
         upvoteBtn.classList.remove('dark-btn');
         upvoteBtn.classList.add('light-btn');
       } else {
+        upvoteCounter++;
         upvoteText.textContent = 'Upvoted';
-        upvoteCount.textContent = Number(upvoteCount.textContent) + 1;
         upvoteBtn.classList.remove('light-btn');
         upvoteBtn.classList.add('dark-btn');
       }
+      upvoteCount.textContent = new Intl
+          .NumberFormat('en', {notation: 'compact'})
+          .format(upvoteCounter);
     }
   });
 });
 
 // eslint-disable-next-line no-unused-vars
 async function upvoteComment(e) {
-  console.log(e);
   let commentUpvoteBtn = e.target;
   if (e.target.localName !== 'button') {
     commentUpvoteBtn = e.target.parentElement;
   }
+  const commentItem = commentUpvoteBtn.parentElement.parentElement;
   const icon = commentUpvoteBtn.lastChild;
   const commentUpvoteCount = icon.previousElementSibling;
-  const upvoteNumber = Number(commentUpvoteCount.textContent);
+  const upvoteNumber = Number(commentItem.dataset.upvotes);
   const text = commentUpvoteBtn.firstChild;
-  const commentId = commentUpvoteBtn.parentElement.parentElement.dataset.id;
+  const commentId = commentItem.dataset.id;
   const upvoted = commentUpvoteBtn.classList.contains('dark-btn') ?
     true : false;
 
@@ -929,13 +946,17 @@ async function upvoteComment(e) {
       commentUpvoteBtn.disabled = false;
       icon.style.animationName = 'none';
       if (upvoted) {
-        commentUpvoteCount.textContent = upvoteNumber - 1;
+        commentItem.dataset.upvotes = upvoteNumber - 1;
+        commentUpvoteCount.textContent = new Intl
+            .NumberFormat('en', {notation: 'compact'}).format(upvoteNumber - 1);
         text.textContent = 'Upvote ';
         commentUpvoteBtn.classList.remove('dark-btn');
         commentUpvoteBtn.classList.add('light-btn');
       } else {
+        commentItem.dataset.upvotes = upvoteNumber + 1;
         text.textContent = 'Upvoted ';
-        commentUpvoteCount.textContent = upvoteNumber + 1;
+        commentUpvoteCount.textContent = new Intl
+            .NumberFormat('en', {notation: 'compact'}).format(upvoteNumber + 1);
         commentUpvoteBtn.classList.add('dark-btn');
         commentUpvoteBtn.classList.remove('light-btn');
       }
