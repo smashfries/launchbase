@@ -347,6 +347,7 @@ export const getIdeas = {
                 desc: {type: 'string'},
                 timeStamp: {type: 'string'},
                 upvotes: {type: 'integer'},
+                idea_details: {type: 'array'},
               },
             },
           },

@@ -132,6 +132,40 @@ export default async function rIdeas(fastify, _options) {
     }
   });
 
+  fastify.get('/ideas/my/upvoted', getIdeas, async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const upvotes = fastify.mongo.db.collection('upvotes');
+    const myUpvotedIdeas = await upvotes.aggregate([
+      {
+        $match: {
+          user: req.userOId,
+          resourceType: 'idea',
+        },
+      },
+      {
+        $lookup: {
+          from: 'ideas',
+          localField: 'resource',
+          foreignField: '_id',
+          as: 'idea_details',
+        },
+      },
+      {
+        $project: {
+          'idea_details._id': 1,
+          'idea_details.name': 1,
+          'idea_details.desc': 1,
+          'idea_details.timeStamp': 1,
+          'idea_details.upvotes': 1,
+        },
+      },
+    ]);
+    const arr = await myUpvotedIdeas.toArray();
+    rep.code(200).send({hottestIdeas: arr});
+  });
+
   fastify.get('/ideas/:ideaId', getIdea, async (req, rep) => {
     if (req.token) {
       const {ideaId} = req.params;
