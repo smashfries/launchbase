@@ -69,8 +69,8 @@ function addIdeaItems(idea) {
   ideaUpvotes.classList.add('minor-text');
   ideaUpvotes.innerHTML = `${new Intl.NumberFormat('en',
       {notation: 'compact'})
-      .format(idea.upvotes ?
-        ideaUpvotes : 0)} ${idea.idea_details[0].upvotes == 1 ?
+      .format(idea.idea_details[0].upvotes ||
+        0)} ${idea.idea_details[0].upvotes == 1 ?
         'Upvote' : 'Upvotes'} 👌`;
   ideaUpvotes.appendChild(ideaDate);
   ideaItem.appendChild(ideaTitle);
