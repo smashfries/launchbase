@@ -20,7 +20,7 @@ export default async function rIdeas(fastify, _options) {
         const latestIdeas = await ideasCollection.find({status: 'published'})
             .sort({timeStamp: -1}).limit(5);
         const hottestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({upvotes: 1}).limit(20);
+            .sort({upvotes: -1}).limit(20);
 
         const latestIdeasArr = await latestIdeas.toArray();
         const hottestIdeasArr = await hottestIdeas.toArray();
