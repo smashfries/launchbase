@@ -55,6 +55,49 @@ export default async function rIdeas(fastify, _options) {
     }
   });
 
+  fastify.get('/ideas/published/search', getIdeas, async (req, rep) => {
+    if (req.token) {
+      const query = req.query;
+      const searchQuery = query.q;
+      const page = query.page ? query.page : 1;
+
+      if (!searchQuery) {
+        return rep.code(400).send({error: 'query not provided'});
+      }
+
+      const ideas = fastify.mongo.db.collection('ideas');
+      const agg = [
+        {
+          $search: {
+            index: 'idea-search',
+            text: {
+              query: searchQuery,
+              path: ['name', 'desc', 'idea'],
+              fuzzy: {maxEdits: 1},
+            },
+          },
+        },
+        {
+          $match: {
+            status: 'draft',
+          },
+        },
+        {
+          $skip: (page-1)*20,
+        },
+        {
+          $limit: 20,
+        },
+      ];
+      const cursor = await ideas.aggregate(agg);
+      const arr = await cursor.toArray();
+
+      return rep.code(200).send({latestIdeas: arr});
+    } else {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+  });
+
   fastify.get('/ideas/my/drafts', getIdeas, async (req, rep) => {
     if (req.token) {
       const ideaMembers = fastify.mongo.db.collection('idea-members');
