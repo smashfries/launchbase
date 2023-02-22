@@ -543,6 +543,34 @@ h5 {
   padding-right: 25px;
 }
 
+.search-btn {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 10px;
+  background-color: #EBEBEB;
+  transition: 0.3s;
+  color: #424242;
+}
+
+.search-input {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  width: 100% !important;
+  color: #424242;
+}
+
+.search-btn:focus-within {
+  /* background-color: #fff; */
+  box-shadow: 0 0 0 2px #3884f6;
+  transition: 0.3s;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;
