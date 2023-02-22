@@ -26,85 +26,100 @@ export default async function pages(fastify, _options) {
   });
   fastify.get('/backstage/profile', (_req, rep) => {
     return rep.view('backstage/profile.hbs', {jsPath: 'backstage/profile',
-      title: 'Profile', backstageSection: true, profilePage: true});
+      title: 'Profile', backstageSection: true, profilePage: true,
+      metaDesc: 'Update your Launch Base talent profile!'});
   });
   fastify.get('/backstage/email', (_req, rep) => {
     return rep.view('backstage/email/email.hbs',
         {jsPath: 'backstage/email/email', title: 'Email',
-          backstageSection: true, emailPage: true});
+          backstageSection: true, emailPage: true,
+          metaDesc: 'View and update your Launch Base email settings.'});
   });
   fastify.get('/backstage/email/update-primary', (_req, rep) => {
     return rep.view('backstage/email/update-primary.hbs',
         {jsPath: 'backstage/email/update-primary',
           title: 'Update Primary Email', backstageSection: true,
-          emailPage: true});
+          emailPage: true, metaDesc: 'Update your primary Launch Base email.'});
   });
   fastify.get('/backstage/email/update-backup', (_req, rep) => {
     return rep.view('backstage/email/update-backup.hbs',
         {jsPath: 'backstage/email/update-backup',
           title: 'Update Backup Email', backstageSection: true,
-          emailPage: true});
+          emailPage: true, metaDesc: 'Update your backup Launch Base email.'});
   });
   fastify.get('/backstage/security', (_req, rep) => {
     return rep.view('backstage/security.hbs', {jsPath: 'backstage/security',
-      title: 'Security', backstageSection: true, securityPage: true});
+      title: 'Security', backstageSection: true, securityPage: true,
+      metaDesc: 'Review and update your Launch Base security settings.'});
   });
   fastify.get('/backstage/dms', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
-      title: 'DMs', backstageSection: true, dmsPage: true});
+      title: 'DMs', backstageSection: true, dmsPage: true,
+      metaDesc: 'View and send DMs to Launch Base talent!'});
   });
   fastify.get('/backstage/notifications', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
-      title: 'Notifications', backstageSection: true, notificationsPage: true});
+      title: 'Notifications', backstageSection: true, notificationsPage: true,
+      metaDesc: 'Check your Launch Base notifications.'});
   });
   fastify.get('/just-an-idea', (_req, rep) => {
     return rep.view('just-an-idea/ideas.hbs', {jsPath: 'just-an-idea/ideas',
-      title: 'Ideas', ideaSection: true, communityIdeasPage: true});
+      title: 'Ideas', ideaSection: true, communityIdeasPage: true,
+      metaDesc: 'View ideas posted by the Launch Base community!'});
   });
   fastify.get('/just-an-idea/new', (_req, rep) => {
     return rep.view('just-an-idea/new-idea.hbs',
         {jsPath: 'just-an-idea/new-idea', title: 'Create Idea',
-          ideaSection: true, newIdeaPage: true});
+          ideaSection: true, newIdeaPage: true,
+          metaDesc: 'Create a new Idea on Launch Base!'});
   });
   fastify.get('/just-an-idea/drafts', (_req, rep) => {
     return rep.view('just-an-idea/drafts.hbs', {jsPath: 'just-an-idea/drafts',
-      title: 'Draft Ideas', ideaSection: true, draftIdeasPage: true});
+      title: 'Draft Ideas', ideaSection: true, draftIdeasPage: true,
+      metaDesc: 'View your saved Draft Ideas.'});
   });
   fastify.get('/just-an-idea/published', (_req, rep) => {
     return rep.view('just-an-idea/published.hbs',
         {jsPath: 'just-an-idea/published', title: 'Published Ideas',
-          ideaSection: true, publishedIdeasPage: true});
+          ideaSection: true, publishedIdeasPage: true,
+          metaDesc: 'View your Published Ideas.'});
   });
   fastify.get('/just-an-idea/upvoted', (_req, rep) => {
     return rep.view('just-an-idea/upvoted.hbs',
         {jsPath: 'just-an-idea/upvoted', title: 'Upvoted Ideas',
-          ideaSection: true, upvotedIdeasPage: true});
+          ideaSection: true, upvotedIdeasPage: true,
+          metaDesc: 'View ideas that you have upvoted!'});
   });
   fastify.get('/just-an-idea/accept-invite', (_req, rep) => {
     return rep.view('just-an-idea/accept-invite.hbs',
         {jsPath: 'just-an-idea/accept-invite', title: 'Accept Idea Invite',
-          ideaSection: true});
+          ideaSection: true, metaDesc: 'Accept a Launch Base Idea invite!'});
   });
   fastify.get('/just-an-idea/search', (_req, rep) => {
     return rep.view('just-an-idea/search',
         {jsPath: 'just-an-idea/search', title: 'Search Ideas',
-          ideaSection: true, communityIdeasPage: true});
+          ideaSection: true, communityIdeasPage: true,
+          metaDesc: 'Search for Ideas posted by the Launch Base community!'});
   });
   fastify.get('/just-an-idea/*', (_req, rep) => {
     return rep.view('just-an-idea/idea.hbs', {jsPath: 'just-an-idea/idea',
-      title: 'The Idea', ideaSection: true});
+      title: 'The Idea', ideaSection: true,
+      metaDesc: 'A Launch Base Community Idea'});
   });
   fastify.get('/discuss/:commentId', (_req, rep) => {
     return rep.view('discuss/discuss.hbs', {jsPath: 'discuss/discuss',
-      title: 'Discuss', discussSection: true});
+      title: 'Discuss', discussSection: true,
+      metaDesc: 'A Launch Base Discussion!'});
   });
   fastify.get('/the-real-thing', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
-      title: 'The Real Thing', realSection: true});
+      title: 'The Real Thing', realSection: true,
+      metaDesc: 'View organizations on Launch Base'});
   });
   fastify.get('/perks', (_req, rep) => {
     return rep.view('coming-soon.hbs', {jsPath: 'coming-soon',
-      title: 'Perks', perksSection: true});
+      title: 'Perks', perksSection: true, metaDesc:
+        'Get access to exclusive deals and perks for Launch Base members'});
   });
   fastify.get('/u/:handle', async (req, rep) => {
     const {handle} = req.params;
@@ -115,11 +130,14 @@ export default async function pages(fastify, _options) {
     return rep.view('talent/profile.hbs', {jsPath: 'talent/profile',
       title: user ? user.nickname + '\'s Talent Profile' : 'Talent Profile',
       talentSection: true, talentProfilePage: true, user,
-      emailHash: user ? md5(user.email) : null});
+      emailHash: user ? md5(user.email) : null,
+      metaDesc:
+        `${user ? user.nickname : 'Someone'}'s Talent profile on Launch Base`});
   });
   fastify.get('/talent', (_req, rep) => {
     return rep.view('coming-soon', {jsPath: 'coming-soon',
-      title: 'Talent', talentSection: true});
+      title: 'Talent', talentSection: true, metaDesc:
+        'View talent on the Launch Base community!'});
   });
   fastify.get('/*', (_req, rep) => {
     return rep.code(404).sendFile('404.html');
