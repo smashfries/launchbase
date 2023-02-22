@@ -79,7 +79,7 @@ export default async function rIdeas(fastify, _options) {
         },
         {
           $match: {
-            status: 'draft',
+            status: 'published',
           },
         },
         {
