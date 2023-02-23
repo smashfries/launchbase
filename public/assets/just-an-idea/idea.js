@@ -706,47 +706,58 @@ submitReplyBtn.addEventListener('click', async () => {
       submitReplyBtn.disabled = false;
       if (!data.error) {
         replyCount++;
-        const date = new Date();
-        const formattedDate = new Intl.DateTimeFormat('en-US',
-            {dateStyle: 'medium'}).format(date);
-        const container = document.createElement('div');
-        container.classList.add('container');
-        container.classList.add('comment-item');
-        container.dataset.id = data.commentId;
-        container.dataset.replies = 0;
-        container.dataset.upvotes = 0;
+        const commentPage = data.page;
+        if (commentPage !== page) {
+          commentError.classList.remove('hide');
+          commentError.classList.replace('error', 'info');
+          commentError.textContent = 'Loading...';
+          setPage(commentPage);
+          if (page != 1) {
+            previousPage.classList.remove('hide');
+          }
+          setupComments(page);
+        } else {
+          const date = new Date();
+          const formattedDate = new Intl.DateTimeFormat('en-US',
+              {dateStyle: 'medium'}).format(date);
+          const container = document.createElement('div');
+          container.classList.add('container');
+          container.classList.add('comment-item');
+          container.dataset.id = data.commentId;
+          container.dataset.replies = 0;
+          container.dataset.upvotes = 0;
 
-        const commentFragments = replyBox.value.split('\n');
-        let formattedCommentBody = '';
-        commentFragments.forEach((fragment) => {
-          formattedCommentBody = formattedCommentBody + '<span>' +
-            fragment + '</span><br>';
-        });
+          const commentFragments = replyBox.value.split('\n');
+          let formattedCommentBody = '';
+          commentFragments.forEach((fragment) => {
+            formattedCommentBody = formattedCommentBody + '<span>' +
+              fragment + '</span><br>';
+          });
 
-
-        container.innerHTML =
-        `<p class="no-margin-top">${data.authorName}` +
-        `<a href="/u/${data.authorHandle}" class="public-member">` +
-        `<span class="badge">@${data.authorHandle}</span></a>` +
-        `</p>` +
-        `<p>${formattedCommentBody}</p>` +
-        `<p class="small-font no-margin-bottom">` +
-        `<button class="mini-btn light-btn" ` +
-        `onclick="upvoteComment(event)"><span class="upvote-text">` +
-        `Upvote</span>` +
-        ` <span>0</span> <span class="submit-icon">👌</span></button>` +
-        ` • <a href="/discuss/${data.commentId}" ` +
-        `class="idea-link small-font">0 Replies</a> ` +
-        `• <button class="idea-link small-font" ` +
-        `onclick="deleteCommentConfirm('${data.commentId}')">Delete</button> ` +
-        `• ${formattedDate}</p>`;
-        commentDataContainer.appendChild(container);
-        replyBox.value = '';
-        // console.log(replyCount, commentCount);
-        commentCount.textContent = replyCount == 1 ?
-          '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
-              .format(replyCount)} Comments`;
-        window.scrollTo(0, document.body.scrollHeight);
+          container.innerHTML =
+          `<p class="no-margin-top">${data.authorName}` +
+          `<a href="/u/${data.authorHandle}" class="public-member">` +
+          `<span class="badge">@${data.authorHandle}</span></a>` +
+          `</p>` +
+          `<p>${formattedCommentBody}</p>` +
+          `<p class="small-font no-margin-bottom">` +
+          `<button class="mini-btn light-btn" ` +
+          `onclick="upvoteComment(event)"><span class="upvote-text">` +
+          `Upvote</span>` +
+          ` <span>0</span> <span class="submit-icon">👌</span></button>` +
+          ` • <a href="/discuss/${data.commentId}" ` +
+          `class="idea-link small-font">0 Replies</a> ` +
+          `• <button class="idea-link small-font" ` +
+          `onclick="deleteCommentConfirm('${data.commentId}')">` +
+          `Delete</button> ` +
+          `• ${formattedDate}</p>`;
+          commentDataContainer.appendChild(container);
+          replyBox.value = '';
+          commentCount.textContent = replyCount == 1 ?
+            '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
+                .format(replyCount)} Comments`;
+          window.scrollTo(0, document.body.scrollHeight);
+        }
       } else {
         if (data.error === 'profile incomplete') {
           commentError.classList.remove('hide');

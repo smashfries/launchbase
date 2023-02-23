@@ -607,6 +607,7 @@ export const createComment = {
           authorName: {type: 'string'},
           authorHandle: {type: 'string'},
           authorId: {type: 'string'},
+          page: {type: 'integer'},
         },
       },
       400: {

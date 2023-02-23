@@ -57,6 +57,9 @@ export default async function discuss(fastify, _options) {
         message: 'Profile must be complete before posting a comment.'});
     }
 
+    const totalCommentCount = await comments.count({parent: parentOId});
+    const page = Math.floor(totalCommentCount / 20) + 1;
+
     const comment = await comments.insertOne({comment: req.body.comment,
       parent: parentOId, superParent: superParentOId,
       superType: req.body.superType, timeStamp: new Date(),
@@ -74,7 +77,7 @@ export default async function discuss(fastify, _options) {
 
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId, authorName: author.nickname,
-      authorHandle: author.url, authorId: author._id});
+      authorHandle: author.url, authorId: author._id, page});
   });
 
   fastify.get('/comments/:parent', getComments,
