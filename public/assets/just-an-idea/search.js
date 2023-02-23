@@ -18,6 +18,11 @@ const pfpElement = document.querySelector('.pfp-container');
 const logoutBtn = document.querySelector('#logout-btn');
 const lockIcon = document.querySelector('.lock-icon');
 const draftContainer = document.querySelector('.idea-container');
+const paginationContainer = document.querySelector('.pagination-container');
+const pageInput = document.querySelector('#page-in');
+const nextPage = document.querySelector('#next');
+const previousPage = document.querySelector('#prev');
+const searchBox = document.querySelector('input');
 
 const publicProfileLink = document.querySelector('#public-profile');
 if (payload.handle) {
@@ -26,18 +31,38 @@ if (payload.handle) {
   publicProfileLink.setAttribute('href', '/backstage/profile');
 }
 
-document.querySelector('input').addEventListener('input', (e) => {
+let params = (new URL(document.location)).searchParams;
+const q = params.get('q');
+let page = params.get('page') || 1;
+
+if (!Number.isInteger(Number(page)) || Number(page) < 1) {
+  window.location.replace('/just-an-idea/search');
+}
+
+pageInput.value = page;
+if (page == 1) {
+  previousPage.classList.add('hide');
+}
+pageInput.value = page;
+
+searchBox.addEventListener('input', (e) => {
+  nextPage.setAttribute('href', `?q=${e.target.value}&page=${Number(page)+1}`);
+  previousPage.setAttribute('href',
+      `?q=${e.target.value}&page=${Number(page)-1}`);
   const encodedQuery = encodeURIComponent(e.target.value);
   updateResults(encodedQuery);
 });
 
+
 const updateResults = debounce((query) => {
+  history.pushState({}, '', `/just-an-idea/search?q=${query}&page=${page}`);
   if (query == '') {
     draftContainer.innerHTML =
-            '<p>Start typing to search!</p>';
+    '<p>Start typing to search!</p>';
+    paginationContainer.classList.add('hide');
     return;
   }
-  fetch(`/ideas/published/search?q=${query}`, {
+  fetch(`/ideas/published/search?q=${query}&page=${page}`, {
     method: 'get',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -46,9 +71,11 @@ const updateResults = debounce((query) => {
       .then((data) => {
         if (!data.error) {
           if (data.latestIdeas.length == 0) {
+            paginationContainer.classList.remove('hide');
             draftContainer.innerHTML =
-              '<p>No ideas found.</p>';
+            '<p>No ideas found.</p>';
           } else {
+            paginationContainer.classList.remove('hide');
             draftContainer.innerHTML = '';
             data.latestIdeas.forEach((idea) => {
               addIdeaItems(idea);
@@ -56,14 +83,16 @@ const updateResults = debounce((query) => {
           }
         } else {
           console.log(data);
+          paginationContainer.classList.add('hide');
           draftContainer.innerHTML =
             '<p>Something wen\'t wrong. Please try again.</p>';
         }
       })
       .catch((error) => {
         console.log(error);
+        paginationContainer.classList.add('hide');
         draftContainer.innerHTML =
-            '<p>Something wen\'t wrong. Please try again.</p>';
+        '<p>Something wen\'t wrong. Please try again.</p>';
       });
 });
 
@@ -109,6 +138,37 @@ function addIdeaItems(idea) {
   link.appendChild(ideaItem);
   draftContainer.appendChild(link);
 }
+
+if (q) {
+  searchBox.value = q;
+  searchBox.dispatchEvent(new Event('input'));
+}
+
+pageInput.addEventListener('keyup', (e) => {
+  if (e.key == 'Enter') {
+    const newPage = Number(pageInput.value);
+    if (Number.isInteger(newPage) && newPage > 0) {
+      window.location.href = `?q=${searchBox.value}&page=${newPage}`;
+    }
+  }
+});
+
+window.addEventListener('popstate', (event) => {
+  const url = new URL(event.target.location);
+  params = url.searchParams;
+  page = params.get('page') ? Number(params.get('page')) : 1;
+  if (!Number.isInteger(Number(page)) || Number(page) < 1) {
+    window.location.replace(url.pathname);
+  }
+  pageInput.value = page;
+  if (page == 1) {
+    previousPage.classList.add('hide');
+  } else {
+    previousPage.classList.remove('hide');
+  }
+  searchBox.value = params.get('q') || '';
+  searchBox.dispatchEvent(new Event('input'));
+});
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
