@@ -70,8 +70,9 @@ export default async function auth(fastify, _options) {
         const deviceIdentifier = randomBytes(24).toString('hex');
         const codes = fastify.mongo.db.collection('verification-codes');
         const expiresOn = new Date().getTime() + 300000;
-        codes.updateOne({email}, {$set: {email, code: hash(result), expiresOn,
-          deviceIdentifier: hash(deviceIdentifier)}}, {upsert: true});
+        await codes.updateOne({email}, {$set: {email, code: hash(result),
+          expiresOn, deviceIdentifier: hash(deviceIdentifier)}},
+        {upsert: true});
         return rep.code(200).send({deviceIdentifier});
       });
 
