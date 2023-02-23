@@ -55,8 +55,11 @@ form.addEventListener('submit', (e) => {
           emailInput.disabled = false;
           submitButton.disabled = false;
           if (data.error) {
+            let errorMessage = 'Something wen\'t wrong. Please try again.';
+            if (errorCodes[data.error]) {
+              errorMessage = errorCodes[data.error];
+            }
             if (!document.querySelector('.msg')) {
-              const errorMessage = errorCodes[data.error];
               const errorElement = document.createElement('p');
               const textNode = document.createTextNode(errorMessage);
               errorElement.appendChild(textNode);
@@ -67,7 +70,7 @@ form.addEventListener('submit', (e) => {
               loginBox.appendChild(errorElement);
             } else {
               const errorMessage = document.querySelector('.msg');
-              errorMessage.textContent = errorCodes[data.error];
+              errorMessage.textContent = errorMessage;
               errorMessage.className = 'msg error';
             }
           } else {
@@ -109,8 +112,11 @@ form.addEventListener('submit', (e) => {
           emailInput.disabled = false;
           submitButton.disabled = false;
           if (data.error) {
+            let errorMessage = 'Something wen\'t wrong. Please try again.';
+            if (errorCodes[data.error]) {
+              errorMessage = errorCodes[data.error];
+            }
             if (!document.querySelector('.msg')) {
-              const errorMessage = errorCodes[data.error];
               const errorElement = document.createElement('p');
               const textNode = document.createTextNode(errorMessage);
               errorElement.appendChild(textNode);
@@ -121,7 +127,7 @@ form.addEventListener('submit', (e) => {
               loginBox.appendChild(errorElement);
             } else {
               const errorMessage = document.querySelector('.msg');
-              errorMessage.textContent = errorCodes[data.error];
+              errorMessage.textContent = errorMessage;
               errorMessage.className = 'msg error';
             }
           } else {
