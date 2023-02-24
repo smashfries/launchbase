@@ -274,7 +274,9 @@ pageInput.addEventListener('keyup', (e) => {
 
 nextPage.addEventListener('click', () => {
   commentError.classList.remove('hide');
-  commentError.classList.replace('error', 'info');
+  commentError.classList.remove('error');
+  commentError.classList.remove('warning');
+  commentError.classList.add('info');
   commentError.textContent = 'Loading...';
   setPage(page + 1);
   if (page != 1) {
@@ -285,7 +287,9 @@ nextPage.addEventListener('click', () => {
 
 previousPage.addEventListener('click', () => {
   commentError.classList.remove('hide');
-  commentError.classList.replace('error', 'info');
+  commentError.classList.remove('error');
+  commentError.classList.remove('warning');
+  commentError.classList.add('info');
   commentError.textContent = 'Loading...';
   setPage(page - 1);
   if (page == 1) {
@@ -762,10 +766,20 @@ submitReplyBtn.addEventListener('click', async () => {
         if (data.error === 'profile incomplete') {
           commentError.classList.remove('hide');
           commentError.classList.remove('info');
-          commentError.classList.add('error');
+          commentError.classList.remove('error');
+          commentError.classList.add('warning');
           commentError.innerHTML = 'Please complete your profile before' +
             ` posting a comment. Click <u><a href="/backstage/profile?` +
             `redirect=${window.location.href}">here</a></u> to update it!`;
+        } else if (data.error === 'bad-words') {
+          commentError.classList.remove('hide');
+          commentError.classList.remove('warning');
+          commentError.classList.remove('info');
+          commentError.classList.add('error');
+          commentError.innerHTML = 'Profanity is strictly prohibited on ' +
+            `Launch Base. Please ensure all your posts are kind and helpful ` +
+            `to everyone in the community. Please refrain from further foul ` +
+            `language on the platform. Thank you!`;
         }
       }
     });
