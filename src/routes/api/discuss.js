@@ -1,3 +1,4 @@
+import {isProfane} from '../../utils/filter.js';
 import {createComment, getComments, deleteComment} from '../../utils/schema.js';
 
 /**
@@ -55,6 +56,10 @@ export default async function discuss(fastify, _options) {
     if (!isComplete) {
       return rep.code(400).send({error: 'profile incomplete',
         message: 'Profile must be complete before posting a comment.'});
+    }
+
+    if (isProfane(req.body.comment)) {
+      return rep.code(400).send({error: 'bad-words'});
     }
 
     const totalCommentCount = await comments.count({parent: parentOId});
