@@ -62,6 +62,7 @@ const submitReplyBtn = document.querySelector('#post-comment');
 const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
 const revertBtn = document.querySelector('#revert-draft');
+const copyBtn = document.querySelector('#copy-link');
 let replyCount = 0;
 let upvoteCounter = 0;
 
@@ -262,6 +263,18 @@ fetch(`/ideas/${ideaId}`, {
         }
       }
     });
+
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    copyBtn.textContent = 'Copied! 📋';
+  } catch (error) {
+    copyBtn.textContent = 'Could not copy, sorry! 📋';
+  }
+  setTimeout(() => {
+    copyBtn.textContent = 'Copy link to Clipboard 📋';
+  }, 3000);
+});
 
 pageInput.addEventListener('keyup', (e) => {
   if (e.key == 'Enter') {
