@@ -59,6 +59,7 @@ const upvoteText = document.querySelector('#upvote-text');
 const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
+const submitReplyIcon = document.querySelector('#share-comment-icon');
 const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
 const revertBtn = document.querySelector('#revert-draft');
@@ -335,7 +336,7 @@ window.addEventListener('popstate', (event) => {
   setupComments();
 });
 
-function setupComments() {
+function setupComments(scrollToReply = false) {
   document.querySelectorAll('.comment-item').forEach((i) => {
     i.remove();
   });
@@ -403,6 +404,9 @@ function setupComments() {
       ` • ${formattedDate}</p>`;
       commentDataContainer.appendChild(container);
     });
+    if (scrollToReply) {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   });
 };
 
@@ -703,7 +707,8 @@ leaveBtn.addEventListener('click', () => {
 
 submitReplyBtn.addEventListener('click', async () => {
   if (replyBox.value !== '') {
-    submitReplyBtn.textContent = '...';
+    // submitReplyBtn.textContent = '...';
+    submitReplyIcon.style.animationName = 'loading';
     submitReplyBtn.disabled = true;
     fetch('/comments', {
       method: 'post',
@@ -719,7 +724,8 @@ submitReplyBtn.addEventListener('click', async () => {
       }),
     }).then((res) => res.json()).then((data) => {
       console.log(data);
-      submitReplyBtn.textContent = 'Share a Comment';
+      // submitReplyBtn.textContent = 'Share a Comment';
+      submitReplyIcon.style.animationName = 'none';
       submitReplyBtn.disabled = false;
       if (!data.error) {
         replyCount++;
@@ -732,7 +738,7 @@ submitReplyBtn.addEventListener('click', async () => {
           if (page != 1) {
             previousPage.classList.remove('hide');
           }
-          setupComments(page);
+          setupComments(true);
         } else {
           const date = new Date();
           const formattedDate = new Intl.DateTimeFormat('en-US',
