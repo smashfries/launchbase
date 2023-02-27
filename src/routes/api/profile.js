@@ -27,7 +27,7 @@ export default async function profile(fastify, _options) {
       }
       const users = fastify.mongo.db.collection('users');
       const user = await users.findOne({_id: req.userOId});
-      const url = req.body.url;
+      const url = req.body.url.toLowerCase();
       if (user.url) {
         if (user.url !== url) {
           const urlMatches = await users.findOne({url});
@@ -44,7 +44,7 @@ export default async function profile(fastify, _options) {
       await users.updateOne({_id: req.userOId}, {$set: {name: req.body.name,
         nickname: req.body.nickname, url: req.body.url, occ: req.body.occ,
         skills: req.body.skills, interests: req.body.interests, github,
-        twitter}});
+        twitter, urlLower: url}});
       rep.code(200).send({message: 'successfully updated profile'});
     } else {
       rep.code(400).send({error: 'unauthorized'});
