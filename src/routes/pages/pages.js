@@ -125,7 +125,7 @@ export default async function pages(fastify, _options) {
     const {handle} = req.params;
 
     const users = fastify.mongo.db.collection('users');
-    const user = await users.findOne({url: handle});
+    const user = await users.findOne({urlLower: handle.toLowerCase()});
 
     return rep.view('talent/profile.hbs', {jsPath: 'talent/profile',
       title: user ? user.nickname + '\'s Talent Profile' : 'Talent Profile',
