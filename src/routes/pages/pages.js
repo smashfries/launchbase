@@ -101,10 +101,23 @@ export default async function pages(fastify, _options) {
           ideaSection: true, communityIdeasPage: true,
           metaDesc: 'Search for Ideas posted by the Launch Base community!'});
   });
-  fastify.get('/just-an-idea/*', (_req, rep) => {
+  fastify.get('/just-an-idea/:ideaId', async (req, rep) => {
+    const {ideaId} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(ideaId)) {
+      return rep.code(404).sendFile('404.html');
+    }
+
+    const ideas = fastify.mongo.db.collection('ideas');
+    const idea = await ideas.findOne({_id: new fastify.mongo.ObjectId(ideaId)});
+
+    if (!idea) {
+      return rep.code(404).sendFile('404.html');
+    }
+
     return rep.view('just-an-idea/idea.hbs', {jsPath: 'just-an-idea/idea',
-      title: 'The Idea', ideaSection: true,
-      metaDesc: 'A Launch Base Community Idea'});
+      title: idea.status == 'draft' ? 'Idea Draft' : idea.name,
+      ideaSection: true, metaDesc: idea.status == 'draft' ?
+      'A Launch Base Community Idea' : idea.desc});
   });
   fastify.get('/discuss/:commentId', (_req, rep) => {
     return rep.view('discuss/discuss.hbs', {jsPath: 'discuss/discuss',
