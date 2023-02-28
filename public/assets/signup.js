@@ -14,7 +14,7 @@ const submitIcon = document.querySelector('.submit-icon');
 const codeInput = document.createElement('input');
 codeInput.setAttribute('type', 'text');
 codeInput.setAttribute('inputmode', 'numeric');
-codeInput.setAttribute('placeholder', 'Magic Code');
+codeInput.setAttribute('placeholder', 'Verification Code');
 codeInput.className = 'code-input';
 codeInput.setAttribute('required', '');
 
