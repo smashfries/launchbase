@@ -239,4 +239,27 @@ export default async function discuss(fastify, _options) {
 
     rep.code(200).send({message: 'The comment was successfully deleted!'});
   });
+
+
+  fastify.get('/comments/mine', getComments, async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+
+    const comments = fastify.mongo.db.collection('comments');
+
+    const query = req.query;
+    const page = query.page || 1;
+
+    if (page < 1) {
+      return rep.code(400).send({error:
+        'page must be a number greater than or equal to 1'});
+    }
+
+    const userComments = await comments.find({author: req.userOId})
+        .skip((page - 1) * 20).limit(20);
+    const array = await userComments.toArray();
+
+    rep.code(200).send({replies: array, page});
+  });
 };

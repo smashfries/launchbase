@@ -624,6 +624,12 @@ export const createComment = {
 export const getComments = {
   schema: {
     headers,
+    querystring: {
+      type: 'object',
+      properties: {
+        page: {type: 'integer'},
+      },
+    },
     response: {
       200: {
         type: 'object',
