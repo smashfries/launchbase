@@ -62,6 +62,12 @@ export default async function pages(fastify, _options) {
       title: 'Notifications', backstageSection: true, notificationsPage: true,
       metaDesc: 'Check your Launch Base notifications.'});
   });
+  fastify.get('/backstage/discussion-history', (_req, rep) => {
+    return rep.view('backstage/discussion-history.hbs',
+        {jsPath: 'backstage/discussion-history', title: 'Discussion History',
+          backstageSection: true, discussionHistoryPage: true,
+          metaDesc: 'View history of your discussions on Launch Base'});
+  });
   fastify.get('/just-an-idea', (_req, rep) => {
     return rep.view('just-an-idea/ideas.hbs', {jsPath: 'just-an-idea/ideas',
       title: 'Ideas', ideaSection: true, communityIdeasPage: true,
