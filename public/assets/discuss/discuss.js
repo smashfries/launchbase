@@ -214,7 +214,7 @@ function setupComments() {
     if (commentData.comment.upvotes) {
       const upvoteFormatted = new Intl.NumberFormat('en-us',
           {notation: 'compact'}).format(commentData.comment.upvotes);
-      upvoteCount.textContent = upvoteFormatted;
+      upvoteCount.textContent = upvoteFormatted + ' ';
     }
 
     if (commentData.upvoted) {
@@ -539,12 +539,12 @@ upvoteBtn.addEventListener('click', async () => {
       upvoteBtn.dataset.upvoted = upvoted == 'true' ? false : true;
       if (upvoted == 'true') {
         upvoteText.textContent = 'Upvote';
-        upvoteCount.textContent = Number(upvoteCount.textContent) - 1;
+        upvoteCount.textContent = Number(upvoteCount.textContent) - 1 + ' ';
         upvoteBtn.classList.remove('dark-btn');
         upvoteBtn.classList.add('light-btn');
       } else {
         upvoteText.textContent = 'Upvoted';
-        upvoteCount.textContent = Number(upvoteCount.textContent) + 1;
+        upvoteCount.textContent = Number(upvoteCount.textContent) + 1 + ' ';
         upvoteBtn.classList.remove('light-btn');
         upvoteBtn.classList.add('dark-btn');
       }
@@ -582,13 +582,13 @@ async function upvoteComment(e) {
       commentUpvoteBtn.disabled = false;
       icon.style.animationName = 'none';
       if (upvoted) {
-        commentUpvoteCount.textContent = upvoteNumber - 1;
+        commentUpvoteCount.textContent = upvoteNumber - 1 + ' ';
         text.textContent = 'Upvote ';
         commentUpvoteBtn.classList.remove('dark-btn');
         commentUpvoteBtn.classList.add('light-btn');
       } else {
         text.textContent = 'Upvoted ';
-        commentUpvoteCount.textContent = upvoteNumber + 1;
+        commentUpvoteCount.textContent = upvoteNumber + 1 + ' ';
         commentUpvoteBtn.classList.add('dark-btn');
         commentUpvoteBtn.classList.remove('light-btn');
       }
