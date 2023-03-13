@@ -39,6 +39,8 @@ export default async function discuss(fastify, _options) {
     let superParent;
     let superType;
 
+    let ideaMember;
+
     switch (req.body.parentType) {
       case 'idea':
         idea = await ideas.findOne({_id: parentOId});
@@ -61,22 +63,46 @@ export default async function discuss(fastify, _options) {
         break;
     }
 
+    const author = await fastify.mongo.db.collection('users')
+        .findOne({_id: req.userOId});
+
+    switch (superType) {
+      case 'idea':
+        const ideaMembers = fastify.mongo.db.collection('idea-members');
+        ideaMember = await ideaMembers
+            .findOne({user: req.userOId, idea: superParent});
+        break;
+      default:
+        break;
+    }
+
+    if (parentOId.equals(superParent)) {
+      switch (superType) {
+        case 'idea':
+          await ideas.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
+          break;
+
+        default:
+          break;
+      }
+    } else {
+      // use || syntax and add on to account for other memberTypes in the future
+      if (ideaMember) {
+        await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1},
+          $push: {tags: 'team-replied'}});
+      }
+    }
+
     const totalCommentCount = await comments.count({parent: parentOId});
     const page = Math.floor(totalCommentCount / 20) + 1;
 
+    // update the tags property to check for other possible members as expanded
+    // use || syntax and add on
+    // ex: ideaMember || realMember || abcMember ? ['team-response'] : []
     const comment = await comments.insertOne({comment: req.body.comment,
       parent: parentOId, superParent,
       superType, timeStamp: new Date(),
-      author: req.userOId});
-
-    if (parentOId.equals(superParent)) {
-      await ideas.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
-    } else {
-      await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
-    }
-
-    const author = await fastify.mongo.db.collection('users')
-        .findOne({_id: req.userOId});
+      author: req.userOId, tags: ideaMember ? ['team-response']: []});
 
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId, authorName: author.nickname,
