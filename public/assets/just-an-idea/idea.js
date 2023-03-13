@@ -211,7 +211,7 @@ fetch(`/ideas/${ideaId}`, {
             upvoteCounter = data.upvotes;
             const upvoteFormatted = new Intl.NumberFormat('en-us',
                 {notation: 'compact'}).format(data.upvotes);
-            upvoteCount.textContent = upvoteFormatted;
+            upvoteCount.textContent = upvoteFormatted + ' ';
           } else {
             upvoteCounter = 0;
           }
@@ -954,7 +954,7 @@ upvoteBtn.addEventListener('click', async () => {
       }
       upvoteCount.textContent = new Intl
           .NumberFormat('en', {notation: 'compact'})
-          .format(upvoteCounter);
+          .format(upvoteCounter) + ' ';
     }
   });
 });
