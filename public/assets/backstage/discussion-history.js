@@ -22,12 +22,29 @@ if (payload.handle) {
 
 const msg = document.querySelector('.msg');
 const commentContainer = document.querySelector('.comment-container');
+const paginationContainer = document.querySelector('.pagination-container');
+const pageInput = document.querySelector('#page-in');
+const previousPage = document.querySelector('#prev');
+const nextPage = document.querySelector('#next');
 
-const superTypeMap = {
-  'idea': 'Just an Idea',
-};
+let params = (new URL(document.location)).searchParams;
+const q = params.get('q');
+let page = params.get('page') || 1;
 
-fetch('/comments/mine', {
+if (!Number.isInteger(Number(page)) || Number(page) < 1) {
+  window.location.replace('/just-an-idea/search');
+}
+
+pageInput.value = page;
+if (page == 1) {
+  previousPage.classList.add('hide');
+}
+pageInput.value = page;
+previousPage.setAttribute('href', `?page=${Number(page)-1}`);
+nextPage.setAttribute('href', `?page=${Number(page)+1}`);
+
+
+fetch(`/comments/mine?page=${page}`, {
   method: 'get',
   headers: {
     'Authorization': `Bearer ${token}`,
@@ -39,6 +56,7 @@ fetch('/comments/mine', {
     console.log(data);
     logout();
   } else {
+    paginationContainer.classList.remove('hide');
     const replyData = data.replies;
     replyData.forEach((item) => {
       const comment = document.createElement('div');
@@ -91,6 +109,15 @@ fetch('/comments/mine', {
 
       commentContainer.appendChild(comment);
     });
+  }
+});
+
+pageInput.addEventListener('keyup', (e) => {
+  if (e.key == 'Enter') {
+    const newPage = Number(pageInput.value);
+    if (Number.isInteger(newPage) && newPage > 0) {
+      window.location.href = `?page=${newPage}`;
+    }
   }
 });
 
