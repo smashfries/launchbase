@@ -587,10 +587,6 @@ export const createComment = {
           type: 'string',
           maxLength: 24,
         },
-        // superParent: {
-        //   type: 'string',
-        //   maxLength: 24,
-        // },
         parentType: {
           type: 'string',
           maxLength: 20,
@@ -608,6 +604,7 @@ export const createComment = {
           authorHandle: {type: 'string'},
           authorId: {type: 'string'},
           page: {type: 'integer'},
+          tags: {type: 'array'},
         },
       },
       400: {

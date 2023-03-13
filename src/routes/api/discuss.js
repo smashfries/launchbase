@@ -99,14 +99,17 @@ export default async function discuss(fastify, _options) {
     // update the tags property to check for other possible members as expanded
     // use || syntax and add on
     // ex: ideaMember || realMember || abcMember ? ['team-response'] : []
+    const tags = ideaMember ? ['team-response']: [];
+
+
     const comment = await comments.insertOne({comment: req.body.comment,
       parent: parentOId, superParent,
       superType, timeStamp: new Date(),
-      author: req.userOId, tags: ideaMember ? ['team-response']: []});
+      author: req.userOId, tags});
 
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId, authorName: author.nickname,
-      authorHandle: author.url, authorId: author._id, page});
+      authorHandle: author.url, authorId: author._id, page, tags});
   });
 
   fastify.get('/comments/:parent', getComments,
@@ -186,6 +189,7 @@ export default async function discuss(fastify, _options) {
               'upvotes': 1,
               'replyCount': 1,
               'upvote_details._id': 1,
+              'tags': 1,
             },
           },
           {
