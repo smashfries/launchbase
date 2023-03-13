@@ -719,8 +719,7 @@ submitReplyBtn.addEventListener('click', async () => {
       body: JSON.stringify({
         comment: replyBox.value,
         parent: ideaId,
-        superParent: ideaId,
-        superType: 'idea',
+        parentType: 'idea',
       }),
     }).then((res) => res.json()).then((data) => {
       console.log(data);

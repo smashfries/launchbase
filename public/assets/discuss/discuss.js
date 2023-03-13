@@ -61,9 +61,6 @@ const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
 let replyCount = 0;
 
-let superParent;
-let superType;
-
 const superTypeMap = {
   'idea': 'just-an-idea',
 };
@@ -299,8 +296,7 @@ submitReplyBtn.addEventListener('click', async () => {
       body: JSON.stringify({
         comment: replyBox.value,
         parent: commentId,
-        superParent,
-        superType,
+        parentType: 'comment',
       }),
     }).then((res) => res.json()).then((data) => {
       console.log(data);
