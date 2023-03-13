@@ -256,8 +256,38 @@ export default async function discuss(fastify, _options) {
         'page must be a number greater than or equal to 1'});
     }
 
-    const userComments = await comments.find({author: req.userOId})
-        .skip((page - 1) * 20).limit(20);
+    const userComments = await comments.aggregate([
+      {
+        $match: {
+          author: req.userOId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'ideas',
+          localField: 'superParent',
+          foreignField: '_id',
+          as: 'idea_details',
+        },
+      },
+      // add additional lookups to other collections as needed
+      {
+        $project: {
+          'idea_details.name': 1,
+          'timeStamp': 1,
+          'comment': 1,
+          'upvotes': 1,
+          'superParent': 1,
+          'parent': 1,
+        },
+      },
+      {
+        $skip: (page - 1) * 20,
+      },
+      {
+        $limit: 20,
+      },
+    ]);
     const array = await userComments.toArray();
 
     rep.code(200).send({replies: array, page});
