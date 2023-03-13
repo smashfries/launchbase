@@ -158,11 +158,19 @@ function setupComments() {
     loadingMsg.classList.add('hide');
     mainContent.classList.remove('hide');
     const authorDetails = document.querySelector('#comment-author');
-    authorDetails.innerHTML =
-      `<span>${commentData['author_details'].displayName}</span>` +
-      `<a href="/u/${commentData['author_details'].handle}"` +
-      ` class="public-member">` +
-      `<span class="badge">${commentData['author_details'].handle}</span></a>`;
+    const authorDisplayName = document.createElement('span');
+    authorDisplayName.textContent = commentData['author_details'].displayName;
+    authorDetails.appendChild(authorDisplayName);
+    const authorPageLink = document.createElement('a');
+    authorPageLink.classList.add('public-member');
+    authorPageLink.setAttribute('href',
+        `/u/${commentData['author_details'].handle}`);
+    const authorBadge = document.createElement('span');
+    authorBadge.classList.add('badge');
+    authorBadge.textContent = commentData['author_details'].handle;
+    authorPageLink.appendChild(authorBadge);
+    authorDetails.appendChild(authorPageLink);
+
     const parentComment = document.querySelector('#parent');
     const superParentComment = document.querySelector('#super-parent');
     if (commentData.comment.parent === commentData.comment.superParent) {
@@ -234,31 +242,74 @@ function setupComments() {
       container.classList.add('container');
       container.classList.add('comment-item');
       container.dataset.id = reply._id;
-      container.innerHTML =
-      `<p class="no-margin-top">${authorDetails.nickname}` +
-      `<a href="/u/${authorDetails.url}" class="public-member">` +
-      `<span class="badge">@${authorDetails.url}</span></a>` +
-      `</p>` +
-      commentBody.outerHTML +
-      `<p class="small-font no-margin-bottom">` +
-      `<button class="mini-btn${reply['upvote_details'].length === 1 ?
-        ' dark-btn' : ' light-btn'}" ` +
-        `onclick="upvoteComment(event)">` +
-      `<span class="upvote-text">${reply['upvote_details']
-          .length === 1 ?
-        'Upvoted' : 'Upvote'}</span> ` +
-      `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
-          .format(reply.upvotes ? reply.upvotes : 0)}</span>` +
-      ` <span class="submit-icon">👌</span></button>` +
-      ` • <a href="/discuss/${reply._id}" ` +
-      `class="idea-link small-font">${reply.replyCount || 0} ` +
-      `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}` +
-      `</a> ` +
-      `${(payload.id === authorDetails._id) && !reply.deleted ?
-        '• <button class="idea-link small-font" ' +
-        'onclick="deleteCommentConfirm(' + '\'' + reply._id +
-        '\'' + ')">Delete</button>' : ''}` +
-      ` • ${formattedDate}</p>`;
+
+      // comment header
+      const commentHeader = document.createElement('p');
+      commentHeader.classList.add('no-margin-top');
+      const authorNick = document.createTextNode(authorDetails.nickname);
+      commentHeader.appendChild(authorNick);
+      const authorUrl = document.createElement('a');
+      authorUrl.classList.add('public-member');
+      authorUrl.setAttribute('href', `/u/${authorDetails.url}`);
+      const urlBadge = document.createElement('badge');
+      urlBadge.classList.add('badge');
+      urlBadge.textContent = `@${authorDetails.url}`;
+      authorUrl.appendChild(urlBadge);
+      commentHeader.appendChild(authorUrl);
+
+      // comment body (commentBody)
+
+      // comment footer
+      const commentFooter = document.createElement('p');
+      commentFooter.classList.add('small-font', 'no-margin-bottom');
+      const tmpCommentUpvoteBtn = document.createElement('button');
+      tmpCommentUpvoteBtn.classList.add('mini-btn',
+          reply['upvote_details'].length === 1 ? 'dark-btn' : 'light-btn');
+      tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
+      const commentUpvoteTxt = document.createElement('span');
+      commentUpvoteTxt.classList.add('upvote-text');
+      commentUpvoteTxt.textContent = reply['upvote_details'].length === 1 ?
+        'Upvoted ' : 'Upvote ';
+      tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
+      const commentUpvoteNum = document.createElement('span');
+      commentUpvoteNum.textContent = new Intl.NumberFormat('en',
+          {notation: 'compact'}).format(reply.upvotes || 0) + ' ';
+      tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
+      const tmpUpvoteIcon = document.createElement('span');
+      tmpUpvoteIcon.classList.add('submit-icon');
+      tmpUpvoteIcon.textContent = '👌';
+      tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
+      commentFooter.appendChild(tmpCommentUpvoteBtn);
+
+      const spacer = document.createTextNode(' • ');
+      commentFooter.appendChild(spacer.cloneNode());
+
+      const repliesLink = document.createElement('a');
+      repliesLink.classList.add('idea-link', 'small-font');
+      repliesLink.setAttribute('href', `/discuss/${reply._id}`);
+      repliesLink.textContent = `${Intl.NumberFormat('en',
+          {notation: 'compact'}).format(reply.replyCount || 0)} ` +
+          `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}`;
+      commentFooter.appendChild(repliesLink);
+
+      if (payload.id === authorDetails._id && !reply.deleted) {
+        commentFooter.appendChild(spacer.cloneNode());
+        const commentDeleteBtn = document.createElement('button');
+        commentDeleteBtn.classList.add('idea-link', 'small-font');
+        commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
+          '\'' + reply._id + '\'' + ')');
+        commentDeleteBtn.textContent = 'Delete';
+        commentFooter.appendChild(commentDeleteBtn);
+      }
+
+      commentFooter.appendChild(spacer.cloneNode());
+      const commentDate = document.createTextNode(formattedDate);
+      commentFooter.appendChild(commentDate);
+
+      container.appendChild(commentHeader);
+      container.appendChild(commentBody);
+      container.appendChild(commentFooter);
+
       commentDataContainer.appendChild(container);
     });
   });
@@ -312,21 +363,76 @@ submitReplyBtn.addEventListener('click', async () => {
         container.classList.add('container');
         container.classList.add('comment-item');
         container.dataset.id = data.commentId;
-        container.innerHTML =
-        `<p class="no-margin-top">${data.authorName}` +
-        `<a href="/u/${data.authorHandle}" class="public-member">` +
-        `<span class="badge">@${data.authorHandle}</span></a>` +
-        `</p>` +
-        `<p>${replyBox.value}</p>` +
-        `<p class="small-font no-margin-bottom">` +
-        `<button class="mini-btn light-btn"><span>` +
-        `0 </span>` +
-        `Upvotes 👌</button>` +
-        ` • <a href="/discuss/${data.commentId}" ` +
-        `class="idea-link small-font">Replies</a> ` +
-        `• <button class="idea-link small-font" ` +
-        `onclick="deleteCommentConfirm('${data.commentId}')">Delete</button> ` +
-        `• ${formattedDate}</p>`;
+
+        // comment header
+        const commentHeader = document.createElement('p');
+        commentHeader.classList.add('no-margin-top');
+        const authorNick = document.createTextNode(data.authorName);
+        commentHeader.appendChild(authorNick);
+        const authorUrl = document.createElement('a');
+        authorUrl.classList.add('public-member');
+        authorUrl.setAttribute('href', `/u/${data.authorHandle}`);
+        const urlBadge = document.createElement('badge');
+        urlBadge.classList.add('badge');
+        urlBadge.textContent = `@${data.authorHandle}`;
+        authorUrl.appendChild(urlBadge);
+        commentHeader.appendChild(authorUrl);
+
+        // comment body (commentBody)
+        const commentBody = document.createElement('p');
+        const commentFragments = replyBox.value.split('\n');
+        commentFragments.forEach((fragment) => {
+          const fragmentText = document.createElement('span');
+          fragmentText.textContent = fragment;
+          commentBody.appendChild(fragmentText);
+          const lineBreak = document.createElement('br');
+          commentBody.appendChild(lineBreak);
+        });
+
+        // comment footer
+        const commentFooter = document.createElement('p');
+        commentFooter.classList.add('small-font', 'no-margin-bottom');
+        const tmpCommentUpvoteBtn = document.createElement('button');
+        tmpCommentUpvoteBtn.classList.add('mini-btn', 'light-btn');
+        tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
+        const commentUpvoteTxt = document.createElement('span');
+        commentUpvoteTxt.classList.add('upvote-text');
+        commentUpvoteTxt.textContent = 'Upvote ';
+        tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
+        const commentUpvoteNum = document.createElement('span');
+        commentUpvoteNum.textContent = '0 ';
+        tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
+        const tmpUpvoteIcon = document.createElement('span');
+        tmpUpvoteIcon.classList.add('submit-icon');
+        tmpUpvoteIcon.textContent = '👌';
+        tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
+        commentFooter.appendChild(tmpCommentUpvoteBtn);
+
+        const spacer = document.createTextNode(' • ');
+        commentFooter.appendChild(spacer.cloneNode());
+
+        const repliesLink = document.createElement('a');
+        repliesLink.classList.add('idea-link', 'small-font');
+        repliesLink.setAttribute('href', `/discuss/${data.commentId}`);
+        repliesLink.textContent = `0 Replies`;
+        commentFooter.appendChild(repliesLink);
+
+        commentFooter.appendChild(spacer.cloneNode());
+        const commentDeleteBtn = document.createElement('button');
+        commentDeleteBtn.classList.add('idea-link', 'small-font');
+        commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
+          '\'' + data.commentId + '\'' + ')');
+        commentDeleteBtn.textContent = 'Delete';
+        commentFooter.appendChild(commentDeleteBtn);
+
+        commentFooter.appendChild(spacer.cloneNode());
+        const commentDate = document.createTextNode(formattedDate);
+        commentFooter.appendChild(commentDate);
+
+        container.appendChild(commentHeader);
+        container.appendChild(commentBody);
+        container.appendChild(commentFooter);
+
         commentDataContainer.appendChild(container);
         replyBox.value = '';
         // console.log(replyCount, commentCount);
