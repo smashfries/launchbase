@@ -1077,7 +1077,8 @@ async function upvoteComment(e) {
       if (upvoted) {
         commentItem.dataset.upvotes = upvoteNumber - 1;
         commentUpvoteCount.textContent = new Intl
-            .NumberFormat('en', {notation: 'compact'}).format(upvoteNumber - 1);
+            .NumberFormat('en', {notation: 'compact'})
+            .format(upvoteNumber - 1)+ ' ';
         text.textContent = 'Upvote ';
         commentUpvoteBtn.classList.remove('dark-btn');
         commentUpvoteBtn.classList.add('light-btn');
@@ -1085,7 +1086,8 @@ async function upvoteComment(e) {
         commentItem.dataset.upvotes = upvoteNumber + 1;
         text.textContent = 'Upvoted ';
         commentUpvoteCount.textContent = new Intl
-            .NumberFormat('en', {notation: 'compact'}).format(upvoteNumber + 1);
+            .NumberFormat('en', {notation: 'compact'})
+            .format(upvoteNumber + 1) + ' ';
         commentUpvoteBtn.classList.add('dark-btn');
         commentUpvoteBtn.classList.remove('light-btn');
       }
