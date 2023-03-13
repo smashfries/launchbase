@@ -571,6 +571,19 @@ h5 {
   transition: 0.3s;
 }
 
+.comment-header, .comment-footer {
+  margin: 5px;
+  margin-left: 0;
+}
+
+.comment-body {
+  font-style: italic;
+}
+
+.comment-item {
+  margin-bottom: 20px;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;
