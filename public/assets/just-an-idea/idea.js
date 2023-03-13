@@ -375,33 +375,74 @@ function setupComments(scrollToReply = false) {
       container.dataset.id = reply._id;
       container.dataset.replies = reply.replyCount || 0;
       container.dataset.upvotes = reply.upvotes || 0;
-      container.innerHTML =
-      `<p class="no-margin-top">${authorDetails.nickname}` +
-      `<a href="/u/${authorDetails.url}" class="public-member">` +
-      `<span class="badge">@${authorDetails.url}</span></a>` +
-      `</p>` +
-      commentBody.outerHTML +
-      `<p class="small-font no-margin-bottom">` +
-      `<button class="mini-btn${reply['upvote_details'].length === 1 ?
-        ' dark-btn' : ' light-btn'}" ` +
-        `onclick="upvoteComment(event)">` +
-      `<span class="upvote-text">${reply['upvote_details']
-          .length === 1 ?
-        'Upvoted' : 'Upvote'}</span> ` +
-      `<span>${new Intl.NumberFormat('en', {notation: 'compact'})
-          .format(reply.upvotes || 0)}</span>` +
-      ` <span class="submit-icon">👌</span></button>` +
-      ` • <a href="/discuss/${reply._id}" ` +
-      `class="idea-link small-font">${
-        new Intl.NumberFormat('en', {notation: 'compact'}).
-            format(reply.replyCount || 0)} ` +
-      `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}` +
-      `</a> ` +
-      `${(payload.id === authorDetails._id) && !reply.deleted ?
-        '• <button class="idea-link small-font" ' +
-        'onclick="deleteCommentConfirm(' + '\'' + reply._id +
-        '\'' + ')">Delete</button>' : ''}` +
-      ` • ${formattedDate}</p>`;
+
+      // comment header
+      const commentHeader = document.createElement('p');
+      commentHeader.classList.add('no-margin-top');
+      const authorNick = document.createTextNode(authorDetails.nickname);
+      commentHeader.appendChild(authorNick);
+      const authorUrl = document.createElement('a');
+      authorUrl.classList.add('public-member');
+      authorUrl.setAttribute('href', `/u/${authorDetails.url}`);
+      const urlBadge = document.createElement('badge');
+      urlBadge.classList.add('badge');
+      urlBadge.textContent = `@${authorDetails.url}`;
+      authorUrl.appendChild(urlBadge);
+      commentHeader.appendChild(authorUrl);
+
+      // comment body (commentBody)
+
+      // comment footer
+      const commentFooter = document.createElement('p');
+      commentFooter.classList.add('small-font', 'no-margin-bottom');
+      const tmpCommentUpvoteBtn = document.createElement('button');
+      tmpCommentUpvoteBtn.classList.add('mini-btn',
+          reply['upvote_details'].length === 1 ? 'dark-btn' : 'light-btn');
+      tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
+      const commentUpvoteTxt = document.createElement('span');
+      commentUpvoteTxt.classList.add('upvote-text');
+      commentUpvoteTxt.textContent = reply['upvote_details'].length === 1 ?
+        'Upvoted ' : 'Upvote ';
+      tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
+      const commentUpvoteNum = document.createElement('span');
+      commentUpvoteNum.textContent = new Intl.NumberFormat('en',
+          {notation: 'compact'}).format(reply.upvotes || 0) + ' ';
+      tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
+      const tmpUpvoteIcon = document.createElement('span');
+      tmpUpvoteIcon.classList.add('submit-icon');
+      tmpUpvoteIcon.textContent = '👌';
+      tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
+      commentFooter.appendChild(tmpCommentUpvoteBtn);
+
+      const spacer = document.createTextNode(' • ');
+      commentFooter.appendChild(spacer.cloneNode());
+
+      const repliesLink = document.createElement('a');
+      repliesLink.classList.add('idea-link', 'small-font');
+      repliesLink.setAttribute('href', `/discuss/${reply._id}`);
+      repliesLink.textContent = `${Intl.NumberFormat('en',
+          {notation: 'compact'}).format(reply.replyCount || 0)} ` +
+          `${reply.replyCount && reply.replyCount == 1 ? 'Reply' : 'Replies'}`;
+      commentFooter.appendChild(repliesLink);
+
+      if (payload.id === authorDetails._id && !reply.deleted) {
+        commentFooter.appendChild(spacer.cloneNode());
+        const commentDeleteBtn = document.createElement('button');
+        commentDeleteBtn.classList.add('idea-link', 'small-font');
+        commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
+          '\'' + reply._id + '\'' + ')');
+        commentDeleteBtn.textContent = 'Delete';
+        commentFooter.appendChild(commentDeleteBtn);
+      }
+
+      commentFooter.appendChild(spacer.cloneNode());
+      const commentDate = document.createTextNode(formattedDate);
+      commentFooter.appendChild(commentDate);
+
+      container.appendChild(commentHeader);
+      container.appendChild(commentBody);
+      container.appendChild(commentFooter);
+
       commentDataContainer.appendChild(container);
     });
     if (scrollToReply) {
@@ -728,6 +769,9 @@ submitReplyBtn.addEventListener('click', async () => {
       submitReplyBtn.disabled = false;
       if (!data.error) {
         replyCount++;
+        commentCount.textContent = replyCount == 1 ?
+            '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
+                .format(replyCount)} Comments`;
         const commentPage = data.page;
         if (commentPage !== page) {
           commentError.classList.remove('hide');
@@ -749,35 +793,77 @@ submitReplyBtn.addEventListener('click', async () => {
           container.dataset.replies = 0;
           container.dataset.upvotes = 0;
 
+          // comment header
+          const commentHeader = document.createElement('p');
+          commentHeader.classList.add('no-margin-top');
+          const authorNick = document.createTextNode(data.authorName);
+          commentHeader.appendChild(authorNick);
+          const authorUrl = document.createElement('a');
+          authorUrl.classList.add('public-member');
+          authorUrl.setAttribute('href', `/u/${data.authorHandle}`);
+          const urlBadge = document.createElement('badge');
+          urlBadge.classList.add('badge');
+          urlBadge.textContent = `@${data.authorHandle}`;
+          authorUrl.appendChild(urlBadge);
+          commentHeader.appendChild(authorUrl);
+
+          // comment body (commentBody)
+          const commentBody = document.createElement('p');
           const commentFragments = replyBox.value.split('\n');
-          let formattedCommentBody = '';
           commentFragments.forEach((fragment) => {
-            formattedCommentBody = formattedCommentBody + '<span>' +
-              fragment + '</span><br>';
+            const fragmentText = document.createElement('span');
+            fragmentText.textContent = fragment;
+            commentBody.appendChild(fragmentText);
+            const lineBreak = document.createElement('br');
+            commentBody.appendChild(lineBreak);
           });
 
-          container.innerHTML =
-          `<p class="no-margin-top">${data.authorName}` +
-          `<a href="/u/${data.authorHandle}" class="public-member">` +
-          `<span class="badge">@${data.authorHandle}</span></a>` +
-          `</p>` +
-          `<p>${formattedCommentBody}</p>` +
-          `<p class="small-font no-margin-bottom">` +
-          `<button class="mini-btn light-btn" ` +
-          `onclick="upvoteComment(event)"><span class="upvote-text">` +
-          `Upvote</span>` +
-          ` <span>0</span> <span class="submit-icon">👌</span></button>` +
-          ` • <a href="/discuss/${data.commentId}" ` +
-          `class="idea-link small-font">0 Replies</a> ` +
-          `• <button class="idea-link small-font" ` +
-          `onclick="deleteCommentConfirm('${data.commentId}')">` +
-          `Delete</button> ` +
-          `• ${formattedDate}</p>`;
+          // comment footer
+          const commentFooter = document.createElement('p');
+          commentFooter.classList.add('small-font', 'no-margin-bottom');
+          const tmpCommentUpvoteBtn = document.createElement('button');
+          tmpCommentUpvoteBtn.classList.add('mini-btn', 'light-btn');
+          tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
+          const commentUpvoteTxt = document.createElement('span');
+          commentUpvoteTxt.classList.add('upvote-text');
+          commentUpvoteTxt.textContent = 'Upvote ';
+          tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
+          const commentUpvoteNum = document.createElement('span');
+          commentUpvoteNum.textContent = '0 ';
+          tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
+          const tmpUpvoteIcon = document.createElement('span');
+          tmpUpvoteIcon.classList.add('submit-icon');
+          tmpUpvoteIcon.textContent = '👌';
+          tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
+          commentFooter.appendChild(tmpCommentUpvoteBtn);
+
+          const spacer = document.createTextNode(' • ');
+          commentFooter.appendChild(spacer.cloneNode());
+
+          const repliesLink = document.createElement('a');
+          repliesLink.classList.add('idea-link', 'small-font');
+          repliesLink.setAttribute('href', `/discuss/${data.commentId}`);
+          repliesLink.textContent = `0 Replies`;
+          commentFooter.appendChild(repliesLink);
+
+          commentFooter.appendChild(spacer.cloneNode());
+          const commentDeleteBtn = document.createElement('button');
+          commentDeleteBtn.classList.add('idea-link', 'small-font');
+          commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
+            '\'' + data.commentId + '\'' + ')');
+          commentDeleteBtn.textContent = 'Delete';
+          commentFooter.appendChild(commentDeleteBtn);
+
+          commentFooter.appendChild(spacer.cloneNode());
+          const commentDate = document.createTextNode(formattedDate);
+          commentFooter.appendChild(commentDate);
+
+          container.appendChild(commentHeader);
+          container.appendChild(commentBody);
+          container.appendChild(commentFooter);
+
           commentDataContainer.appendChild(container);
           replyBox.value = '';
-          commentCount.textContent = replyCount == 1 ?
-            '1 Comment' : `${new Intl.NumberFormat('en', {notation: 'compact'})
-                .format(replyCount)} Comments`;
           window.scrollTo(0, document.body.scrollHeight);
         }
       } else {
