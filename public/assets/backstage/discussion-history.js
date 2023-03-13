@@ -59,6 +59,8 @@ fetch(`/comments/mine?page=${page}`, {
     paginationContainer.classList.remove('hide');
     const replyData = data.replies;
     replyData.forEach((item) => {
+      const link = document.createElement('a');
+      link.setAttribute('href', `/discuss/${item._id}`);
       const comment = document.createElement('div');
       comment.classList.add('container', 'comment-item');
 
@@ -79,6 +81,8 @@ fetch(`/comments/mine?page=${page}`, {
         boldText.textContent = item['idea_details'][0].name + ' ';
         badge.textContent = 'Just an Idea';
       }
+
+
       superName.appendChild(boldText);
       header.appendChild(superName);
       header.appendChild(badge);
@@ -107,7 +111,9 @@ fetch(`/comments/mine?page=${page}`, {
       comment.appendChild(commentBody);
       comment.appendChild(footer);
 
-      commentContainer.appendChild(comment);
+      link.appendChild(comment);
+
+      commentContainer.appendChild(link);
     });
   }
 });
