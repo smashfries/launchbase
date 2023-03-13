@@ -587,16 +587,16 @@ export const createComment = {
           type: 'string',
           maxLength: 24,
         },
-        superParent: {
-          type: 'string',
-          maxLength: 24,
-        },
-        superType: {
+        // superParent: {
+        //   type: 'string',
+        //   maxLength: 24,
+        // },
+        parentType: {
           type: 'string',
           maxLength: 20,
         },
       },
-      required: ['comment', 'parent', 'superParent', 'superType'],
+      required: ['comment', 'parent', 'parentType'],
     },
     response: {
       200: {

@@ -12,43 +12,12 @@ export default async function discuss(fastify, _options) {
       return rep.code(400).send({error: 'unauthorized'});
     }
 
-    if (req.body.superType !== 'idea') {
-      return rep.code(400).send({error: 'method not supported',
-        message: 'Only comments for ideas are currently supported. ' +
-          'This feature is coming soon!'});
-    }
-
     const parentId = req.body.parent;
     if (!fastify.mongo.ObjectId.isValid(parentId)) {
       return rep.code(400).send({error: 'invalid parentId',
         message: 'parentId is an invalid MongoDB Object ID'});
     }
     const parentOId = new fastify.mongo.ObjectId(parentId);
-
-    const superParentId = req.body.superParent;
-    if (!fastify.mongo.ObjectId.isValid(superParentId)) {
-      return rep.code(400).send({error: 'invalid superParentId',
-        message: 'superParentId is an invalid MongoDB Object ID'});
-    }
-    const superParentOId = new fastify.mongo.ObjectId(superParentId);
-
-    const comments = fastify.mongo.db.collection('comments');
-    const ideas = fastify.mongo.db.collection('ideas');
-
-    const superParent = await ideas.findOne({_id: superParentOId});
-    if (!superParent) {
-      return rep.code(400).send({error: 'idea does not exist'});
-    }
-
-    if (req.body.parent !== req.body.superParent) {
-      const parentComment = await comments.findOne({_id: parentOId});
-      if (!parentComment) {
-        return rep.code(400).send({error: 'parent comment does not exist'});
-      }
-      if (!parentComment.superParent.equals(superParentOId)) {
-        return rep.code(400).send({error: 'invalid super-parent'});
-      }
-    }
 
     const users = fastify.mongo.db.collection('users');
     const user = await users.findOne({_id: req.userOId});
@@ -62,20 +31,49 @@ export default async function discuss(fastify, _options) {
       return rep.code(400).send({error: 'bad-words'});
     }
 
+    const comments = fastify.mongo.db.collection('comments');
+    const ideas = fastify.mongo.db.collection('ideas');
+
+    let idea;
+    let parentComment;
+    let superParent;
+    let superType;
+
+    switch (req.body.parentType) {
+      case 'idea':
+        idea = await ideas.findOne({_id: parentOId});
+        if (!idea) {
+          return rep.code(400).send({error: 'idea does not exist'});
+        }
+        superParent = idea._id;
+        superType = 'idea';
+        break;
+      case 'comment':
+        parentComment = await comments.findOne({_id: parentOId});
+        if (!parentComment) {
+          return rep.code(400).send({error: 'comment does not exist'});
+        }
+        superParent = parentComment.superParent;
+        superType = parentComment.superType;
+        break;
+      default:
+        return rep.code(400).send({error: 'parentType not supported'});
+        break;
+    }
+
     const totalCommentCount = await comments.count({parent: parentOId});
     const page = Math.floor(totalCommentCount / 20) + 1;
 
     const comment = await comments.insertOne({comment: req.body.comment,
-      parent: parentOId, superParent: superParentOId,
-      superType: req.body.superType, timeStamp: new Date(),
+      parent: parentOId, superParent,
+      superType, timeStamp: new Date(),
       author: req.userOId});
 
-    if (parentId === superParentId) {
+    if (parentOId.equals(superParent)) {
       await ideas.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
     } else {
       await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
     }
-
 
     const author = await fastify.mongo.db.collection('users')
         .findOne({_id: req.userOId});
