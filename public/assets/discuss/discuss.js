@@ -127,7 +127,7 @@ window.addEventListener('popstate', (event) => {
   setupComments();
 });
 
-function setupComments() {
+function setupComments(scrollToReply = false) {
   document.querySelectorAll('.comment-item').forEach((i) => {
     i.remove();
   });
@@ -312,6 +312,9 @@ function setupComments() {
 
       commentDataContainer.appendChild(container);
     });
+    if (scrollToReply) {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   });
 };
 
@@ -356,89 +359,103 @@ submitReplyBtn.addEventListener('click', async () => {
       if (!data.error) {
         commentError.classList.add('hide');
         replyCount++;
-        const date = new Date();
-        const formattedDate = new Intl.DateTimeFormat('en-US',
-            {dateStyle: 'medium'}).format(date);
-        const container = document.createElement('div');
-        container.classList.add('container');
-        container.classList.add('comment-item');
-        container.dataset.id = data.commentId;
-
-        // comment header
-        const commentHeader = document.createElement('p');
-        commentHeader.classList.add('no-margin-top');
-        const authorNick = document.createTextNode(data.authorName);
-        commentHeader.appendChild(authorNick);
-        const authorUrl = document.createElement('a');
-        authorUrl.classList.add('public-member');
-        authorUrl.setAttribute('href', `/u/${data.authorHandle}`);
-        const urlBadge = document.createElement('badge');
-        urlBadge.classList.add('badge');
-        urlBadge.textContent = `@${data.authorHandle}`;
-        authorUrl.appendChild(urlBadge);
-        commentHeader.appendChild(authorUrl);
-
-        // comment body (commentBody)
-        const commentBody = document.createElement('p');
-        const commentFragments = replyBox.value.split('\n');
-        commentFragments.forEach((fragment) => {
-          const fragmentText = document.createElement('span');
-          fragmentText.textContent = fragment;
-          commentBody.appendChild(fragmentText);
-          const lineBreak = document.createElement('br');
-          commentBody.appendChild(lineBreak);
-        });
-
-        // comment footer
-        const commentFooter = document.createElement('p');
-        commentFooter.classList.add('small-font', 'no-margin-bottom');
-        const tmpCommentUpvoteBtn = document.createElement('button');
-        tmpCommentUpvoteBtn.classList.add('mini-btn', 'light-btn');
-        tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
-        const commentUpvoteTxt = document.createElement('span');
-        commentUpvoteTxt.classList.add('upvote-text');
-        commentUpvoteTxt.textContent = 'Upvote ';
-        tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
-        const commentUpvoteNum = document.createElement('span');
-        commentUpvoteNum.textContent = '0 ';
-        tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
-        const tmpUpvoteIcon = document.createElement('span');
-        tmpUpvoteIcon.classList.add('submit-icon');
-        tmpUpvoteIcon.textContent = '👌';
-        tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
-        commentFooter.appendChild(tmpCommentUpvoteBtn);
-
-        const spacer = document.createTextNode(' • ');
-        commentFooter.appendChild(spacer.cloneNode());
-
-        const repliesLink = document.createElement('a');
-        repliesLink.classList.add('idea-link', 'small-font');
-        repliesLink.setAttribute('href', `/discuss/${data.commentId}`);
-        repliesLink.textContent = `0 Replies`;
-        commentFooter.appendChild(repliesLink);
-
-        commentFooter.appendChild(spacer.cloneNode());
-        const commentDeleteBtn = document.createElement('button');
-        commentDeleteBtn.classList.add('idea-link', 'small-font');
-        commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
-          '\'' + data.commentId + '\'' + ')');
-        commentDeleteBtn.textContent = 'Delete';
-        commentFooter.appendChild(commentDeleteBtn);
-
-        commentFooter.appendChild(spacer.cloneNode());
-        const commentDate = document.createTextNode(formattedDate);
-        commentFooter.appendChild(commentDate);
-
-        container.appendChild(commentHeader);
-        container.appendChild(commentBody);
-        container.appendChild(commentFooter);
-
-        commentDataContainer.appendChild(container);
-        replyBox.value = '';
-        // console.log(replyCount, commentCount);
         commentCount.textContent = replyCount == 1 ?
-          '1 Reply' : `${replyCount} Replies`;
-        window.scrollTo(0, document.body.scrollHeight);
+          '1 Reply' : `${new Intl.NumberFormat('en', {notation: 'compact'})
+              .format(replyCount)} Replies`;
+
+        const commentPage = data.page;
+        if (commentPage !== page) {
+          commentError.classList.remove('hide');
+          commentError.classList.replace('error', 'info');
+          commentError.textContent = 'Loading...';
+          setPage(commentPage);
+          if (page != 1) {
+            previousPage.classList.remove('hide');
+          }
+          setupComments(true);
+        } else {
+          const date = new Date();
+          const formattedDate = new Intl.DateTimeFormat('en-US',
+              {dateStyle: 'medium'}).format(date);
+          const container = document.createElement('div');
+          container.classList.add('container');
+          container.classList.add('comment-item');
+          container.dataset.id = data.commentId;
+
+          // comment header
+          const commentHeader = document.createElement('p');
+          commentHeader.classList.add('no-margin-top');
+          const authorNick = document.createTextNode(data.authorName);
+          commentHeader.appendChild(authorNick);
+          const authorUrl = document.createElement('a');
+          authorUrl.classList.add('public-member');
+          authorUrl.setAttribute('href', `/u/${data.authorHandle}`);
+          const urlBadge = document.createElement('badge');
+          urlBadge.classList.add('badge');
+          urlBadge.textContent = `@${data.authorHandle}`;
+          authorUrl.appendChild(urlBadge);
+          commentHeader.appendChild(authorUrl);
+
+          // comment body (commentBody)
+          const commentBody = document.createElement('p');
+          const commentFragments = replyBox.value.split('\n');
+          commentFragments.forEach((fragment) => {
+            const fragmentText = document.createElement('span');
+            fragmentText.textContent = fragment;
+            commentBody.appendChild(fragmentText);
+            const lineBreak = document.createElement('br');
+            commentBody.appendChild(lineBreak);
+          });
+
+          // comment footer
+          const commentFooter = document.createElement('p');
+          commentFooter.classList.add('small-font', 'no-margin-bottom');
+          const tmpCommentUpvoteBtn = document.createElement('button');
+          tmpCommentUpvoteBtn.classList.add('mini-btn', 'light-btn');
+          tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
+          const commentUpvoteTxt = document.createElement('span');
+          commentUpvoteTxt.classList.add('upvote-text');
+          commentUpvoteTxt.textContent = 'Upvote ';
+          tmpCommentUpvoteBtn.appendChild(commentUpvoteTxt);
+          const commentUpvoteNum = document.createElement('span');
+          commentUpvoteNum.textContent = '0 ';
+          tmpCommentUpvoteBtn.appendChild(commentUpvoteNum);
+          const tmpUpvoteIcon = document.createElement('span');
+          tmpUpvoteIcon.classList.add('submit-icon');
+          tmpUpvoteIcon.textContent = '👌';
+          tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
+          commentFooter.appendChild(tmpCommentUpvoteBtn);
+
+          const spacer = document.createTextNode(' • ');
+          commentFooter.appendChild(spacer.cloneNode());
+
+          const repliesLink = document.createElement('a');
+          repliesLink.classList.add('idea-link', 'small-font');
+          repliesLink.setAttribute('href', `/discuss/${data.commentId}`);
+          repliesLink.textContent = `0 Replies`;
+          commentFooter.appendChild(repliesLink);
+
+          commentFooter.appendChild(spacer.cloneNode());
+          const commentDeleteBtn = document.createElement('button');
+          commentDeleteBtn.classList.add('idea-link', 'small-font');
+          commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
+            '\'' + data.commentId + '\'' + ')');
+          commentDeleteBtn.textContent = 'Delete';
+          commentFooter.appendChild(commentDeleteBtn);
+
+          commentFooter.appendChild(spacer.cloneNode());
+          const commentDate = document.createTextNode(formattedDate);
+          commentFooter.appendChild(commentDate);
+
+          container.appendChild(commentHeader);
+          container.appendChild(commentBody);
+          container.appendChild(commentFooter);
+
+          commentDataContainer.appendChild(container);
+          replyBox.value = '';
+          // console.log(replyCount, commentCount);
+          window.scrollTo(0, document.body.scrollHeight);
+        }
       } else {
         if (data.error === 'profile incomplete') {
           commentError.classList.remove('hide');
