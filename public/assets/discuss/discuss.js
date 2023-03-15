@@ -59,6 +59,7 @@ const copyBtn = document.querySelector('#copy-link');
 const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
+const submitReplyIcon = document.querySelector('#share-comment-icon');
 const commentCount = document.querySelector('#comment-count');
 const commentError = document.querySelector('#comment-error');
 let replyCount = 0;
@@ -341,8 +342,9 @@ deleteBtn.addEventListener('click', () => {
 
 submitReplyBtn.addEventListener('click', async () => {
   if (replyBox.value !== '') {
-    submitReplyBtn.textContent = '...';
+    // submitReplyBtn.textContent = '...';
     submitReplyBtn.disabled = true;
+    submitReplyIcon.style.animationName = 'loading';
     fetch('/comments', {
       method: 'post',
       headers: {
@@ -356,7 +358,8 @@ submitReplyBtn.addEventListener('click', async () => {
       }),
     }).then((res) => res.json()).then((data) => {
       console.log(data);
-      submitReplyBtn.textContent = 'Share a Comment';
+      // submitReplyBtn.textContent = 'Share a Comment';
+      submitReplyIcon.style.animationName = 'none';
       submitReplyBtn.disabled = false;
       if (!data.error) {
         commentError.classList.add('hide');
