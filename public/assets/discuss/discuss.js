@@ -54,6 +54,8 @@ const upvoteCount = document.querySelector('#upvote-count');
 const upvoteBtn = document.querySelector('#idea-upvote');
 const upvoteText = document.querySelector('#upvote-text');
 
+const copyBtn = document.querySelector('#copy-link');
+
 const commentDataContainer = document.querySelector('#comment-data');
 const replyBox = document.querySelector('#reply-box');
 const submitReplyBtn = document.querySelector('#post-comment');
@@ -618,6 +620,18 @@ async function upvoteComment(e) {
     }
   });
 }
+
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    copyBtn.textContent = 'Copied! 📋';
+  } catch (error) {
+    copyBtn.textContent = 'Could not copy, sorry! 📋';
+  }
+  setTimeout(() => {
+    copyBtn.textContent = 'Copy link to Clipboard 📋';
+  }, 3000);
+});
 
 pfpElement.addEventListener('click', showPfpDropdown);
 pfpDropdown.addEventListener('click', (e) => {
