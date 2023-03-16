@@ -89,7 +89,9 @@ export default async function discuss(fastify, _options) {
       // use || syntax and add on to account for other memberTypes in the future
       if (ideaMember) {
         await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1},
-          $push: {tags: 'team-replied'}});
+          $addToSet: {tags: 'team-replied'}});
+      } else {
+        await comments.updateOne({_id: parentOId}, {$inc: {replyCount: 1}});
       }
     }
 
@@ -252,17 +254,37 @@ export default async function discuss(fastify, _options) {
         message: 'Only the authors can delete their own comments.'});
     }
 
+    const superType = comment.superType;
+
     if (comment.parent.equals(comment.superParent)) {
-      ideas.updateOne({_id: comment.superParent}, {$inc: {replyCount: -1}});
+      switch (superType) {
+        case 'idea':
+          ideas.updateOne({_id: comment.superParent}, {$inc: {replyCount: -1}});
+          break;
+        default:
+          break;
+      }
     } else {
-      comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1}});
+      if (comment.tags.includes('team-response')) {
+        const memberReplies = await comments.find({parent: comment.parent,
+          tags: 'team-response'}).count();
+        if (memberReplies == 1) {
+          comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1},
+            $pullAll: {tags: ['team-replied']}});
+        } else {
+          comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1}});
+        }
+      } else {
+        comments.updateOne({_id: comment.parent}, {$inc: {replyCount: -1}});
+      }
     }
 
     if (!comment.replyCount) {
       await comments.deleteOne({_id: commentOId});
     } else {
       await comments.updateOne({_id: commentOId}, {$set:
-        {comment: 'This comment was deleted.', deleted: true}});
+        {comment: 'This comment was deleted.', deleted: true},
+      $pullAll: {tags: ['team-response']}});
     }
 
     rep.code(200).send({message: 'The comment was successfully deleted!'});
