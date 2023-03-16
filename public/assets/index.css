@@ -584,6 +584,35 @@ h5 {
   margin-bottom: 20px;
 }
 
+.tag {
+  color: #fff;
+  padding-right: 5px !important;
+  margin-right: 5px !important;
+  word-wrap: break-word;
+}
+
+.actual-comment-footer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 5px;
+}
+
+#text {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+[data-tag="team-replied"] {
+  background: linear-gradient(90deg, #1CB5E0 0%, #000851 100%);
+}
+
+[data-tag="team-response"] {
+  background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+  user-select: none;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;

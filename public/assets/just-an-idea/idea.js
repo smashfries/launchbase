@@ -333,6 +333,10 @@ window.addEventListener('popstate', (event) => {
   } else {
     previousPage.classList.remove('hide');
   }
+  commentError.classList.remove('warning');
+  commentError.classList.remove('error');
+  commentError.classList.remove('hide');
+  commentError.textContent = 'Loading data...';
   setupComments();
 });
 
@@ -394,7 +398,8 @@ function setupComments(scrollToReply = false) {
 
       // comment footer
       const commentFooter = document.createElement('p');
-      commentFooter.classList.add('small-font', 'no-margin-bottom');
+      commentFooter.classList.add('small-font', 'no-margin-bottom',
+          'actual-comment-footer');
       const tmpCommentUpvoteBtn = document.createElement('button');
       tmpCommentUpvoteBtn.classList.add('mini-btn',
           reply['upvote_details'].length === 1 ? 'dark-btn' : 'light-btn');
@@ -414,8 +419,10 @@ function setupComments(scrollToReply = false) {
       tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
       commentFooter.appendChild(tmpCommentUpvoteBtn);
 
-      const spacer = document.createTextNode(' • ');
-      commentFooter.appendChild(spacer.cloneNode());
+      const spacer = document.createElement('span');
+      spacer.textContent = ' • ';
+      spacer.id = 'text';
+      commentFooter.appendChild(spacer.cloneNode(true));
 
       const repliesLink = document.createElement('a');
       repliesLink.classList.add('idea-link', 'small-font');
@@ -426,7 +433,7 @@ function setupComments(scrollToReply = false) {
       commentFooter.appendChild(repliesLink);
 
       if (payload.id === authorDetails._id && !reply.deleted) {
-        commentFooter.appendChild(spacer.cloneNode());
+        commentFooter.appendChild(spacer.cloneNode(true));
         const commentDeleteBtn = document.createElement('button');
         commentDeleteBtn.classList.add('idea-link', 'small-font');
         commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
@@ -435,9 +442,29 @@ function setupComments(scrollToReply = false) {
         commentFooter.appendChild(commentDeleteBtn);
       }
 
-      commentFooter.appendChild(spacer.cloneNode());
+      commentFooter.appendChild(spacer.cloneNode(true));
       const commentDate = document.createTextNode(formattedDate);
       commentFooter.appendChild(commentDate);
+
+      if (reply.tags) {
+        commentFooter.appendChild(spacer.cloneNode(true));
+        if (reply.tags.includes('team-replied')) {
+          const replyLink = document.createElement('a');
+          replyLink.setAttribute('href', `/discuss/${reply._id}`);
+          replyLink.classList.add('mini-btn', 'tag');
+          replyLink.dataset.tag = 'team-replied';
+          replyLink.textContent = 'A team member has responded';
+          commentFooter.appendChild(replyLink);
+        }
+
+        if (reply.tags.includes('team-response')) {
+          const tag = document.createElement('span');
+          tag.classList.add('mini-btn', 'tag');
+          tag.dataset.tag = 'team-response';
+          tag.textContent = 'A team member response';
+          commentFooter.appendChild(tag);
+        }
+      }
 
       container.appendChild(commentHeader);
       container.appendChild(commentBody);
@@ -775,7 +802,9 @@ submitReplyBtn.addEventListener('click', async () => {
         const commentPage = data.page;
         if (commentPage !== page) {
           commentError.classList.remove('hide');
-          commentError.classList.replace('error', 'info');
+          commentError.classList.remove('warning');
+          commentError.classList.remove('error');
+          commentError.classList.add('info');
           commentError.textContent = 'Loading...';
           setPage(commentPage);
           if (page != 1) {
@@ -820,7 +849,8 @@ submitReplyBtn.addEventListener('click', async () => {
 
           // comment footer
           const commentFooter = document.createElement('p');
-          commentFooter.classList.add('small-font', 'no-margin-bottom');
+          commentFooter.classList.add('small-font', 'no-margin-bottom',
+              'actual-comment-footer');
           const tmpCommentUpvoteBtn = document.createElement('button');
           tmpCommentUpvoteBtn.classList.add('mini-btn', 'light-btn');
           tmpCommentUpvoteBtn.setAttribute('onclick', 'upvoteComment(event)');
@@ -837,8 +867,10 @@ submitReplyBtn.addEventListener('click', async () => {
           tmpCommentUpvoteBtn.appendChild(tmpUpvoteIcon);
           commentFooter.appendChild(tmpCommentUpvoteBtn);
 
-          const spacer = document.createTextNode(' • ');
-          commentFooter.appendChild(spacer.cloneNode());
+          const spacer = document.createElement('span');
+          spacer.textContent = ' • ';
+          spacer.id = 'text';
+          commentFooter.appendChild(spacer.cloneNode(true));
 
           const repliesLink = document.createElement('a');
           repliesLink.classList.add('idea-link', 'small-font');
@@ -846,7 +878,7 @@ submitReplyBtn.addEventListener('click', async () => {
           repliesLink.textContent = `0 Replies`;
           commentFooter.appendChild(repliesLink);
 
-          commentFooter.appendChild(spacer.cloneNode());
+          commentFooter.appendChild(spacer.cloneNode(true));
           const commentDeleteBtn = document.createElement('button');
           commentDeleteBtn.classList.add('idea-link', 'small-font');
           commentDeleteBtn.setAttribute('onclick', 'deleteCommentConfirm(' +
@@ -854,9 +886,29 @@ submitReplyBtn.addEventListener('click', async () => {
           commentDeleteBtn.textContent = 'Delete';
           commentFooter.appendChild(commentDeleteBtn);
 
-          commentFooter.appendChild(spacer.cloneNode());
+          commentFooter.appendChild(spacer.cloneNode(true));
           const commentDate = document.createTextNode(formattedDate);
           commentFooter.appendChild(commentDate);
+
+          if (data.tags) {
+            commentFooter.appendChild(spacer.cloneNode(true));
+            if (data.tags.includes('team-replied')) {
+              const replyLink = document.createElement('a');
+              replyLink.setAttribute('href', `/discuss/${data._id}`);
+              replyLink.classList.add('mini-btn', 'tag');
+              replyLink.dataset.tag = 'team-replied';
+              replyLink.textContent = 'A team member has responded';
+              commentFooter.appendChild(replyLink);
+            }
+
+            if (data.tags.includes('team-response')) {
+              const tag = document.createElement('span');
+              tag.classList.add('mini-btn', 'tag');
+              tag.dataset.tag = 'team-response';
+              tag.textContent = 'A team member response';
+              commentFooter.appendChild(tag);
+            }
+          }
 
           container.appendChild(commentHeader);
           container.appendChild(commentBody);
