@@ -76,6 +76,7 @@ p {
 
 .text-center {
   text-align: center;
+  margin: auto !important;
 }
 
 .logo-title {
@@ -460,11 +461,12 @@ h5 {
 }
 
 .settings-content h4 {
-  margin-bottom: 5px;
+  margin-bottom: 5px !important;
 }
 
 .link-item, .email-item {
   display: flex;
+  align-items: center;
 }
 
 .link-item button, .email-item button {
@@ -492,6 +494,11 @@ h5 {
 
 #create-btn {
   margin-left: 0;
+}
+
+#idea-name {
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
 }
 
 #idea-members {

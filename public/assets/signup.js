@@ -80,7 +80,7 @@ form.addEventListener('submit', (e) => {
             }
             const emailResendText = document.createElement('a');
             emailResendText.className = 'desc-link desc';
-            emailResendText.innerHTML = `Click to resend email`;
+            emailResendText.textContent = `Click to resend email`;
             emailResendText.style.cursor = 'pointer';
             emailResendText.onclick = sendEmailVerification;
             emailInput.insertAdjacentElement('afterend', emailResendText);

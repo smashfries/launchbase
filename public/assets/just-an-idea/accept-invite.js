@@ -55,13 +55,35 @@ fetch('/ideas/invite?token=' + inviteToken, {
         msg.classList.add('hide');
         const contentDiv = document.querySelector('.settings-content');
         const content = document.createElement('div');
-        content.innerHTML = `<center><h4>You have been invited to ` +
-        `${data.name}</h4><p>Do you want to accept this invite and` +
-        ` join the team?</p><button id="yes-btn" onclick="acceptInvite()" ` +
-        `class="inline submit-btn">Yes ` +
-        `<span class="confirm-thumbsup">👍</span>` +
-        `</button><button class="inline" onclick="cancel()">No 👎</button>` +
-        `<div class="msg error hide"></div></center>`;
+        content.classList.add('text-center');
+
+        const h4 = document.createElement('h4');
+        h4.textContent = 'You have been invited to ' + data.name;
+
+        const acceptDesc = document.createElement('p');
+        acceptDesc.textContent = 'Do you want to accept this invite' +
+          ' and join the team?';
+
+        const yesBtn = document.createElement('button');
+        yesBtn.id = 'yes-btn';
+        yesBtn.onclick = acceptInvite;
+        yesBtn.classList.add('inline', 'submit-btn');
+        yesBtn.innerHTML = 'Yes <span class="confirm-thumbsup">👍</span>';
+
+        const noBtn = document.createElement('button');
+        noBtn.onclick = cancel;
+        noBtn.classList.add('inline');
+        noBtn.innerHTML = 'No <span class="confirm-thumbsup">👎</span>';
+
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('msg', 'error', 'hide', 'text-center');
+
+        content.appendChild(h4);
+        content.appendChild(acceptDesc);
+        content.appendChild(yesBtn);
+        content.appendChild(noBtn);
+        content.appendChild(errorMessage);
+
         contentDiv.appendChild(content);
       }
     });
@@ -107,7 +129,7 @@ function acceptInvite() {
           }
           error.classList.remove('hide');
           if (errorMessages[data.error]) {
-            error.innerHTML = errorMessages[data.error];
+            error.textContent = errorMessages[data.error];
           } else {
             error.textContent = 'Something wen\'t wrong. Please try again.';
           }

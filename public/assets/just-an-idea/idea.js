@@ -143,16 +143,12 @@ fetch(`/ideas/${ideaId}`, {
 
           document.querySelectorAll('.edit-role').forEach((i) => {
             i.addEventListener('click', () => {
-              confirmDialog.innerHTML = `<h1>Change member role</h1>` +
-              `<p>Are you sure you want to change ${i.dataset.nickname}'s` +
-              ` role to ${i.dataset.role == 'admin' ? 'Member' : 'Admin'}?` +
-              `</p> <button class="inline confirm-btn" ` +
-              `onclick="changeRole('${i.dataset.role}', '${i.dataset.userid}'` +
-              `)">Yes <span class="confirm-thumbsup">👍</span></button>` +
-              `<button class="inline" onclick="closeConfirmDialog()">No 👎` +
-              `</button>` +
-              `<div class="msg error hide" id="confirm-error"></div>`;
-              confirmDialog.showModal();
+              const confirmTitle = 'Change member role';
+              const confirmDesc = `Are you sure you want to change` +
+                ` ${i.dataset.nickname}'s role to ` +
+                `${i.dataset.role == 'admin' ? 'Member' : 'Admin'}?`;
+              updateConfirmDialog(confirmTitle, confirmDesc,
+                  `changeRole('${i.dataset.role}', '${i.dataset.userid}')`);
             });
           });
 
@@ -169,29 +165,21 @@ fetch(`/ideas/${ideaId}`, {
 
             document.querySelectorAll('.resend-invite').forEach((i) => {
               i.addEventListener('click', () => {
-                confirmDialog.innerHTML = `<h1>Resend Invite</h1>` +
-                `<p>Do you want to resend an invite to ${i.dataset.email}` +
-                `?</p> <button class="inline confirm-btn" ` +
-                `onclick="resendInvite('${i.dataset.email}', ` +
-                `'${i.dataset.idea}')"> Yes <span class="confirm-thumbsup">` +
-                `👍</span></button> <button class="inline" ` +
-                `onclick="closeConfirmDialog()">No 👎</button>` +
-                `<div class="msg error hide" id="confirm-error"></div>`;
-                confirmDialog.showModal();
+                const confirmTitle = 'Resend Invite';
+                const confirmDesc = `Do you want to resend an invite to` +
+                  ` ${i.dataset.email}?`;
+                updateConfirmDialog(confirmTitle, confirmDesc,
+                    `resendInvite('${i.dataset.email}', '${i.dataset.idea}')`);
               });
             });
 
             document.querySelectorAll('.del-invite').forEach((i) => {
               i.addEventListener('click', () => {
-                confirmDialog.innerHTML = `<h1>Revoke Invite</h1>` +
-                `<p>Are you sure you want to revoke the invite that was ` +
-                `sent to ${i.dataset.email}?</p> <button ` +
-                `class="inline confirm-btn" onclick="revokeInvite` +
-                `('${i.dataset.id}')">Yes <span class="confirm-thumbsup">` +
-                `👍</span></button> <button class="inline" ` +
-                `onclick="closeConfirmDialog()">No 👎</button>` +
-                `<div class="msg error hide" id="confirm-error"></div>`;
-                confirmDialog.showModal();
+                const confirmTitle = 'Revoke Invite';
+                const confirmDesc = `Are you sure you want to revoke the ` +
+                  `invite that was sent to ${i.dataset.email}?`;
+                updateConfirmDialog(confirmTitle, confirmDesc,
+                    `revokeInvite('${i.dataset.id}')`);
               });
             });
           });
@@ -229,7 +217,7 @@ fetch(`/ideas/${ideaId}`, {
             ideaContent.appendChild(fragmentText);
             ideaContent.appendChild(lineBreak);
           });
-          let memberContent = '';
+          ideaMembers.innerHTML = '';
           let isAdmin = false;
           data.members.forEach((member) => {
             if (member.user === payload.id && member.role === 'admin') {
@@ -237,15 +225,26 @@ fetch(`/ideas/${ideaId}`, {
             }
             const handle = member.user_details[0].url;
             const name = member.user_details[0].nickname;
-            const display = `<div class="idea-member-name">${name}</div> ` +
-              `<a href="/u/${handle}" class="public-member">` +
-              `<span class="badge">@${handle}</span></a>`;
-            memberContent += display;
+
+            const nameDisplay = document.createElement('div');
+            nameDisplay.classList.add('idea-member-name');
+            nameDisplay.textContent = name;
+
+            const handleDisplay = document.createElement('a');
+            handleDisplay.href = `/u/${handle}`;
+            handleDisplay.classList.add('public-member');
+
+            const badgeDisplay = document.createElement('span');
+            badgeDisplay.classList.add('badge');
+            badgeDisplay.textContent = `@${handle}`;
+
+            handleDisplay.appendChild(badgeDisplay);
+            ideaMembers.appendChild(nameDisplay);
+            ideaMembers.appendChild(handleDisplay);
           });
           if (isAdmin) {
             revertBtn.classList.remove('hide');
           }
-          ideaMembers.innerHTML = memberContent;
           if (data.links.length > 0) {
             document.querySelector('#link-title').classList.remove('hide');
             data.links.forEach((link) => {
@@ -511,13 +510,39 @@ function deleteInput(e) {
 
 function createMemberItem(member) {
   const mainText = document.createElement('p');
-  mainText.innerHTML = `${member.user_details[0].nickname} ` +
-    `<a href="/u/${member.user_details[0].url}">` +
-    `<span class="badge">@${member.user_details[0].url}</span></a> • ` +
-    `<em>${member.role == 'member' ? 'Member' : 'Admin'}</em> ` +
-    `<button class="small-emoji-btn edit-role" data-role="${member.role}"` +
-    ` title="Change role" data-nickname="${member.user_details[0].nickname}" ` +
-    `data-userid="${member.user_details[0]._id}">✏️</button>`;
+
+  const nameDisplay = document.createElement('span');
+  nameDisplay.classList.add('idea-member-name');
+  nameDisplay.textContent = member.user_details[0].nickname + ' ';
+
+  const handleDisplay = document.createElement('a');
+  handleDisplay.href = `/u/${member.user_details[0].url}`;
+
+  const badgeDisplay = document.createElement('span');
+  badgeDisplay.classList.add('badge');
+  badgeDisplay.textContent = `@${member.user_details[0].url}`;
+  handleDisplay.appendChild(badgeDisplay);
+
+  const spacer = document.createElement('span');
+  spacer.textContent = ' • ';
+
+  const roleDisplay = document.createElement('em');
+  roleDisplay.textContent = (member.role == 'member' ? 'Member' : 'Admin') +
+    ' ';
+
+  const editRoleDisplay = document.createElement('button');
+  editRoleDisplay.classList.add('small-emoji-btn', 'edit-role');
+  editRoleDisplay.dataset.role = member.role;
+  editRoleDisplay.dataset.nickname = member.user_details[0].nickname;
+  editRoleDisplay.dataset.userid = member.user_details[0]._id;
+  editRoleDisplay.title = 'Change role';
+  editRoleDisplay.textContent = '✏️';
+
+  mainText.appendChild(nameDisplay);
+  mainText.appendChild(handleDisplay);
+  mainText.appendChild(spacer);
+  mainText.appendChild(roleDisplay);
+  mainText.appendChild(editRoleDisplay);
 
   membersDiv.appendChild(mainText);
 }
@@ -526,14 +551,38 @@ function createInviteItem(invite) {
   const date = new Date(invite.timeStamp);
   const formattedDate = new Intl.DateTimeFormat('en-US',
       {dateStyle: 'medium'}).format(date);
+
   const mainText = document.createElement('p');
-  mainText.innerHTML = `${invite.email} • ${formattedDate}` +
-    ` <button class="small-emoji-btn resend-invite" ` +
-    `title="Resend Invite" data-email="${invite.email}" ` +
-    `data-idea="${ideaId}">🔃</button>` +
-    ` <button class="small-emoji-btn del-invite" ` +
-    `title="Revoke invite" data-email="${invite.email}" ` +
-    `data-id="${invite._id}">🗑️</button>`;
+
+  const emailDisplay = document.createElement('span');
+  emailDisplay.textContent = invite.email;
+
+  const spacer = document.createElement('span');
+  spacer.textContent = ' • ';
+
+  const dateDisplay = document.createElement('span');
+  dateDisplay.textContent = formattedDate + ' ';
+
+  const resendBtn = document.createElement('button');
+  resendBtn.classList.add('small-emoji-btn', 'resend-invite');
+  resendBtn.title = 'Resend Invite';
+  resendBtn.dataset.email = invite.email;
+  resendBtn.dataset.idea = ideaId;
+  resendBtn.textContent = '🔃';
+
+  const delBtn = document.createElement('button');
+  delBtn.classList.add('small-emoji-btn', 'del-invite');
+  delBtn.title = 'Revoke Invite';
+  delBtn.dataset.email = invite.email;
+  delBtn.dataset.id = invite._id;
+  delBtn.textContent = '🗑️';
+
+  mainText.appendChild(emailDisplay);
+  mainText.appendChild(spacer);
+  mainText.appendChild(dateDisplay);
+  mainText.appendChild(resendBtn);
+  mainText.appendChild(document.createTextNode(' '));
+  mainText.appendChild(delBtn);
 
   invitesDiv.appendChild(mainText);
 }
@@ -753,24 +802,16 @@ inviteForm.addEventListener('submit', (e) => {
 });
 
 publishBtn.addEventListener('click', () => {
-  confirmDialog.innerHTML = `<h1>Publish Idea</h1>` +
-  `<p>Are you sure you want to publish this idea?</p>` +
-  `<button class="inline confirm-btn" onclick="publishIdea()">` +
-  `Yes <span class="confirm-thumbsup">👍</span></button>` +
-  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
-  `<div class="msg error hide" id="confirm-error"></div>`;
-  confirmDialog.showModal();
+  const confirmTitle = 'Publish Idea';
+  const confirmDesc = 'Are you sure you want to publish this idea?';
+  updateConfirmDialog(confirmTitle, confirmDesc, 'publishIdea()');
 });
 
 leaveBtn.addEventListener('click', () => {
-  confirmDialog.innerHTML = `<h1>Leave this Idea</h1>` +
-  `<p>Are you sure you want to leave? If you say 'yes', you will` +
-  ` not be able to access any of this data anymore.</p>` +
-  `<button class="inline confirm-btn" onclick="leaveIdea()">` +
-  `Yes <span class="confirm-thumbsup">👍</span></button>` +
-  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
-  `<div class="msg error hide" id="confirm-error"></div>`;
-  confirmDialog.showModal();
+  const confirmTitle = 'Leave this Idea';
+  const confirmDesc = 'Are you sure you want to leave? If you say \'yes\', ' +
+    'you will not be able to access any of this data anymore.';
+  updateConfirmDialog(confirmTitle, confirmDesc, 'leaveIdea()');
 });
 
 submitReplyBtn.addEventListener('click', async () => {
@@ -944,16 +985,12 @@ submitReplyBtn.addEventListener('click', async () => {
 
 // eslint-disable-next-line no-unused-vars
 function deleteCommentConfirm(commentId) {
-  confirmDialog.innerHTML = `<h1>Delete this Comment</h1>` +
-  `<p>Are you sure you want to delete this comment? ` +
-  `If you say 'yes', the contents of this comment will be ` +
-  `permanently deleted. However, others can still reply to it.</p>` +
-  `<button class="inline confirm-btn" ` +
-  `onclick="deleteComment('${commentId}')">` +
-  `Yes <span class="confirm-thumbsup">👍</span></button>` +
-  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
-  `<div class="msg error hide" id="confirm-error"></div>`;
-  confirmDialog.showModal();
+  const confirmTitle = 'Delete this Comment';
+  const confirmDesc = 'Are you sure you want to delete this comment? ' +
+   `If you say 'yes', the contents of this comment will be ` +
+   'permanently deleted. However, any replies will still exist.';
+  const onclickAction = `deleteComment('${commentId}')`;
+  updateConfirmDialog(confirmTitle, confirmDesc, onclickAction);
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -975,7 +1012,7 @@ async function deleteComment(commentId) {
     okIcon.style.animationName = 'none';
     if (data.error) {
       confirmError.classList.remove('hide');
-      confirmError.textContent = 'Something wen\' wrong. Please try again.';
+      confirmError.textContent = 'Something wen\'t wrong. Please try again.';
     } else {
       replyCount--;
       closeConfirmDialog();
@@ -1148,16 +1185,11 @@ async function upvoteComment(e) {
 }
 
 revertBtn.addEventListener('click', () => {
-  confirmDialog.innerHTML = `<h1>Revert to Draft?</h1>` +
-  `<p>Are you sure you want to revert this idea to a draft? ` +
-  `If you say 'yes', this idea will become private and will only be visible ` +
-  `to its members.</p>` +
-  `<button class="inline confirm-btn" ` +
-  `onclick="revertDraft()">` +
-  `Yes <span class="confirm-thumbsup">👍</span></button>` +
-  `<button class="inline" onclick="closeConfirmDialog()">No 👎</button>` +
-  `<div class="msg error hide" id="confirm-error"></div>`;
-  confirmDialog.showModal();
+  const confirmTitle = 'Revert to Draft';
+  const confirmDesc = 'Are you sure you want to revert this idea to a draft? ' +
+    `If you say 'yes', this idea will become private and will only be visible` +
+    ' to its members.';
+  updateConfirmDialog(confirmTitle, confirmDesc, 'revertDraft()');
 });
 
 // eslint-disable-next-line no-unused-vars
@@ -1185,6 +1217,37 @@ async function revertDraft() {
       window.location.reload();
     }
   });
+}
+
+function updateConfirmDialog(title, desc, onclickAction) {
+  confirmDialog.innerHTML = '';
+  const h1 = document.createElement('h1');
+  h1.textContent = title;
+
+  const confirmDesc = document.createElement('p');
+  confirmDesc.textContent = desc;
+
+  const yesBtn = document.createElement('button');
+  yesBtn.classList.add('inline', 'confirm-btn');
+  yesBtn.setAttribute('onclick', onclickAction);
+  yesBtn.innerHTML = 'Yes <span class="confirm-thumbsup">👍</span>';
+
+  const noBtn = document.createElement('button');
+  noBtn.classList.add('inline');
+  noBtn.onclick = closeConfirmDialog;
+  noBtn.innerHTML = 'No 👎';
+
+  const errorMessage = document.createElement('div');
+  errorMessage.classList.add('error', 'msg', 'hide');
+  errorMessage.id = 'confirm-error';
+
+  confirmDialog.appendChild(h1);
+  confirmDialog.appendChild(confirmDesc);
+  confirmDialog.appendChild(yesBtn);
+  confirmDialog.appendChild(noBtn);
+  confirmDialog.appendChild(errorMessage);
+
+  confirmDialog.showModal();
 }
 
 pfpElement.addEventListener('click', showPfpDropdown);
