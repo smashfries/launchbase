@@ -156,6 +156,7 @@ export const getProfilesOpts = {
             interests: {type: 'string'},
             twitter: {type: 'string'},
             github: {type: 'string'},
+            emailHash: {type: 'string'},
           },
         },
       },

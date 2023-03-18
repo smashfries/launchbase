@@ -154,9 +154,12 @@ export default async function pages(fastify, _options) {
         `${user ? user.nickname : 'Someone'}'s Talent profile on Launch Base`});
   });
   fastify.get('/talent', (_req, rep) => {
-    return rep.view('coming-soon', {jsPath: 'coming-soon',
-      title: 'Talent', talentSection: true, metaDesc:
-        'View talent on the Launch Base community!'});
+    rep.redirect('/talent/search');
+  });
+  fastify.get('/talent/search', (_req, rep) => {
+    return rep.view('talent/search.hbs', {jsPath: 'talent/search',
+      title: 'Talent Search', talentSection: true, talentSearchPage: true,
+      metaDesc: 'Search for Talent on the Launch Base community'});
   });
   fastify.get('/*', (_req, rep) => {
     return rep.code(404).sendFile('404.html');

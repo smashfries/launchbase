@@ -620,6 +620,27 @@ h5 {
   user-select: none;
 }
 
+.talent-item {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(-45deg, #fafafa, transparent);
+  margin-bottom: 10px;
+}
+
+.talent-item div {
+  padding: 10px;
+}
+
+.talent-item .name-section {
+  width: 200px;
+}
+
+.talent-item h4 {
+  padding: 0;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
 @media only screen and (max-width: 428px) {
   .pfp {
     right: 10px;
@@ -632,6 +653,13 @@ h5 {
   }
   .idea-container {
     flex-direction: column;
+  }
+}
+
+@media only screen and (max-width: 715px) {
+  .talent-item {
+    flex-direction: column;
+    text-align: center;
   }
 }
 

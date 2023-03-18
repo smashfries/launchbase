@@ -1,3 +1,5 @@
+import {md5} from '../../utils/crypto.js';
+
 import {updateProfileOpts, getProfileOpts,
   getProfilesOpts} from '../../utils/schema.js';
 
@@ -104,7 +106,6 @@ export default async function profile(fastify, _options) {
       },
       {
         $project: {
-          email: 0,
           backupEmail: 0,
           subscribed: 0,
           urlLower: 0,
@@ -114,6 +115,15 @@ export default async function profile(fastify, _options) {
     ]);
 
     const arr = await searchedUsers.toArray();
-    rep.code(200).send(arr);
+    const updatedArr = arr.map((item) => {
+      /**
+       * @type {Object}
+       */
+      const init = item;
+      init.emailHash = md5(init.email);
+      delete init.email;
+      return init;
+    });
+    rep.code(200).send(updatedArr);
   });
 };
