@@ -1,4 +1,5 @@
-import {updateProfileOpts, getProfileOpts} from '../../utils/schema.js';
+import {updateProfileOpts, getProfileOpts,
+  getProfilesOpts} from '../../utils/schema.js';
 
 /**
  * API endpoints for user profile
@@ -68,5 +69,51 @@ export default async function profile(fastify, _options) {
     } else {
       rep.code(400).send({error: 'unauthorized'});
     }
+  });
+
+  fastify.get('/profile/search', getProfilesOpts, async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+
+    const query = req.query;
+    const search = query.q;
+    const page = query.page ? query.page : 1;
+
+    if (!search) {
+      return rep.code(400).send({error: 'query not provided'});
+    }
+
+    const users = fastify.mongo.db.collection('users');
+    const searchedUsers = await users.aggregate([
+      {
+        $search: {
+          index: 'user_search',
+          text: {
+            query: search,
+            path: ['name', 'nickname', 'url', 'occ'],
+            fuzzy: {maxEdits: 1},
+          },
+        },
+      },
+      {
+        $skip: (page-1)*20,
+      },
+      {
+        $limit: 20,
+      },
+      {
+        $project: {
+          email: 0,
+          backupEmail: 0,
+          subscribed: 0,
+          urlLower: 0,
+          publicEmail: 0,
+        },
+      },
+    ]);
+
+    const arr = await searchedUsers.toArray();
+    rep.code(200).send(arr);
   });
 };

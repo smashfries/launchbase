@@ -130,6 +130,46 @@ export const getProfileOpts = {
   },
 };
 
+export const getProfilesOpts = {
+  schema: {
+    headers,
+    querystring: {
+      type: 'object',
+      properties: {
+        q: {type: 'string'},
+        page: {type: 'integer'},
+      },
+      required: ['q'],
+    },
+    response: {
+      200: {
+        type: 'array',
+        maxItems: 20,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: 'string'},
+            nickname: {type: 'string'},
+            url: {type: 'string'},
+            occ: {type: 'string'},
+            skills: {type: 'string'},
+            interests: {type: 'string'},
+            twitter: {type: 'string'},
+            github: {type: 'string'},
+          },
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
+
 export const getEmailSettings = {
   schema: {
     headers,
