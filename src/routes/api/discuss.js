@@ -122,7 +122,8 @@ export default async function discuss(fastify, _options) {
         if (otherMembers.length > 0) {
           const logDocs = otherMembers.map((item) => {
             return {type: 'reply', user: item.user,
-              resource: item.idea, resourceType: 'idea'};
+              resource: item.idea, resourceType: 'idea',
+              triggerResource: comment.insertedId};
           });
           await notificationLogs.insertMany(logDocs);
         }
@@ -131,7 +132,7 @@ export default async function discuss(fastify, _options) {
         if (!parentComment.author.equals(req.userOId)) {
           await notificationLogs.insertOne({type: 'reply',
             user: parentComment.author, resource: parentComment._id,
-            resourceType: 'comment'});
+            resourceType: 'comment', triggerResource: comment.insertedId});
         }
         break;
       default:
@@ -315,6 +316,9 @@ export default async function discuss(fastify, _options) {
         {comment: 'This comment was deleted.', deleted: true},
       $pullAll: {tags: ['team-response']}});
     }
+
+    const notificationLogs = fastify.mongo.db.collection('notification-logs');
+    await notificationLogs.deleteMany({triggerResource: commentOId});
 
     rep.code(200).send({message: 'The comment was successfully deleted!'});
   });
