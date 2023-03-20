@@ -90,7 +90,7 @@ nextPage.addEventListener('click', () => {
   if (page != 1) {
     previousPage.classList.remove('hide');
   }
-  setupComments(page);
+  setupComments();
 });
 
 previousPage.addEventListener('click', () => {
@@ -103,7 +103,7 @@ previousPage.addEventListener('click', () => {
   if (page == 1) {
     previousPage.classList.add('hide');
   }
-  setupComments(page);
+  setupComments();
 });
 
 function setPage(newPage) {
@@ -161,18 +161,20 @@ function setupComments(scrollToReply = false) {
     loadingMsg.classList.add('hide');
     mainContent.classList.remove('hide');
     const authorDetails = document.querySelector('#comment-author');
-    const authorDisplayName = document.createElement('span');
-    authorDisplayName.textContent = commentData['author_details'].displayName;
-    authorDetails.appendChild(authorDisplayName);
-    const authorPageLink = document.createElement('a');
-    authorPageLink.classList.add('public-member');
-    authorPageLink.setAttribute('href',
-        `/u/${commentData['author_details'].handle}`);
-    const authorBadge = document.createElement('span');
-    authorBadge.classList.add('badge');
-    authorBadge.textContent = commentData['author_details'].handle;
-    authorPageLink.appendChild(authorBadge);
-    authorDetails.appendChild(authorPageLink);
+    if (!authorDetails.hasChildNodes()) {
+      const authorDisplayName = document.createElement('span');
+      authorDisplayName.textContent = commentData['author_details'].displayName;
+      authorDetails.appendChild(authorDisplayName);
+      const authorPageLink = document.createElement('a');
+      authorPageLink.classList.add('public-member');
+      authorPageLink.setAttribute('href',
+          `/u/${commentData['author_details'].handle}`);
+      const authorBadge = document.createElement('span');
+      authorBadge.classList.add('badge');
+      authorBadge.textContent = commentData['author_details'].handle;
+      authorPageLink.appendChild(authorBadge);
+      authorDetails.appendChild(authorPageLink);
+    }
 
     const parentComment = document.querySelector('#parent');
     const superParentComment = document.querySelector('#super-parent');
