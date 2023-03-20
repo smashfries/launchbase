@@ -35,6 +35,24 @@ export default async function upvote(fastify, _options) {
 
         if (ideaUpdate.upsertedCount === 1) {
           ideas.updateOne({_id: resourceOId}, {$inc: {upvotes: 1}});
+
+          const ideaMembersColl = fastify.mongo.db.collection('idea-members');
+          const ideaMembersCursor = await ideaMembersColl
+              .find({idea: idea._id});
+          const ideaMembersList = await ideaMembersCursor.toArray();
+          const otherMembers = ideaMembersList.filter((item) => {
+            return !item.user.equals(req.userOId);
+          });
+          if (otherMembers.length > 0) {
+            const logDocs = otherMembers.map((item) => {
+              return {type: 'upvote', user: item.user,
+                resource: item.idea, resourceType: 'idea',
+                triggerResource: ideaUpdate.upsertedId};
+            });
+            const notificationLogs = fastify.mongo.db
+                .collection('notification-logs');
+            await notificationLogs.insertMany(logDocs);
+          }
         }
 
         rep.code(200).send({message: 'idea successfully upvoted!'});
@@ -56,6 +74,15 @@ export default async function upvote(fastify, _options) {
 
         if (commentUpdate.upsertedCount === 1) {
           comments.updateOne({_id: resourceOId}, {$inc: {upvotes: 1}});
+        }
+
+        if (!comment.author.equals(req.userOId)) {
+          const notificationLogs = fastify.mongo.db
+              .collection('notification-logs');
+          await notificationLogs.insertOne({type: 'upvote',
+            user: comment.author, resource: comment._id,
+            resourceType: 'comment',
+            triggerResource: commentUpdate.upsertedId});
         }
 
         rep.code(200).send({message: 'comment succesfully upvoted'});
