@@ -842,6 +842,7 @@ submitReplyBtn.addEventListener('click', async () => {
                 .format(replyCount)} Comments`;
         const commentPage = data.page;
         if (commentPage !== page) {
+          replyBox.value = '';
           commentError.classList.remove('hide');
           commentError.classList.remove('warning');
           commentError.classList.remove('error');

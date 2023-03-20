@@ -393,8 +393,11 @@ submitReplyBtn.addEventListener('click', async () => {
 
         const commentPage = data.page;
         if (commentPage !== page) {
+          replyBox.value = '';
           commentError.classList.remove('hide');
-          commentError.classList.replace('error', 'info');
+          commentError.classList.remove('warning');
+          commentError.classList.remove('error');
+          commentError.classList.add('info');
           commentError.textContent = 'Loading...';
           setPage(commentPage);
           if (page != 1) {
