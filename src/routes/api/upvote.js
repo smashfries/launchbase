@@ -117,11 +117,17 @@ export default async function upvote(fastify, _options) {
           return rep.code(400).send({error: 'resource does not exist'});
         }
 
-        const ideaUpdate = await upvotes.deleteOne({user: req.userOId,
+        const ideaUpdate = await upvotes.findOneAndDelete({user: req.userOId,
           resource: resourceOId, resourceType: 'idea'});
 
-        if (ideaUpdate.deletedCount === 1) {
+        if (ideaUpdate) {
           ideas.updateOne({_id: resourceOId}, {$inc: {upvotes: -1}});
+
+          console.log(ideaUpdate);
+          const notificationLogs = fastify.mongo.db
+              .collection('notification-logs');
+          await notificationLogs
+              .deleteMany({triggerResource: ideaUpdate.value._id});
         }
 
         rep.code(200).send({message: 'idea successfully downvoted!'});
@@ -136,11 +142,16 @@ export default async function upvote(fastify, _options) {
           return rep.code(400).send({error: 'resource does not exist'});
         }
 
-        const commentUpdate = await upvotes.deleteOne({user: req.userOId,
+        const commentUpdate = await upvotes.findOneAndDelete({user: req.userOId,
           resource: resourceOId, resourceType: 'comment'});
 
-        if (commentUpdate.deletedCount === 1) {
+        if (commentUpdate) {
           comments.updateOne({_id: resourceOId}, {$inc: {upvotes: -1}});
+
+          const notificationLogs = fastify.mongo.db
+              .collection('notification-logs');
+          await notificationLogs
+              .deleteMany({triggerResource: commentUpdate.value._id});
         }
 
         rep.code(200).send({message: 'comment succesfully upvoted'});
