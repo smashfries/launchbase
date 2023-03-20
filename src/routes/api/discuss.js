@@ -40,6 +40,7 @@ export default async function discuss(fastify, _options) {
     let superType;
 
     let ideaMember;
+    let ideaMembersList;
 
     switch (req.body.parentType) {
       case 'idea':
@@ -69,8 +70,11 @@ export default async function discuss(fastify, _options) {
     switch (superType) {
       case 'idea':
         const ideaMembers = fastify.mongo.db.collection('idea-members');
-        ideaMember = await ideaMembers
-            .findOne({user: req.userOId, idea: superParent});
+        const ideaMembersCursor = await ideaMembers
+            .find({idea: superParent});
+        ideaMembersList = await ideaMembersCursor.toArray();
+        ideaMember = ideaMembersList
+            .find((item) => item.user.equals(req.userOId));
         break;
       default:
         break;
@@ -108,6 +112,31 @@ export default async function discuss(fastify, _options) {
       parent: parentOId, superParent,
       superType, timeStamp: new Date(),
       author: req.userOId, tags});
+
+    const notificationLogs = fastify.mongo.db.collection('notification-logs');
+    switch (req.body.parentType) {
+      case 'idea':
+        const otherMembers = ideaMembersList.filter((item) => {
+          return !item.user.equals(req.userOId);
+        });
+        if (otherMembers.length > 0) {
+          const logDocs = otherMembers.map((item) => {
+            return {type: 'reply', user: item.user,
+              resource: item.idea, resourceType: 'idea'};
+          });
+          await notificationLogs.insertMany(logDocs);
+        }
+        break;
+      case 'comment':
+        if (!parentComment.author.equals(req.userOId)) {
+          await notificationLogs.insertOne({type: 'reply',
+            user: parentComment.author, resource: parentComment._id,
+            resourceType: 'comment'});
+        }
+        break;
+      default:
+        break;
+    }
 
     rep.code(200).send({message: 'comment was successfully created',
       commentId: comment.insertedId, authorName: author.nickname,
