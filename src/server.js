@@ -5,6 +5,7 @@ import minifier from 'html-minifier';
 
 import fastifyStatic from '@fastify/static';
 import pointOfView from '@fastify/view';
+import fastifyBasicAuth from '@fastify/basic-auth';
 
 import handlebars from 'handlebars';
 import * as dotenv from 'dotenv';
@@ -49,8 +50,27 @@ fastify.register(fastifyStatic, {
 
 fastify.register(mongoConnector);
 fastify.register(redisConnector);
+fastify.register(fastifyBasicAuth, {validate});
 
 dotenv.config({path: './.env'});
+
+/**
+ * validates if user is an admin
+ * @param {string} username
+ * @param {string} password
+ * @param {any} req
+ * @param {any} _rep
+ * @param {any} done
+ **/
+function validate(username, password, req, _rep, done) {
+  if (username === process.env.USERNAME && password === process.env.PASSWORD) {
+    req.isAdmin = true;
+    done();
+  } else {
+    req.isAdmin = false;
+    done();
+  }
+}
 
 fastify.register(pointOfView, {
   engine: {

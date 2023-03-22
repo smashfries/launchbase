@@ -11,6 +11,7 @@
   },
   "author": "Aditya",
   "dependencies": {
+    "@fastify/basic-auth": "^5.0.0",
     "@fastify/mongodb": "^6.2.0",
     "@fastify/redis": "^6.1.0",
     "@fastify/static": "^6.8.0",
