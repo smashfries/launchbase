@@ -24,6 +24,7 @@ import ideaStatus from './routes/api/ideas/idea-status.js';
 import discuss from './routes/api/discuss.js';
 import upvote from './routes/api/upvote.js';
 import contact from './routes/api/contact.js';
+import notifications from './routes/api/notifications.js';
 
 import {verifyToken} from './utils/crypto.js';
 
@@ -101,6 +102,7 @@ fastify.register(ideaStatus);
 fastify.register(discuss);
 fastify.register(upvote);
 fastify.register(contact);
+fastify.register(notifications);
 
 /**
  * Build function
