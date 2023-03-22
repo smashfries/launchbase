@@ -18,6 +18,7 @@ specifiers:
   jsonwebtoken: ^9.0.0
   nanoid: ^4.0.0
   nodemon: ^2.0.20
+  prettier: ^2.8.5
 
 dependencies:
   '@fastify/mongodb': 6.2.0
@@ -39,6 +40,7 @@ devDependencies:
   eslint: 8.33.0
   eslint-config-google: 0.14.0_eslint@8.33.0
   nodemon: 2.0.20
+  prettier: 2.8.5
 
 packages:
 
@@ -2203,6 +2205,12 @@ packages:
   /prelude-ls/1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+    dev: true
+
+  /prettier/2.8.5:
+    resolution: {integrity: sha512-3gzuxrHbKUePRBB4ZeU08VNkUcqEHaUaouNt0m7LGP4Hti/NuB07C7PPTM/LkWqXoJYJn2McEo5+kxPNrtQkLQ==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /process-warning/2.1.0:

@@ -35,7 +35,6 @@ const fastify = new Fastify({
   trustProxy: true,
 });
 
-
 fastify.register(fastifyStatic, {
   root: resolve('./public/templates'),
   serve: false,
