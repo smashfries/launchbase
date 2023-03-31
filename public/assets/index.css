@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   font-family: 'Fira Code', monospace;
   margin: 0;
   padding: 0;
@@ -56,7 +57,7 @@ p {
   box-sizing: border-box;
 }
 
-[role="tooltip"] {
+[role='tooltip'] {
   background: #333;
   color: white;
   font-weight: bold;
@@ -66,7 +67,7 @@ p {
   display: none;
 }
 
-[role="tooltip"][data-show] {
+[role='tooltip'][data-show] {
   display: block;
 }
 
@@ -144,7 +145,8 @@ input {
   margin-bottom: 10px;
 }
 
-.email-input, .code-input {
+.email-input,
+.code-input {
   width: 250px;
 }
 
@@ -159,7 +161,7 @@ button {
   border: none;
   font-family: 'Fira Code', monospace;
   font-weight: 600;
-  cursor: pointer;  
+  cursor: pointer;
 }
 
 .light-btn {
@@ -173,7 +175,12 @@ button {
   background-color: #000;
 }
 
-.submit-icon, .lock-icon, .logout-icon, .logoutall-icon, .confirm-thumbsup, .invite-icon {
+.submit-icon,
+.lock-icon,
+.logout-icon,
+.logoutall-icon,
+.confirm-thumbsup,
+.invite-icon {
   display: inline-block;
   animation-name: none;
   animation-duration: 1s;
@@ -284,7 +291,7 @@ button {
 }
 
 .panel-item:hover {
-  background-color: #EBEBEB;
+  background-color: #ebebeb;
 }
 
 h2 {
@@ -293,7 +300,7 @@ h2 {
 
 .active-panel-item {
   border-left: 2px solid #000;
-  background-color: #EBEBEB;
+  background-color: #ebebeb;
 }
 
 #pfp-dropdown {
@@ -302,7 +309,6 @@ h2 {
   top: 75px;
   left: 100%;
   transform: translateX(calc(-100% - 30px));
-
 }
 
 #confirm-dialog {
@@ -313,7 +319,8 @@ h2 {
   margin: auto;
 }
 
-.settings-content input, .settings-content textarea {
+.settings-content input,
+.settings-content textarea {
   display: block;
   width: 410px;
 }
@@ -322,7 +329,7 @@ h2 {
   display: inline !important;
 }
 
-input[type="checkbox"] {
+input[type='checkbox'] {
   width: 30px !important;
 }
 
@@ -358,7 +365,7 @@ label {
   font-size: 14px;
 }
 
-input[type="checkbox"] {
+input[type='checkbox'] {
   vertical-align: middle;
 }
 
@@ -415,7 +422,7 @@ h5 {
 }
 
 .badge {
-  background-color: #EBEBEB;
+  background-color: #ebebeb;
   border-radius: 10px;
   padding-left: 2px;
   padding-right: 2px;
@@ -464,12 +471,14 @@ h5 {
   margin-bottom: 5px !important;
 }
 
-.link-item, .email-item {
+.link-item,
+.email-item {
   display: flex;
   align-items: center;
 }
 
-.link-item button, .email-item button {
+.link-item button,
+.email-item button {
   background-color: #fff;
   border: 1px solid #000;
   color: #000;
@@ -529,7 +538,8 @@ h5 {
   flex-direction: row-reverse;
 }
 
-#prev, #next {
+#prev,
+#next {
   cursor: pointer;
 }
 
@@ -542,10 +552,11 @@ h5 {
   display: flex;
   flex-wrap: wrap;
   vertical-align: middle;
-  justify-content:center;
+  justify-content: center;
 }
 
-.profile-header .left-col, .profile-header .right-col {
+.profile-header .left-col,
+.profile-header .right-col {
   padding-left: 25px;
   padding-right: 25px;
 }
@@ -557,7 +568,7 @@ h5 {
   padding: 5px;
   font-size: 14px;
   border-radius: 10px;
-  background-color: #EBEBEB;
+  background-color: #ebebeb;
   transition: 0.3s;
   color: #424242;
 }
@@ -578,7 +589,8 @@ h5 {
   transition: 0.3s;
 }
 
-.comment-header, .comment-footer {
+.comment-header,
+.comment-footer {
   margin: 5px;
   margin-left: 0;
 }
@@ -611,12 +623,12 @@ h5 {
   margin-right: 5px;
 }
 
-[data-tag="team-replied"] {
-  background: linear-gradient(90deg, #1CB5E0 0%, #000851 100%);
+[data-tag='team-replied'] {
+  background: linear-gradient(90deg, #1cb5e0 0%, #000851 100%);
 }
 
-[data-tag="team-response"] {
-  background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+[data-tag='team-response'] {
+  background: linear-gradient(90deg, #fc466b 0%, #3f5efb 100%);
   user-select: none;
 }
 
@@ -639,6 +651,30 @@ h5 {
   padding: 0;
   margin-top: 14px;
   margin-bottom: 14px;
+}
+
+.notif-box {
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.notif-preview {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.notif-preview span {
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+details > summary {
+  list-style: none;
 }
 
 @media only screen and (max-width: 428px) {
@@ -664,7 +700,9 @@ h5 {
 }
 
 @media only screen and (max-width: 828px) {
-  .settings-content input, .settings-content textarea, .settings-content .error {
+  .settings-content input,
+  .settings-content textarea,
+  .settings-content .error {
     width: calc(100% - 40px) !important;
   }
 }
