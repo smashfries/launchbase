@@ -1,17 +1,43 @@
+import {getNotifications} from '../../utils/schema.js';
+
 /**
  * API endpoints for notifications
  * @param {*} fastify
  * @param {*} _options
  */
 export default async function notifications(fastify, _options) {
-  fastify.after(() => {
-    fastify.addHook('onRequest', fastify.basicAuth);
-    fastify.post('/send-notifications', async (req, rep) => {
-      if (!req.isAdmin) {
-        return rep
-          .code(400)
-          .send({error: 'only admins can trigger a notification-send'});
-      }
+  fastify.get('/notifications', getNotifications, async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const notificationsColl = fastify.mongo.db.collection('notifications');
+    const myNotifications = await notificationsColl.find({user: req.userOId});
+    const arr = await myNotifications.toArray();
+
+    return rep.code(200).send(arr);
+  });
+  fastify.patch('/notifications/:id/dismiss', async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const {id} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(id)) {
+      return rep.code(400).send({error: 'invalid id'});
+    }
+    const update = await fastify.updateOne(
+      {_id: id},
+      {$set: {dismissed: true}}
+    );
+    if (update.matchedCount < 1) {
+      return rep.code(400).send({error: 'notification does not exist'});
+    }
+    rep.code(200).send({message: 'notification was dismissed'});
+  });
+  fastify.route({
+    method: 'POST',
+    url: '/send-notifications',
+    onRequest: fastify.basicAuth,
+    handler: async (_req, rep) => {
       const notificationLogs = fastify.mongo.db.collection('notification-logs');
       const users = fastify.mongo.db.collection('users');
       const agg = [
@@ -55,9 +81,14 @@ export default async function notifications(fastify, _options) {
 
       const notifications = [];
       if (arr.length > 0) {
+        const date = new Date();
         arr.forEach((element) => {
           element.notification_details.forEach((item) => {
-            notifications.push({user: element._id, notification_details: item});
+            notifications.push({
+              user: element._id,
+              notification_details: item,
+              timeStamp: date,
+            });
           });
         });
       }
@@ -72,6 +103,6 @@ export default async function notifications(fastify, _options) {
       }
 
       rep.send({message: 'Notifications were created!'});
-    });
+    },
   });
 }
