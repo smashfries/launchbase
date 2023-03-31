@@ -24,7 +24,8 @@ export default async function notifications(fastify, _options) {
     if (!fastify.mongo.ObjectId.isValid(id)) {
       return rep.code(400).send({error: 'invalid id'});
     }
-    const update = await fastify.updateOne(
+    const notificationsColl = fastify.mongo.db.collection('notifications');
+    const update = await notificationsColl.updateOne(
       {_id: id},
       {$set: {dismissed: true}}
     );
@@ -32,6 +33,18 @@ export default async function notifications(fastify, _options) {
       return rep.code(400).send({error: 'notification does not exist'});
     }
     rep.code(200).send({message: 'notification was dismissed'});
+  });
+  fastify.patch('/notifications/dismiss', async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const notificationsColl = fastify.mongo.db.collection('notifications');
+    await notificationsColl.updateMany(
+      {user: req.userOId},
+      {$set: {dismissed: true}}
+    );
+
+    rep.code(200).send({message: 'All notifications were dismissed'});
   });
   fastify.route({
     method: 'POST',
