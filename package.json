@@ -30,6 +30,7 @@
   "devDependencies": {
     "eslint": "^8.33.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.8.0",
     "nodemon": "^2.0.20",
     "prettier": "^2.8.5"
   }

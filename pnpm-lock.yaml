@@ -12,6 +12,7 @@ specifiers:
   dotenv: ^16.0.3
   eslint: ^8.33.0
   eslint-config-google: ^0.14.0
+  eslint-config-prettier: ^8.8.0
   fastify: ^4.12.0
   fastify-plugin: ^4.5.0
   handlebars: ^4.7.7
@@ -41,6 +42,7 @@ dependencies:
 devDependencies:
   eslint: 8.33.0
   eslint-config-google: 0.14.0_eslint@8.33.0
+  eslint-config-prettier: 8.8.0_eslint@8.33.0
   nodemon: 2.0.20
   prettier: 2.8.5
 
@@ -1426,6 +1428,15 @@ packages:
     engines: {node: '>=0.10.0'}
     peerDependencies:
       eslint: '>=5.16.0'
+    dependencies:
+      eslint: 8.33.0
+    dev: true
+
+  /eslint-config-prettier/8.8.0_eslint@8.33.0:
+    resolution: {integrity: sha512-wLbQiFre3tdGgpDv67NQKnJuTlcUVYHas3k+DZCc2U2BadthoEY4B7hLPvAxaqdyOGCzuLfii2fqGph10va7oA==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
     dependencies:
       eslint: 8.33.0
     dev: true
