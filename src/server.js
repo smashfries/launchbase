@@ -58,17 +58,15 @@ dotenv.config({path: './.env'});
  * validates if user is an admin
  * @param {string} username
  * @param {string} password
- * @param {any} req
+ * @param {any} _req
  * @param {any} _rep
  * @param {any} done
  **/
-function validate(username, password, req, _rep, done) {
+function validate(username, password, _req, _rep, done) {
   if (username === process.env.USERNAME && password === process.env.PASSWORD) {
-    req.isAdmin = true;
     done();
   } else {
-    req.isAdmin = false;
-    done();
+    done(new Error('invalid admin credentials'));
   }
 }
 
@@ -92,7 +90,7 @@ fastify.register(pointOfView, {
 fastify.decorateRequest('user', null);
 fastify.decorateRequest('token', '');
 
-fastify.addHook('preHandler', async (req, rep) => {
+fastify.addHook('preHandler', async (req, _rep) => {
   if (req.headers.authorization) {
     const token = req.headers.authorization.split(' ')[1];
     const dToken = verifyToken(token);
