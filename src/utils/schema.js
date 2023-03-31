@@ -14,7 +14,6 @@ export const sendEmailVerificationOpts = {
       properties: {
         email: {type: 'string', maxLength: 320},
         type: {type: 'string', maxLength: 13},
-
       },
     },
     response: {
@@ -254,16 +253,23 @@ export const createIdeaDraft = {
         name: {type: 'string', maxLength: 80},
         desc: {type: 'string', maxLength: 300},
         idea: {type: 'string', maxLength: 5000},
-        links: {type: 'array', maxItems: 10, items: {type: 'string',
-          maxLength: 2048}},
-        members: {type: 'array', maxItems: 20, items: {
-          type: 'object',
-          properties: {
-            email: {type: 'string', maxLength: 320},
-            role: {type: 'string', maxLength: 20},
+        links: {
+          type: 'array',
+          maxItems: 10,
+          items: {type: 'string', maxLength: 2048},
+        },
+        members: {
+          type: 'array',
+          maxItems: 20,
+          items: {
+            type: 'object',
+            properties: {
+              email: {type: 'string', maxLength: 320},
+              role: {type: 'string', maxLength: 20},
+            },
+            required: ['email', 'role'],
           },
-          required: ['email', 'role'],
-        }},
+        },
       },
       required: ['name'],
     },
@@ -295,8 +301,11 @@ export const updateIdeaDraft = {
         name: {type: 'string', maxLength: 80},
         desc: {type: 'string', maxLength: 300},
         idea: {type: 'string', maxLength: 5000},
-        links: {type: 'array', maxItems: 10, items: {type: 'string',
-          maxLength: 2048}},
+        links: {
+          type: 'array',
+          maxItems: 10,
+          items: {type: 'string', maxLength: 2048},
+        },
       },
       required: ['name'],
     },
@@ -354,7 +363,8 @@ export const getIdeas = {
       200: {
         type: 'object',
         properties: {
-          latestIdeas: {type: 'array',
+          latestIdeas: {
+            type: 'array',
             items: {
               type: 'object',
               properties: {
@@ -367,7 +377,8 @@ export const getIdeas = {
               },
             },
           },
-          oldestIdeas: {type: 'array',
+          oldestIdeas: {
+            type: 'array',
             items: {
               type: 'object',
               properties: {
@@ -379,7 +390,8 @@ export const getIdeas = {
               },
             },
           },
-          hottestIdeas: {type: 'array',
+          hottestIdeas: {
+            type: 'array',
             items: {
               type: 'object',
               properties: {
@@ -672,10 +684,13 @@ export const getComments = {
       200: {
         type: 'object',
         properties: {
-          author_details: {type: 'object', properties: {
-            displayName: {type: 'string'},
-            handle: {type: 'string'},
-          }},
+          author_details: {
+            type: 'object',
+            properties: {
+              displayName: {type: 'string'},
+              handle: {type: 'string'},
+            },
+          },
           comment: {},
           replies: {type: 'array'},
           page: {type: 'integer'},
@@ -714,6 +729,46 @@ export const deleteComment = {
   },
 };
 
+export const getNotifications = {
+  schema: {
+    headers,
+    response: {
+      200: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            _id: {type: 'string'},
+            notification_details: {
+              type: 'object',
+              properties: {
+                _id: {type: 'string'},
+                count: {type: 'integer'},
+                docs: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      resource: {type: 'string'},
+                      resourceType: {type: 'string'},
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      400: {
+        type: 'object',
+        properties: {
+          error: {type: 'string'},
+          message: {type: 'string'},
+        },
+      },
+    },
+  },
+};
 
 export const requestCallbackOpts = {
   schema: {
