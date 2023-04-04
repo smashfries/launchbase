@@ -11,41 +11,56 @@ export default async function rIdeas(fastify, _options) {
       const filter = query.filter;
       const page = query.page ? query.page : 1;
       if (page < 1) {
-        return rep.code(400).send({error:
-          'page must be a number greater than or equal to 1'});
+        return rep
+          .code(400)
+          .send({error: 'page must be a number greater than or equal to 1'});
       }
       const ideasCollection = fastify.mongo.db.collection('ideas');
 
       if (filter == 'display' || !filter) {
-        const latestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({timeStamp: -1}).limit(5);
-        const hottestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({upvotes: -1}).limit(20);
+        const latestIdeas = await ideasCollection
+          .find({status: 'published'})
+          .sort({timeStamp: -1})
+          .limit(5);
+        const hottestIdeas = await ideasCollection
+          .find({status: 'published'})
+          .sort({upvotes: -1})
+          .limit(20);
 
         const latestIdeasArr = await latestIdeas.toArray();
         const hottestIdeasArr = await hottestIdeas.toArray();
 
-        return rep.code(200).send({latestIdeas: latestIdeasArr,
-          hottestIdeas: hottestIdeasArr});
+        return rep
+          .code(200)
+          .send({latestIdeas: latestIdeasArr, hottestIdeas: hottestIdeasArr});
       }
 
       if (filter == 'newest') {
-        const latestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({timeStamp: -1}).skip((page - 1)*20).limit(20);
+        const latestIdeas = await ideasCollection
+          .find({status: 'published'})
+          .sort({timeStamp: -1})
+          .skip((page - 1) * 20)
+          .limit(20);
         const arr = await latestIdeas.toArray();
         return rep.code(200).send({latestIdeas: arr});
       }
 
       if (filter == 'oldest') {
-        const oldestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({timeStamp: 1}).skip((page - 1)*20).limit(20);
+        const oldestIdeas = await ideasCollection
+          .find({status: 'published'})
+          .sort({timeStamp: 1})
+          .skip((page - 1) * 20)
+          .limit(20);
         const arr = await oldestIdeas.toArray();
         return rep.code(200).send({oldestIdeas: arr});
       }
 
       if (filter == 'upvotes') {
-        const hottestIdeas = await ideasCollection.find({status: 'published'})
-            .sort({upvotes: -1}).skip((page - 1)*20).limit(20);
+        const hottestIdeas = await ideasCollection
+          .find({status: 'published'})
+          .sort({upvotes: -1})
+          .skip((page - 1) * 20)
+          .limit(20);
 
         const arr = await hottestIdeas.toArray();
         return rep.code(200).send({hottestIdeas: arr});
@@ -83,7 +98,7 @@ export default async function rIdeas(fastify, _options) {
           },
         },
         {
-          $skip: (page-1)*20,
+          $skip: (page - 1) * 20,
         },
         {
           $limit: 20,
@@ -214,8 +229,12 @@ export default async function rIdeas(fastify, _options) {
       const {ideaId} = req.params;
 
       if (!fastify.mongo.ObjectId.isValid(ideaId)) {
-        return rep.code(400).send({error: 'invalid ideaId',
-          message: 'ideaId must be a valid MongoDB Object ID'});
+        return rep
+          .code(400)
+          .send({
+            error: 'invalid ideaId',
+            message: 'ideaId must be a valid MongoDB Object ID',
+          });
       }
 
       const ideaOId = new fastify.mongo.ObjectId(ideaId);
@@ -228,11 +247,17 @@ export default async function rIdeas(fastify, _options) {
       }
 
       if (idea.status == 'draft') {
-        const member = await ideaMembers.findOne({idea: ideaOId,
-          user: req.userOId});
+        const member = await ideaMembers.findOne({
+          idea: ideaOId,
+          user: req.userOId,
+        });
         if (!member) {
-          return rep.code(400).send({error: 'access denied',
-            message: 'you are not a member of this idea'});
+          return rep
+            .code(400)
+            .send({
+              error: 'access denied',
+              message: 'you are not a member of this idea',
+            });
         }
       }
 
@@ -255,8 +280,8 @@ export default async function rIdeas(fastify, _options) {
             'user_details.nickname': 1,
             'user_details.url': 1,
             'user_details._id': 1,
-            'user': 1,
-            'role': 1,
+            user: 1,
+            role: 1,
           },
         },
       ]);
@@ -265,8 +290,11 @@ export default async function rIdeas(fastify, _options) {
       let target;
 
       const upvotes = fastify.mongo.db.collection('upvotes');
-      const upvote = await upvotes.findOne({user: req.userOId,
-        resource: ideaOId, resourceType: 'idea'});
+      const upvote = await upvotes.findOne({
+        user: req.userOId,
+        resource: ideaOId,
+        resourceType: 'idea',
+      });
 
       if (upvote) {
         target = {members: arr, upvoted: true};
@@ -279,4 +307,4 @@ export default async function rIdeas(fastify, _options) {
       rep.code(400).send({error: 'unauthorized'});
     }
   });
-};
+}
