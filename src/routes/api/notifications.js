@@ -10,9 +10,30 @@ export default async function notifications(fastify, _options) {
     if (!req.token) {
       return rep.code(400).send({error: 'unauthorized'});
     }
+    const query = req.query;
+    const view = query.view || 'all';
+
+    if (view !== 'all' && view !== 'dismissed') {
+      return rep.code(400).send({
+        error: 'invalid view mode',
+        message: "view can only be set to 'all' or 'dismissed'",
+      });
+    }
+    let arr;
+
     const notificationsColl = fastify.mongo.db.collection('notifications');
-    const myNotifications = await notificationsColl.find({user: req.userOId});
-    const arr = await myNotifications.toArray();
+    if (view == 'all') {
+      const myNotifications = await notificationsColl.find({
+        user: req.userOId,
+      });
+      arr = await myNotifications.toArray();
+    } else {
+      const myNotifications = await notificationsColl.find({
+        user: req.userOId,
+        dismissed: true,
+      });
+      arr = await myNotifications.toArray();
+    }
 
     return rep.code(200).send(arr);
   });
