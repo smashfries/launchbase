@@ -351,7 +351,7 @@ textarea {
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 .settings-content .msg {
@@ -675,6 +675,20 @@ h5 {
 
 details > summary {
   list-style: none;
+}
+
+.dismiss-btn {
+  margin-right: 10px !important;
+}
+
+.dismiss-header {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.dismiss-header .idea-link {
+  font-size: 12px !important;
 }
 
 @media only screen and (max-width: 428px) {

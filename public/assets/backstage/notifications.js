@@ -20,10 +20,20 @@ if (payload.handle) {
   publicProfileLink.setAttribute('href', '/backstage/profile');
 }
 
+const searchString = window.location.search;
+const searchParams = new URLSearchParams(searchString);
+
+const viewMode = searchParams.get('view') || 'all';
+
+if (viewMode !== 'all' && viewMode !== 'dismissed') {
+  window.location.replace('/backstage/notifications');
+}
+
 const msg = document.querySelector('.msg');
 const notificationContainer = document.querySelector('#notification-container');
+const dismissHeader = document.querySelector('.dismiss-header');
 
-fetch('/notifications', {
+fetch(`/notifications?view=${viewMode}`, {
   method: 'GET',
   headers: {
     Authorization: `Bearer ${token}`,
@@ -76,6 +86,13 @@ fetch('/notifications', {
         notifBox.appendChild(notificationDetails);
         notificationContainer.appendChild(notifBox);
       });
+      dismissHeader.classList.remove('hide');
+      if (viewMode == 'dismissed') {
+        document.querySelector('.idea-link').textContent =
+          'View current notifications';
+        document.querySelector('.idea-link').setAttribute('href', '?view=all');
+        document.querySelector('.dismiss-btn').textContent = 'Delete All';
+      }
     }
   });
 
