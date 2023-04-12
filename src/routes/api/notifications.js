@@ -6,6 +6,99 @@ import {getNotifications} from '../../utils/schema.js';
  * @param {*} _options
  */
 export default async function notifications(fastify, _options) {
+  fastify.get('/notification/:id', async (req, rep) => {
+    if (!req.token) {
+      return rep.code(400).send({error: 'unauthorized'});
+    }
+    const {id} = req.params;
+    if (!fastify.mongo.ObjectId.isValid(id)) {
+      return rep.code(400).send({error: 'invalid id'});
+    }
+    const notificationObjectId = new fastify.mongo.ObjectId(id);
+
+    const notificationsColl = fastify.mongo.db.collection('notifications');
+    const notification = await notificationsColl.findOne({
+      _id: notificationObjectId,
+    });
+
+    if (!notification) {
+      return rep.code(200).send({error: 'notification does not exist'});
+    }
+
+    if (!notification.notification_details.docs[0].count) {
+      const notificationType = notification.notification_details._id;
+
+      const details = [];
+      for (const element of notification.notification_details.docs) {
+        switch (element.resourceType) {
+          case 'idea':
+            const ideas = fastify.mongo.db.collection('ideas');
+            const idea = await ideas.findOne({_id: element.resource});
+            if (!idea) {
+              details.push({...element, exists: false});
+            } else {
+              switch (notificationType) {
+                case 'reply':
+                  details.push({
+                    ...element,
+                    count: idea.replyCount,
+                    exists: true,
+                  });
+                  break;
+                case 'upvote':
+                  details.push({
+                    ...element,
+                    count: idea.upvotes,
+                    exists: true,
+                  });
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
+          case 'comment':
+            const comments = fastify.mongo.db.collection('comments');
+            const comment = await comments.findOne({_id: element.resource});
+            if (!comment) {
+              details.push({...element, exists: false});
+            } else {
+              switch (notificationType) {
+                case 'reply':
+                  details.push({
+                    ...element,
+                    count: comment.replyCount,
+                    exists: true,
+                  });
+                  break;
+                case 'upvote':
+                  details.push({
+                    ...element,
+                    count: comment.upvotes,
+                    exists: true,
+                  });
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
+          default:
+            break;
+        }
+
+        await notificationsColl.updateOne(
+          {_id: notificationObjectId},
+          {$set: {'notification_details.docs': details}}
+        );
+        return rep.code(200).send(details);
+      };
+    } else {
+      return rep
+        .code(200)
+        .send({message: 'you already have what you need dummy'});
+    }
+  });
   fastify.get('/notifications', getNotifications, async (req, rep) => {
     if (!req.token) {
       return rep.code(400).send({error: 'unauthorized'});

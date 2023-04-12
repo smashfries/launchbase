@@ -751,6 +751,8 @@ export const getNotifications = {
                     properties: {
                       resource: {type: 'string'},
                       resourceType: {type: 'string'},
+                      count: {type: 'string'},
+                      exists: {type: 'boolean'},
                     },
                   },
                 },
