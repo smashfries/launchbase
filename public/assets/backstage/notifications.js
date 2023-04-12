@@ -61,9 +61,6 @@ fetch(`/notifications?view=${viewMode}`, {
         const datePreview = document.createElement('span');
         datePreview.textContent = 'March 23, 2023';
         notifBox.dataset.id = notification._id;
-        notifBox.dataset.docs = JSON.stringify(
-          notification.notification_details.docs
-        );
         switch (notification.notification_details._id) {
           case 'reply':
             textPreview.textContent = `You\'ve received ${notification.notification_details.count} new replies`;
@@ -75,15 +72,45 @@ fetch(`/notifications?view=${viewMode}`, {
             break;
         }
         const notificationDetails = document.createElement('div');
-        notificationDetails.classList.add('msg', 'info');
-        notificationDetails.textContent =
-          'Fetch your data. Please hold on for a bit.';
+        if (
+          notification.notification_details.docs[0].hasOwnProperty('exists')
+        ) {
+          console.log(notification.notification_details.docs);
+        } else {
+          notificationDetails.classList.add('msg', 'info');
+          notificationDetails.textContent =
+            'Fetch your data. Please hold on for a bit.';
+          const observer = new MutationObserver(
+            async (mutationList, _observer) => {
+              for (const mutation of mutationList) {
+                if (mutation.type === 'attributes') {
+                  if (mutation.target.attributes.getNamedItem('open')) {
+                    console.log('open');
+                    fetch(`/notification/${notification._id}`, {
+                      method: 'GET',
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    })
+                      .then((res) => res.json())
+                      .then((data) => {
+                        console.log(data);
+                        observer.disconnect();
+                      });
+                  }
+                }
+              }
+            }
+          );
+          observer.observe(notifBox, {attributes: true});
+        }
 
         summary.appendChild(notifPreview);
         notifPreview.appendChild(textPreview);
         notifPreview.appendChild(datePreview);
         notifBox.appendChild(summary);
         notifBox.appendChild(notificationDetails);
+
         notificationContainer.appendChild(notifBox);
       });
       dismissHeader.classList.remove('hide');
